@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>The $1 Strategy — How It Grows | Verity Architecture</title>
+<script src="chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;height:100%;overflow:hidden;background:#080C1A;font-family:Georgia,"Times New Roman",serif;}
+canvas#bgc{position:fixed;inset:0;z-index:0;pointer-events:none;}
+#vignette{position:fixed;inset:0;background:radial-gradient(ellipse at 50% 50%,transparent 30%,rgba(0,0,0,0.65) 100%);pointer-events:none;z-index:1;}
+#stage{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;}
+.scene{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2em;opacity:0;transition:opacity 0.65s ease;pointer-events:none;}
+.scene.vis{opacity:1;pointer-events:auto;}
+/* chrome */
+#home-link{position:fixed;top:1.1em;left:1.4em;font-family:Arial,sans-serif;font-size:0.63em;letter-spacing:0.15em;text-transform:uppercase;color:#3A3A5E;text-decoration:none;z-index:200;transition:color .2s;}
+#home-link:hover{color:#C9A84C;}
+#replay-btn{position:fixed;top:1.1em;right:1.4em;font-family:Arial,sans-serif;font-size:0.63em;letter-spacing:0.15em;text-transform:uppercase;color:#3A3A5E;cursor:pointer;border:1px solid #1E1E38;padding:0.32em 0.75em;border-radius:3px;z-index:200;opacity:0;transition:opacity .5s,color .2s,border-color .2s;}
+#replay-btn.vis{opacity:1;}
+#replay-btn:hover{color:#C9A84C;border-color:#C9A84C;}
+#skip-btn{position:fixed;bottom:1.4em;right:1.8em;font-family:Arial,sans-serif;font-size:0.61em;letter-spacing:0.14em;text-transform:uppercase;color:#2E2E4A;cursor:pointer;z-index:200;opacity:0;transition:opacity .5s,color .2s;}
+#skip-btn.vis{opacity:1;}
+#skip-btn:hover{color:#666;}
+#prog{position:fixed;bottom:0;left:0;height:3px;background:linear-gradient(90deg,#5A4010,#C9A84C);width:0%;z-index:100;pointer-events:none;}
+/* play scene */
+#s-play{cursor:pointer;}
+.play-ring{width:90px;height:90px;border-radius:50%;border:2.5px solid rgba(201,168,76,0.55);display:flex;align-items:center;justify-content:center;background:rgba(201,168,76,0.07);margin:0 auto 1.6em;transition:all .3s;cursor:pointer;}
+#s-play:hover .play-ring{background:rgba(201,168,76,0.18);border-color:#C9A84C;box-shadow:0 0 36px rgba(201,168,76,0.3);}
+.play-ring::after{content:'';border-style:solid;border-width:13px 0 13px 24px;border-color:transparent transparent transparent #C9A84C;margin-left:6px;}
+.play-hed{font-size:clamp(1.1em,2.4vw,1.65em);color:#fff;text-align:center;letter-spacing:0.04em;}
+.play-sub{font-family:Arial,sans-serif;font-size:clamp(0.58em,1.1vw,0.71em);letter-spacing:0.26em;text-transform:uppercase;color:#444;margin-top:0.65em;text-align:center;}
+/* coin anim */
+@keyframes loonDrop{0%{transform:translateY(-80px) scale(0.6) rotate(-15deg);opacity:0;}55%{transform:translateY(10px) scale(1.05) rotate(3deg);}75%{transform:translateY(-5px) scale(0.98) rotate(-1deg);}100%{transform:translateY(0) scale(1) rotate(0deg);opacity:1;}}
+.loonie-anim{animation:loonDrop 0.9s cubic-bezier(.22,.61,.36,1) both;}
+@keyframes loonGlow{0%,100%{filter:drop-shadow(0 0 12px rgba(201,168,76,0.4));}50%{filter:drop-shadow(0 0 28px rgba(201,168,76,0.7));}}
+.loonie-glow{animation:loonGlow 2.5s ease-in-out infinite;}
+/* text */
+.t-eye{font-family:Arial,sans-serif;font-size:clamp(0.55em,1.1vw,0.7em);letter-spacing:0.28em;text-transform:uppercase;color:#444;margin-bottom:0.9em;text-align:center;}
+.t-hero{font-size:clamp(1.4em,3.8vw,3.2em);color:#fff;text-align:center;line-height:1.32;letter-spacing:0.02em;max-width:800px;}
+.t-hero .gold{color:#C9A84C;}
+.t-hero .dim{color:#555;}
+.t-hero em{font-style:italic;}
+.t-foot{font-family:Arial,sans-serif;font-size:clamp(0.55em,1.1vw,0.69em);letter-spacing:0.22em;text-transform:uppercase;color:#333;margin-top:1.3em;text-align:center;}
+/* mechanism */
+.mech-box{display:flex;align-items:center;gap:clamp(0.8em,3.5vw,3em);flex-wrap:wrap;justify-content:center;}
+.mech-node{display:flex;flex-direction:column;align-items:center;gap:0.5em;}
+.mech-icon{font-size:clamp(1.8em,5vw,4em);line-height:1;}
+.mech-label{font-family:Arial,sans-serif;font-size:clamp(0.58em,1.2vw,0.8em);text-align:center;letter-spacing:0.06em;color:#777;max-width:110px;line-height:1.4;}
+.mech-label strong{color:#fff;display:block;font-size:1.1em;}
+.mech-arrow{font-size:clamp(1.2em,3vw,2.5em);color:#C9A84C;opacity:0.55;line-height:1;}
+/* math */
+.machine-wrap{display:flex;flex-direction:column;align-items:center;gap:0.8em;width:100%;max-width:680px;}
+.machine-eq{font-family:Arial,sans-serif;font-size:clamp(0.82em,2vw,1.45em);color:#fff;text-align:center;letter-spacing:0.03em;background:rgba(201,168,76,0.07);border:1px solid rgba(201,168,76,0.18);border-radius:8px;padding:0.75em 1.3em;width:100%;}
+.machine-eq .big{color:#C9A84C;font-weight:bold;}
+.machine-eq .op{color:#555;margin:0 0.25em;}
+.machine-eq .result{color:#8FD14F;font-weight:bold;}
+.machine-note{font-family:Arial,sans-serif;font-size:clamp(0.58em,1.1vw,0.74em);color:#444;font-style:italic;text-align:center;letter-spacing:0.05em;margin-top:0.4em;}
+/* ── CHART SCENE ── */
+.chart-scene-inner{width:100%;max-width:860px;display:flex;flex-direction:column;align-items:center;gap:0.9em;}
+.chart-hed{font-family:Arial,sans-serif;font-size:clamp(0.65em,1.4vw,0.9em);letter-spacing:0.18em;text-transform:uppercase;color:#C9A84C;text-align:center;}
+.chart-box{background:rgba(255,255,255,0.03);border:1px solid rgba(201,168,76,0.18);border-radius:8px;padding:1.2em 1.4em 0.8em;width:100%;}
+.chart-inner{position:relative;height:clamp(180px,28vh,280px);}
+.milestone-row{display:flex;justify-content:space-between;width:100%;flex-wrap:wrap;gap:0.4em;margin-top:0.2em;}
+.ms{display:flex;flex-direction:column;align-items:center;font-family:Arial,sans-serif;font-size:clamp(0.52em,1vw,0.66em);text-align:center;}
+.ms-val{color:#C9A84C;font-weight:bold;font-size:1.2em;}
+.ms-lbl{color:#444;letter-spacing:0.05em;text-transform:uppercase;}
+.ms.lit .ms-val{color:#8FD14F;text-shadow:0 0 8px rgba(143,209,79,0.4);}
+.ms.lit .ms-lbl{color:#666;}
+/* bills */
+.bill-scene-wrap{display:flex;gap:clamp(1em,3.5vw,2.8em);align-items:flex-start;justify-content:center;flex-wrap:wrap;width:100%;max-width:860px;}
+.bill-left{display:flex;flex-direction:column;align-items:center;gap:0.65em;min-width:190px;}
+.invest-meter{font-family:Arial,sans-serif;font-size:clamp(0.58em,1.2vw,0.78em);color:#555;text-transform:uppercase;letter-spacing:0.14em;text-align:center;}
+.invest-num{font-size:clamp(1.4em,3.8vw,3em);color:#C9A84C;font-weight:bold;text-align:center;font-variant-numeric:tabular-nums;line-height:1.1;font-family:Arial,sans-serif;}
+.income-num{font-size:clamp(0.9em,2.3vw,1.85em);color:#8FD14F;font-weight:bold;text-align:center;font-variant-numeric:tabular-nums;font-family:Arial,sans-serif;}
+.income-label{font-family:Arial,sans-serif;font-size:clamp(0.52em,1vw,0.66em);letter-spacing:0.16em;text-transform:uppercase;color:#3A3A3A;text-align:center;}
+.divider-line{width:50px;height:1px;background:rgba(201,168,76,0.2);}
+.bill-right{display:flex;flex-direction:column;gap:0.5em;min-width:230px;}
+.bill-card{display:flex;align-items:center;gap:0.7em;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:8px;padding:0.55em 0.85em;transition:all 0.5s ease;opacity:0.3;transform:translateX(20px);}
+.bill-card.appeared{opacity:0.3;transform:translateX(0);}
+.bill-card.paid{opacity:1;background:rgba(143,209,79,0.09);border-color:rgba(143,209,79,0.35);box-shadow:0 0 14px rgba(143,209,79,0.1);}
+.bill-icon{font-size:clamp(1em,2.3vw,1.65em);line-height:1;flex-shrink:0;}
+.bill-info{flex:1;}
+.bill-name{font-family:Arial,sans-serif;font-size:clamp(0.62em,1.2vw,0.82em);color:#CCC;font-weight:bold;}
+.bill-amt{font-family:Arial,sans-serif;font-size:clamp(0.5em,0.95vw,0.65em);color:#444;letter-spacing:0.04em;}
+.bill-check{font-size:clamp(0.9em,1.8vw,1.3em);opacity:0;transition:opacity 0.4s;margin-left:auto;}
+.bill-card.paid .bill-check{opacity:1;}
+.bill-need{font-family:Arial,sans-serif;font-size:clamp(0.48em,0.85vw,0.6em);color:#333;text-align:right;flex-shrink:0;}
+.bill-card.paid .bill-need{color:#8FD14F;}
+/* snowball */
+.snowball-wrap{display:flex;flex-direction:column;align-items:center;gap:0.7em;}
+.snowball-stat{font-family:Arial,sans-serif;font-size:clamp(1.2em,3.5vw,2.8em);color:#C9A84C;font-weight:bold;text-align:center;}
+.snowball-sub{font-family:Arial,sans-serif;font-size:clamp(0.6em,1.3vw,0.86em);letter-spacing:0.14em;text-transform:uppercase;color:#444;text-align:center;}
+.snowball-note{font-size:clamp(0.82em,1.7vw,1.15em);color:#777;font-style:italic;text-align:center;max-width:560px;line-height:1.55;margin-top:0.2em;}
+/* CTA */
+.cta-badge{font-family:Arial,sans-serif;font-size:clamp(0.54em,1.1vw,0.69em);letter-spacing:0.26em;text-transform:uppercase;color:#C9A84C;border:1px solid rgba(201,168,76,0.38);padding:0.32em 1em;border-radius:20px;margin-bottom:0.8em;}
+.cta-title{font-size:clamp(1.8em,5.5vw,4.3em);color:#fff;text-align:center;text-transform:uppercase;letter-spacing:0.12em;line-height:1.06;}
+.cta-sub{font-size:clamp(0.82em,1.9vw,1.45em);color:#C9A84C;font-style:italic;text-align:center;margin-top:0.3em;letter-spacing:0.04em;}
+.cta-btns{display:flex;gap:0.8em;flex-wrap:wrap;justify-content:center;margin-top:1.3em;}
+.cta-btn{font-family:Arial,sans-serif;font-size:clamp(0.6em,1.2vw,0.78em);font-weight:bold;letter-spacing:0.12em;text-transform:uppercase;text-decoration:none;padding:0.7em 1.5em;border-radius:4px;cursor:pointer;transition:all .2s;}
+.btn-gold{background:#C9A84C;color:#1A1A2E;border:none;}
+.btn-gold:hover{background:#A88830;}
+.btn-line{background:transparent;color:#C9A84C;border:1.5px solid #C9A84C;}
+.btn-line:hover{background:rgba(201,168,76,0.1);}
+@keyframes burst{0%{transform:scale(0.5);opacity:1;}100%{transform:scale(2.2);opacity:0;}}
+.burst{position:fixed;pointer-events:none;width:75px;height:75px;border-radius:50%;border:3px solid #8FD14F;animation:burst 0.55s ease-out forwards;z-index:500;}
+</style>
+</head>
+<body>
+<a href="/" id="vaHomeBtn" aria-label="Home" style="position:fixed;top:14px;left:14px;z-index:99999;display:inline-flex;align-items:center;gap:7px;padding:9px 15px;background:rgba(18,22,44,0.9);color:#d9b676;font-family:Georgia,'Times New Roman',serif;font-size:14px;font-weight:bold;letter-spacing:.5px;text-decoration:none;border:1px solid #d9b676;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.35);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);"><span style="font-size:16px;line-height:1;">&#8962;</span> Home</a>
+<canvas id="bgc"></canvas>
+<div id="vignette"></div>
+<a href="financially-trapped-hub.html" id="home-link">&larr; Home</a>
+<div id="replay-btn" onclick="resetAnim()">&#8635; Replay</div>
+<div id="skip-btn" onclick="skipToEnd()">Skip &rarr;</div>
+<div id="stage">
+
+<!-- PLAY -->
+<div class="scene vis" id="s-play" onclick="startAnim()">
+  <div class="play-ring"></div>
+  <div class="play-hed">The $1 Strategy</div>
+  <div class="play-sub">How one dollar becomes financial freedom</div>
+</div>
+
+<!-- S1: Opening question -->
+<div class="scene" id="s1">
+  <div class="t-eye">Verity Architecture</div>
+  <div class="t-hero">What if every dollar you invested<br>worked a <span class="gold">12-hour shift</span><br><span class="dim">while you did nothing?</span></div>
+</div>
+
+<!-- S2: The Canadian Loonie -->
+<div class="scene" id="s2">
+  <div class="loonie-anim loonie-glow" style="margin-bottom:1.3em;">
+    <img src="loonie.png" alt="Canadian Loonie" style="width:170px;height:170px;border-radius:50%;object-fit:cover;filter:brightness(0.8) saturate(0.8) contrast(1.08) sepia(0.12);box-shadow:0 0 32px rgba(201,168,76,0.38),0 0 8px rgba(0,0,0,0.6);display:block;">
+  </div>
+  <div class="t-hero"><span class="gold">$1 Canadian.</span><br>The starting point for everything.</div>
+  <div class="t-foot">One loonie. Invested at 12% annual yield.</div>
+</div>
+
+<!-- S3: Mechanism -->
+<div class="scene" id="s3">
+  <div class="t-eye">The Income Engine</div>
+  <div class="mech-box">
+    <div class="mech-node">
+      <div class="mech-icon">🪙</div>
+      <div class="mech-label"><strong>You Invest</strong>$1 into a high-yield ETF</div>
+    </div>
+    <div class="mech-arrow">→</div>
+    <div class="mech-node">
+      <div class="mech-icon">⚙️</div>
+      <div class="mech-label"><strong>12% Yield</strong>Dividends paid monthly</div>
+    </div>
+    <div class="mech-arrow">→</div>
+    <div class="mech-node">
+      <div class="mech-icon">💰</div>
+      <div class="mech-label"><strong>Income</strong>Deposited automatically</div>
+    </div>
+    <div class="mech-arrow">→</div>
+    <div class="mech-node">
+      <div class="mech-icon">🔄</div>
+      <div class="mech-label"><strong>Reinvest</strong>Buy more. Compound.</div>
+    </div>
+  </div>
+  <div class="t-foot">Every dollar working. Every month. Without you lifting a finger.</div>
+</div>
+
+<!-- S4: Math equations -->
+<div class="scene" id="s4">
+  <div class="t-eye">The Simple Math</div>
+  <div class="machine-wrap">
+    <div class="machine-eq"><span class="big">$1,000</span><span class="op">at 12% =</span><span class="result">$10/month</span></div>
+    <div class="machine-eq"><span class="big">$10,000</span><span class="op">at 12% =</span><span class="result">$100/month</span></div>
+    <div class="machine-eq"><span class="big">$100,000</span><span class="op">at 12% =</span><span class="result">$1,000/month</span></div>
+    <div class="machine-note">The machine doesn&rsquo;t care how you started. It only cares how long you run it.</div>
+  </div>
+</div>
+
+<!-- S-CHART: 30-year compound growth -->
+<div class="scene" id="s-chart">
+  <div class="chart-scene-inner">
+    <div class="chart-hed">$50/Month at 12% Over 30 Years &mdash; Starting With One Loonie</div>
+    <div class="chart-box">
+      <div class="chart-inner">
+        <canvas id="growthChart"></canvas>
+      </div>
+    </div>
+    <div class="milestone-row" id="milestoneRow">
+      <div class="ms" id="ms0"><div class="ms-val">$1</div><div class="ms-lbl">Start</div></div>
+      <div class="ms" id="ms5"><div class="ms-val">$4,085</div><div class="ms-lbl">Year 5</div></div>
+      <div class="ms" id="ms10"><div class="ms-val">$11,505</div><div class="ms-lbl">Year 10</div></div>
+      <div class="ms" id="ms15"><div class="ms-val">$24,986</div><div class="ms-lbl">Year 15</div></div>
+      <div class="ms" id="ms20"><div class="ms-val">$49,474</div><div class="ms-lbl">Year 20</div></div>
+      <div class="ms" id="ms25"><div class="ms-val">$93,962</div><div class="ms-lbl">Year 25</div></div>
+      <div class="ms" id="ms30"><div class="ms-val">$174,784</div><div class="ms-lbl">Year 30</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- S5: Bills animation -->
+<div class="scene" id="s5">
+  <div class="bill-scene-wrap">
+    <div class="bill-left">
+      <div class="invest-meter">Total Invested</div>
+      <div class="invest-num" id="investNum">$0</div>
+      <div class="divider-line"></div>
+      <div class="income-label">Monthly Income</div>
+      <div class="income-num" id="incomeNum">$0.00</div>
+    </div>
+    <div class="bill-right" id="billList">
+      <div class="bill-card" id="bill-coffee"><div class="bill-icon">☕</div><div class="bill-info"><div class="bill-name">Morning Coffee</div><div class="bill-amt">~$15/month</div></div><div class="bill-need" id="bill-coffee-need">needs $1,700</div><div class="bill-check">✅</div></div>
+      <div class="bill-card" id="bill-stream"><div class="bill-icon">📺</div><div class="bill-info"><div class="bill-name">Streaming + Phone</div><div class="bill-amt">~$50/month</div></div><div class="bill-need" id="bill-stream-need">needs $5,000</div><div class="bill-check">✅</div></div>
+      <div class="bill-card" id="bill-util"><div class="bill-icon">⚡</div><div class="bill-info"><div class="bill-name">Utilities</div><div class="bill-amt">~$120/month</div></div><div class="bill-need" id="bill-util-need">needs $12,000</div><div class="bill-check">✅</div></div>
+      <div class="bill-card" id="bill-food"><div class="bill-icon">🛒</div><div class="bill-info"><div class="bill-name">Groceries</div><div class="bill-amt">~$400/month</div></div><div class="bill-need" id="bill-food-need">needs $40,000</div><div class="bill-check">✅</div></div>
+      <div class="bill-card" id="bill-rent"><div class="bill-icon">🏠</div><div class="bill-info"><div class="bill-name">Rent / Mortgage</div><div class="bill-amt">~$1,748/month</div></div><div class="bill-need" id="bill-rent-need">needs $174,784</div><div class="bill-check">✅</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- S6: Snowball -->
+<div class="scene" id="s6">
+  <div class="snowball-wrap">
+    <div style="font-size:clamp(2.5em,7vw,5.5em);line-height:1;margin-bottom:0.2em;">🌨️</div>
+    <div class="snowball-stat">The snowball rolls itself.</div>
+    <div class="snowball-sub">Dividends → More shares → More dividends</div>
+    <div class="snowball-note">You don&rsquo;t need a six-figure salary.<br>You need a system &mdash; and the persistence to keep it running.</div>
+    <div class="t-foot" style="margin-top:0.9em;">This is the architecture behind <em>Financially Trapped</em>.</div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="scene" id="s-cta">
+  <div class="cta-badge">Available Now</div>
+  <div class="cta-title">Financially<br>Trapped</div>
+  <div class="cta-sub">Engineering of Persistence</div>
+  <div class="cta-btns">
+    <a class="cta-btn btn-gold" href="financially-trapped-hub.html#worksheets">Get the Book</a>
+    <a class="cta-btn btn-line" href="financially-trapped.html">Live Proof &rarr;</a>
+    <a class="cta-btn btn-line" href="financially-trapped-hub.html">Home</a>
+  </div>
+</div>
+
+</div><!-- /#stage -->
+<div id="prog"></div>
+
+<script>
+/* ── BACKGROUND COIN PARTICLES ── */
+var C=document.getElementById('bgc'),ctx=C.getContext('2d'),W,H,coins=[];
+function resize(){W=C.width=window.innerWidth;H=C.height=window.innerHeight;}
+resize();window.addEventListener('resize',resize);
+function mkC(){return{x:Math.random()*W,y:-20,r:Math.random()*6+3,vy:Math.random()*1.1+0.35,vx:(Math.random()-0.5)*0.5,rot:Math.random()*Math.PI*2,rv:(Math.random()-0.5)*0.05,a:Math.random()*0.3+0.08,active:false};}
+for(var i=0;i<45;i++)coins.push(mkC());
+var coinActive=false;
+function drawC(c){ctx.save();ctx.translate(c.x,c.y);ctx.rotate(c.rot);ctx.globalAlpha=c.a;var g=ctx.createRadialGradient(-c.r*.3,-c.r*.3,0,0,0,c.r);g.addColorStop(0,'#F2DC72');g.addColorStop(.5,'#C9A84C');g.addColorStop(1,'#6A4808');ctx.beginPath();ctx.ellipse(0,0,c.r,c.r*.32,0,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();ctx.restore();}
+function animCoins(){ctx.clearRect(0,0,W,H);if(coinActive){if(Math.random()<.06){var fc=coins.find(function(cc){return!cc.active||cc.y>H+20;});if(fc){fc.x=Math.random()*W;fc.y=-20;fc.active=true;}}coins.forEach(function(c){if(!c.active)return;c.y+=c.vy;c.x+=c.vx;c.rot+=c.rv;if(c.y>H+20)c.active=false;else drawC(c);});}requestAnimationFrame(animCoins);}
+animCoins();
+
+/* ── COMPOUND CHART ── */
+var growthChart=null,chartInterval=null;
+function enterChart(){
+  if(growthChart){return;}
+  // $1 starting + $50/month at 1% monthly (12% annual)
+  // FV(y) = 1*(1.01)^(y*12) + 50*((1.01)^(y*12)-1)/0.01
+  var labels=['Start'],portfolioData=[1.00],investedData=[1.00];
+  for(var y=1;y<=30;y++){
+    var n=y*12;
+    var g=Math.pow(1.01,n);
+    portfolioData.push(+(1*g+50*(g-1)/0.01).toFixed(2));
+    investedData.push(1+50*n);
+    labels.push('Yr '+y);
+  }
+  var canvas=document.getElementById('growthChart');
+  var cx=canvas.getContext('2d');
+  growthChart=new Chart(cx,{
+    type:'line',
+    data:{
+      labels:[labels[0]],
+      datasets:[
+        {
+          label:'Portfolio Value',
+          data:[portfolioData[0]],
+          borderColor:'#C9A84C',
+          backgroundColor:'rgba(201,168,76,0.07)',
+          borderWidth:2.5,
+          pointRadius:function(c2){var i=c2.dataIndex,tot=c2.dataset.data.length;return(i===0||i===tot-1)?6:2;},
+          pointBackgroundColor:function(c2){var i=c2.dataIndex,tot=c2.dataset.data.length;return(i===tot-1)?'#8FD14F':'#C9A84C';},
+          pointBorderColor:'transparent',
+          fill:true,tension:0.45,order:1
+        },
+        {
+          label:'Total Invested',
+          data:[investedData[0]],
+          borderColor:'rgba(180,180,230,0.82)',
+          borderWidth:2.2,
+          borderDash:[5,4],
+          pointRadius:0,
+          fill:false,tension:0.1,order:2
+        }
+      ]
+    },
+    options:{
+      maintainAspectRatio:false,
+      animation:{duration:180,easing:'easeInOutQuart'},
+      plugins:{
+        legend:{display:true,labels:{color:'#555',font:{size:9,family:'Arial'},boxWidth:18,padding:8}},
+        tooltip:{callbacks:{label:function(c){return c.dataset.label+': $'+Math.round(c.parsed.y).toLocaleString();}}}
+      },
+      scales:{
+        y:{min:0,max:200000,
+          ticks:{callback:function(v){if(v===0)return'';return v>=1000?'$'+(v/1000).toFixed(0)+'K':'$'+v;},color:'#555',font:{size:10,family:'Arial'},maxTicksLimit:6},
+          grid:{color:'rgba(255,255,255,0.04)'},border:{display:false}},
+        x:{ticks:{color:'#555',font:{size:9,family:'Arial'},maxTicksLimit:8},grid:{display:false},border:{display:false}}
+      }
+    }
+  });
+  var milestones={5:'ms5',10:'ms10',15:'ms15',20:'ms20',25:'ms25',30:'ms30'};
+  document.getElementById('ms0').classList.add('lit');
+  var idx=1;
+  chartInterval=setInterval(function(){
+    if(idx>30){clearInterval(chartInterval);return;}
+    growthChart.data.labels.push(labels[idx]);
+    growthChart.data.datasets[0].data.push(portfolioData[idx]);
+    growthChart.data.datasets[1].data.push(investedData[idx]);
+    growthChart.update();
+    if(milestones[idx]){var el=document.getElementById(milestones[idx]);if(el)el.classList.add('lit');}
+    idx++;
+  },260); // 260ms × 30 steps ≈ 7.8s
+}
+function destroyChart(){
+  if(chartInterval)clearInterval(chartInterval);
+  if(growthChart){growthChart.destroy();growthChart=null;}
+  document.querySelectorAll('.ms').forEach(function(el){el.classList.remove('lit');});
+}
+
+/* ── BILL COUNTER ── */
+var BILLS=[{id:'bill-coffee',need:1700},{id:'bill-stream',need:5000},{id:'bill-util',need:12000},{id:'bill-food',need:40000},{id:'bill-rent',need:174784}];
+var billsPaid={},investTarget=0,investCurrent=0,billRaf=null;
+function showBurst(el){var b=document.createElement('div');b.className='burst';var r=el.getBoundingClientRect();b.style.left=(r.left+r.width/2-37.5)+'px';b.style.top=(r.top+r.height/2-37.5)+'px';document.body.appendChild(b);setTimeout(function(){if(b.parentNode)b.parentNode.removeChild(b);},700);}
+function animBills(){
+  var speed=Math.max(50,(investTarget-investCurrent)*0.032);
+  investCurrent=Math.min(investCurrent+speed,investTarget);
+  var inc=investCurrent*0.12/12;
+  document.getElementById('investNum').textContent='$'+Math.round(investCurrent).toLocaleString();
+  document.getElementById('incomeNum').textContent='$'+inc.toFixed(2)+'/mo';
+  BILLS.forEach(function(b){
+    var card=document.getElementById(b.id);if(!card)return;
+    if(investCurrent>=b.need&&!billsPaid[b.id]){billsPaid[b.id]=true;card.classList.add('paid');showBurst(card);var n=document.getElementById(b.id+'-need');if(n)n.textContent='COVERED ✓';}
+    if(investCurrent>=(b.need*0.08))card.classList.add('appeared');
+  });
+  if(investCurrent<investTarget)billRaf=requestAnimationFrame(animBills);
+}
+function enterBills(){
+  coinActive=true;
+  document.querySelectorAll('.bill-card').forEach(function(c,i){setTimeout(function(){c.classList.add('appeared');},i*200);});
+  investTarget=174784;investCurrent=0;billsPaid={};
+  setTimeout(function(){animBills();},400);
+}
+function enterCTA(){coinActive=false;}
+
+/* ── SEQUENCE ── */
+var SEQ=[
+  ['s1',      3000,650,null],
+  ['s2',      3800,700,null],
+  ['s3',      4500,700,null],
+  ['s4',      4800,700,null],
+  ['s-chart', 11500,800,enterChart],
+  ['s5',      12000,700,enterBills],
+  ['s6',      3800,700,null],
+  ['s-cta',   99999,0,enterCTA]
+];
+var TOTAL_MS=0;
+SEQ.slice(0,-1).forEach(function(s){TOTAL_MS+=s[1];});
+var timers=[],running=false,raf2=null,startTs=0;
+var progEl=document.getElementById('prog'),replayEl=document.getElementById('replay-btn'),skipEl=document.getElementById('skip-btn');
+
+function vis(id){var el=document.getElementById(id);if(el)el.classList.add('vis');}
+function unvis(id){var el=document.getElementById(id);if(el)el.classList.remove('vis');}
+
+function startAnim(){
+  if(running)return;running=true;unvis('s-play');skipEl.classList.add('vis');
+  var t=0;
+  SEQ.forEach(function(item,idx){
+    (function(id,hold,fout,enter,offset,isLast){
+      timers.push(setTimeout(function(){vis(id);if(enter)enter();},offset));
+      if(!isLast)timers.push(setTimeout(function(){unvis(id);},offset+hold-fout));
+    })(item[0],item[1],item[2],item[3],t,idx===SEQ.length-1);
+    t+=item[1];
+  });
+  timers.push(setTimeout(function(){replayEl.classList.add('vis');skipEl.classList.remove('vis');},TOTAL_MS+200));
+  startTs=performance.now();
+  function tick(now){var p=Math.min((now-startTs)/TOTAL_MS*100,100);progEl.style.width=p+'%';if(p<100)raf2=requestAnimationFrame(tick);}
+  raf2=requestAnimationFrame(tick);
+}
+function skipToEnd(){clearAll();vis('s-cta');enterCTA();replayEl.classList.add('vis');skipEl.classList.remove('vis');progEl.style.width='100%';}
+function resetAnim(){
+  clearAll();
+  document.querySelectorAll('.bill-card').forEach(function(c){c.classList.remove('paid','appeared');});
+  document.getElementById('investNum').textContent='$0';
+  document.getElementById('incomeNum').textContent='$0.00';
+  BILLS.forEach(function(b){var n=document.getElementById(b.id+'-need');if(n)n.textContent='needs $'+b.need.toLocaleString();});
+  billsPaid={};investCurrent=0;investTarget=0;
+  destroyChart();
+  vis('s-play');
+}
+function clearAll(){
+  timers.forEach(clearTimeout);timers=[];
+  cancelAnimationFrame(billRaf);cancelAnimationFrame(raf2);
+  running=false;coinActive=false;
+  document.querySelectorAll('.scene').forEach(function(el){el.classList.remove('vis');});
+  replayEl.classList.remove('vis');skipEl.classList.remove('vis');
+  progEl.style.width='0%';
+}
+</script>
+</body>
+</html>

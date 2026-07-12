@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Architect's Business Escape Strategies — Coming Soon | Verity Architecture</title>
+<style>
+:root{--ink:#0E0E18;--ink2:#16161F;--panel:#1A1A26;--gold:#C9A84C;--gold-light:#E6D6A0;--gold-dim:#A88830;--ember:#E0A85A;--paper:#ECE4D0;--text:#D8D2C4;--muted:#8d8778;}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:Georgia,"Times New Roman",serif;background:var(--ink);color:var(--text);line-height:1.7;overflow-x:hidden;
+  background-image:radial-gradient(ellipse 90% 50% at 50% -5%,rgba(224,168,90,.10),transparent 60%),radial-gradient(ellipse 60% 40% at 50% 102%,rgba(201,168,76,.06),transparent 60%);}
+.label{font-family:Arial,sans-serif;font-weight:bold;text-transform:uppercase;letter-spacing:0.2em;}
+/* nav */
+nav{position:sticky;top:0;z-index:50;background:rgba(14,14,24,.94);backdrop-filter:blur(10px);border-bottom:1px solid rgba(201,168,76,.25);
+  display:flex;justify-content:center;flex-wrap:wrap;}
+nav a{color:#bdb39c;text-decoration:none;font-family:Arial,sans-serif;font-size:0.7em;font-weight:bold;letter-spacing:0.14em;text-transform:uppercase;padding:0.9em 1.1em;transition:color .15s,background .15s;}
+nav a:hover{color:var(--gold-light);background:rgba(201,168,76,.1);}
+nav a.home{color:var(--gold);}
+/* hero */
+.hero{max-width:1040px;margin:0 auto;padding:3.4em 1.6em 2.4em;display:grid;grid-template-columns:auto 1fr;gap:3em;align-items:center;}
+.hero-cover{width:240px;flex-shrink:0;border:2px solid var(--gold);border-radius:5px;box-shadow:8px 14px 44px rgba(0,0,0,.7),0 0 60px rgba(224,168,90,.12);display:block;}
+.hero-meta .badge{font-family:Arial,sans-serif;font-size:0.62em;font-weight:bold;letter-spacing:0.28em;text-transform:uppercase;color:var(--gold);margin-bottom:0.5em;}
+.hero-meta h1{font-size:2.5em;line-height:1.12;color:#F4EEDF;margin-bottom:0.2em;}
+.hero-meta .tagline{font-style:italic;color:var(--gold-light);font-size:1.12em;margin-bottom:1.1em;}
+.hero-meta p{color:#bdb39c;font-size:0.96em;max-width:540px;margin-bottom:1.5em;}
+.cta-row{display:flex;flex-wrap:wrap;gap:0.6em;align-items:center;}
+.btn{font-family:Arial,sans-serif;font-size:0.72em;font-weight:bold;letter-spacing:0.1em;text-transform:uppercase;text-decoration:none;
+  padding:0.8em 1.5em;border-radius:3px;display:inline-block;transition:background .15s,box-shadow .15s;}
+.btn-gold{background:linear-gradient(120deg,var(--gold),var(--ember));color:#1a1407;box-shadow:0 4px 22px rgba(224,168,90,.3);}
+.btn-gold:hover{box-shadow:0 6px 30px rgba(224,168,90,.5);}
+.btn-dim{background:transparent;color:#6f6a5c;border:1.5px solid #3a3730;pointer-events:none;}
+.soon-pill{font-family:Arial,sans-serif;font-size:0.62em;font-weight:bold;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(201,168,76,.5);border-radius:20px;padding:0.35em 0.9em;}
+/* sections */
+.wrap{max-width:920px;margin:0 auto;padding:0 1.6em;}
+section{padding:2.8em 0;}
+.sec-eyebrow{text-align:center;font-family:Arial,sans-serif;font-size:0.66em;font-weight:bold;letter-spacing:0.24em;text-transform:uppercase;color:var(--gold);margin-bottom:0.5em;}
+.sec-title{text-align:center;font-size:1.9em;color:#F4EEDF;margin-bottom:0.4em;}
+.sec-rule{width:70px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:0.6em auto 2em;}
+.lead{text-align:center;color:#c3bba8;font-size:1.05em;max-width:680px;margin:0 auto;font-style:italic;}
+/* dawn divider */
+.dawn{position:relative;height:3px;background:linear-gradient(90deg,transparent,var(--ember) 30%,var(--gold) 50%,var(--ember) 70%,transparent);margin:1em 0;opacity:.6;}
+/* pillars */
+.pillars{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.1em;margin-top:1.5em;}
+.pillar{background:linear-gradient(160deg,var(--panel),var(--ink2));border:1px solid rgba(201,168,76,.22);border-top:3px solid var(--gold);border-radius:6px;padding:1.4em 1.4em;}
+.pillar .pn{font-family:Arial,sans-serif;font-size:0.6em;font-weight:bold;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold-dim);}
+.pillar h3{color:var(--gold-light);font-size:1.12em;margin:0.3em 0 0.4em;}
+.pillar p{color:#a9a08d;font-size:0.9em;}
+/* who-for */
+.audience{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1em;margin-top:1.4em;}
+.aud{background:rgba(255,255,255,.02);border-left:3px solid var(--gold);border-radius:0 5px 5px 0;padding:1em 1.2em;}
+.aud h4{color:var(--gold-light);font-size:1em;margin-bottom:0.2em;}
+.aud p{color:#a9a08d;font-size:0.88em;}
+/* notify */
+.notify{background:linear-gradient(135deg,#1d1a12,#14141f);border:1px solid var(--gold);border-radius:10px;padding:2.4em 2em;text-align:center;margin:1em 0;}
+.notify h2{color:var(--gold-light);font-size:1.5em;margin-bottom:0.4em;}
+.notify p{color:#bdb39c;margin-bottom:1.3em;max-width:520px;margin-left:auto;margin-right:auto;}
+/* series strip */
+.series{display:flex;justify-content:center;gap:1.4em;flex-wrap:wrap;margin-top:1.4em;}
+.series a{text-decoration:none;color:#bdb39c;font-family:Arial,sans-serif;font-size:0.74em;letter-spacing:0.06em;border:1px solid rgba(201,168,76,.28);border-radius:5px;padding:0.7em 1.1em;transition:all .15s;}
+.series a:hover{border-color:var(--gold);color:var(--gold-light);}
+.series a span{display:block;color:var(--gold);font-size:0.8em;letter-spacing:0.18em;text-transform:uppercase;margin-bottom:0.2em;}
+footer{background:#0a0a12;border-top:3px solid var(--gold);text-align:center;padding:2em 1em;margin-top:2em;color:#6f6a5c;font-size:0.8em;}
+footer a{color:var(--gold);text-decoration:none;}
+footer .f-brand{color:var(--gold-light);font-family:Arial,sans-serif;letter-spacing:0.2em;text-transform:uppercase;font-size:0.8em;}
+@media(max-width:720px){.hero{grid-template-columns:1fr;text-align:center;gap:1.6em;}.hero-cover{width:180px;margin:0 auto;}.cta-row{justify-content:center;}.hero-meta p{margin-left:auto;margin-right:auto;}}
+
+/* ============================================================
+   LIGHT PARCHMENT THEME (Book Three - the clean exit, lighter tone)
+   Appended override; original layout rules untouched.
+   ============================================================ */
+body{background:#F1E9D6 !important;background-image:none !important;color:#2A2418 !important;}
+nav{background:rgba(244,238,223,0.94) !important;border-bottom:1px solid rgba(168,136,74,0.5) !important;}
+nav a{color:#5A4A22 !important;}
+nav a:hover{color:#3A2F10 !important;background:rgba(168,136,74,0.22) !important;}
+nav a.home{color:#7E6230 !important;}
+.hero-meta h1{color:#5A4A22 !important;}
+.hero-meta .badge{color:#7E6230 !important;}
+.hero-meta .tagline{color:#8A6A24 !important;}
+.hero-meta p{color:#4A4130 !important;}
+.soon-pill{color:#7E6230 !important;border-color:rgba(168,136,74,0.6) !important;}
+.sec-eyebrow{color:#7E6230 !important;}
+.sec-title{color:#5A4A22 !important;}
+.lead{color:#6B6151 !important;}
+section p{color:#4A4130 !important;}
+.pillar{background:#FBF7EC !important;background-image:none !important;border:1px solid rgba(168,136,74,0.45) !important;border-top:3px solid var(--gold) !important;}
+.pillar .pn{color:#8A6A24 !important;}
+.pillar h3{color:#7E6230 !important;}
+.pillar p{color:#4A4130 !important;}
+.aud h4{color:#7E6230 !important;}
+.notify{background:linear-gradient(135deg,#F7F0DC,#ECE0C4) !important;border:1px solid var(--gold) !important;}
+.notify h2{color:#5A4A22 !important;}
+.notify p{color:#4A4130 !important;}
+.series a span{color:#7E6230 !important;}
+footer{background:#E8D7B3 !important;color:#5A5140 !important;}
+footer a{color:#7E6230 !important;}
+footer .f-brand{color:#7E6230 !important;}
+#vaHomeBtn{background:rgba(251,247,236,0.94) !important;color:#7E6230 !important;border-color:#A8884A !important;box-shadow:0 2px 10px rgba(120,98,48,0.28) !important;}
+</style>
+</head>
+<body>
+<a href="/" id="vaHomeBtn" aria-label="Home" style="position:fixed;top:14px;left:14px;z-index:99999;display:inline-flex;align-items:center;gap:7px;padding:9px 15px;background:rgba(18,22,44,0.9);color:#d9b676;font-family:Georgia,'Times New Roman',serif;font-size:14px;font-weight:bold;letter-spacing:.5px;text-decoration:none;border:1px solid #d9b676;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.35);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);"><span style="font-size:16px;line-height:1;">&#8962;</span> Home</a>
+
+<nav>
+  <a href="#book">The Book</a>
+  <a href="#about">About</a>
+  <a href="#inside">What's Inside</a>
+  <a href="#notify">Get Notified</a>
+  <a href="index.html" class="home">Verity Architecture</a>
+</nav>
+
+<section class="hero" id="book">
+  <img class="hero-cover" src="escape-cover.png" alt="The Architect's Business Escape Strategies by Corvus Verity">
+  <div class="hero-meta">
+    <div class="badge">Verity Architecture — Book Three</div>
+    <h1>The Architect's Business&nbsp;Escape Strategies</h1>
+    <div class="tagline">Financial Independence by Architecture</div>
+    <p>The first two volumes were about building — engineering persistence, then architecting a portfolio. This final volume is about the other side of the blueprint: <em>leaving</em>. How to step back from the work you built, convert what you've made into freedom, and design an exit that holds.</p>
+    <div class="cta-row">
+      <span class="btn btn-dim">Buy the Book — Coming Soon</span>
+      <span class="soon-pill">In Progress · 147 pages</span>
+    </div>
+  </div>
+</section>
+
+<div class="dawn"></div>
+
+<div class="wrap">
+
+<section id="about">
+  <div class="sec-eyebrow">About the Book</div>
+  <h2 class="sec-title">When the Build Is Done</h2>
+  <div class="sec-rule"></div>
+  <p class="lead">Most financial books stop at accumulation. They teach you to build — and then leave you standing in front of something you don't know how to put down. This book begins where the building ends.</p>
+  <p style="text-align:center;color:#a9a08d;max-width:680px;margin:1.4em auto 0;">The Architect's Business Escape Strategies turns from the question "how do I grow this?" to the harder one: "how do I leave it well?" It is a book about thresholds — knowing when enough is enough, converting assets into income and time, simplifying what you've made, and handing it on without watching it unravel. No new accounts to open. No new positions to chase. Just the architecture of a clean exit.</p>
+</section>
+
+<section id="inside">
+  <div class="sec-eyebrow">What's Inside</div>
+  <h2 class="sec-title">The Architecture of Leaving</h2>
+  <div class="sec-rule"></div>
+  <p class="lead">A preview of the themes this volume will explore. Chapters and final structure are being finalized.</p>
+  <div class="pillars">
+    <div class="pillar"><div class="pn">Theme 01</div><h3>Knowing When to Leave</h3><p>The numbers and the signals that tell you the build phase is over — and why "one more year" is the most expensive sentence in finance.</p></div>
+    <div class="pillar"><div class="pn">Theme 02</div><h3>From Assets to Freedom</h3><p>Converting what you've accumulated into durable income and reclaimed time, without dismantling the engine that got you here.</p></div>
+    <div class="pillar"><div class="pn">Theme 03</div><h3>The Clean Exit</h3><p>Structuring a withdrawal and a handover that survives markets, taxes, and the temptation to keep tinkering.</p></div>
+    <div class="pillar"><div class="pn">Theme 04</div><h3>Protecting What You Built</h3><p>Simplifying, de-risking, and insulating a finished system so it keeps working when you are no longer watching it daily.</p></div>
+    <div class="pillar"><div class="pn">Theme 05</div><h3>Succession &amp; Legacy</h3><p>Passing the architecture on intact — so what outlives you is a system, not a puzzle for someone else to solve.</p></div>
+    <div class="pillar"><div class="pn">Theme 06</div><h3>Life After the Build</h3><p>The part nobody plans for: what the days look like, and how to make the escape worth the years it took to earn it.</p></div>
+  </div>
+</section>
+
+<section id="for">
+  <div class="sec-eyebrow">Who It's For</div>
+  <h2 class="sec-title">Readers at the Threshold</h2>
+  <div class="sec-rule"></div>
+  <div class="audience">
+    <div class="aud"><h4>The Finished Builder</h4><p>You've done the accumulating. Now you need a plan for stepping back that's as deliberate as the one that got you here.</p></div>
+    <div class="aud"><h4>The Owner Ready to Sell</h4><p>A business or a portfolio you want to convert into freedom — without giving half of it away in the handover.</p></div>
+    <div class="aud"><h4>The Legacy Planner</h4><p>You're thinking past yourself, and want what you built to pass on whole.</p></div>
+  </div>
+</section>
+
+<section id="notify">
+  <div class="notify">
+    <h2>Be First to Know When It Launches</h2>
+    <p>The Architect's Business Escape Strategies is being written now. Leave a note and we'll let you know the moment it's available.</p>
+    <a class="btn btn-gold" href="mailto:Support@VerityArchitect.com?subject=Notify%20me%20%E2%80%94%20The%20Architect%27s%20Business%20Escape%20Strategies">Email to Get Notified</a>
+    <div class="series">
+      <a href="financially-trapped-hub.html"><span>Book One · Live</span>Financially Trapped</a>
+      <a href="index.html"><span>Book Two · Coming Soon</span>Portfolio Architecture</a>
+      <a href="index.html"><span>The Series</span>Verity Architecture →</a>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <div class="f-brand">Verity Architecture</div>
+  <div style="margin-top:0.5em;">The Architect's Business Escape Strategies &mdash; Book Three by Corvus Verity. Coming soon.</div>
+  <div style="margin-top:0.4em;">&copy; <span id="yr"></span> Verity Architecture &middot; <a href="mailto:Support@VerityArchitect.com">Support@VerityArchitect.com</a> &middot; Nothing here is financial advice.</div>
+</footer>
+
+<script>
+document.getElementById('yr').textContent=new Date().getFullYear();
+document.querySelectorAll('nav a[href^="#"]').forEach(function(a){a.addEventListener('click',function(e){var t=document.querySelector(a.getAttribute('href'));if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth'});}});});
+</script>
+</body>
+</html>

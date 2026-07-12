@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Excel Portfolio Tracker — Interactive Demo | Verity Architecture</title>
+<script src="chart.umd.min.js"></script>
+<style>
+:root{--dark:#1A1A2E;--gold:#C9A84C;--gd:#A88830;--lg:#F5E6C8;--paper:#F0EFE8;--ink:#1A1A2E;--mu:#555;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Georgia,"Times New Roman",serif;background:var(--paper);color:var(--ink);line-height:1.55;}
+header{background:var(--dark);padding:1.6em 1.5em 1.3em;text-align:center;border-bottom:3px solid var(--gold);}
+.brand{color:var(--gold);font-family:Arial,sans-serif;font-size:0.65em;font-weight:bold;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:0.3em;}
+header h1{color:#fff;font-size:1.65em;font-weight:bold;margin:0.15em 0 0.1em;}
+header .sub{color:var(--lg);font-style:italic;font-size:0.9em;}
+nav{background:var(--dark);border-bottom:1px solid rgba(201,168,76,0.35);display:flex;justify-content:center;flex-wrap:wrap;}
+nav a{color:#CCC;text-decoration:none;font-family:Arial,sans-serif;font-size:0.68em;font-weight:bold;letter-spacing:0.14em;text-transform:uppercase;padding:0.85em 1.1em;transition:color .15s;}
+nav a:hover{color:var(--gold);}
+.wrap{max-width:1060px;margin:0 auto;padding:2em 1.5em 4em;}
+/* INTRO */
+.intro{text-align:center;margin-bottom:2em;}
+.intro h2{font-size:1.45em;color:var(--dark);margin-bottom:0.5em;}
+.intro p{color:var(--mu);max-width:660px;margin:0 auto 1em;font-style:italic;line-height:1.7;}
+.badge-row{display:flex;justify-content:center;gap:0.6em;flex-wrap:wrap;margin-top:0.5em;}
+.badge{background:var(--dark);color:var(--gold);font-family:Arial,sans-serif;font-size:0.61em;font-weight:bold;letter-spacing:0.1em;text-transform:uppercase;padding:0.35em 0.85em;border-radius:20px;border:1px solid rgba(201,168,76,0.45);}
+/* EXCEL SHELL */
+.xl-shell{border-radius:8px;overflow:hidden;box-shadow:0 14px 50px rgba(26,26,46,0.38);border:1px solid #888;margin-bottom:2.5em;}
+.xl-titlebar{background:#1D6A38;color:#fff;font-family:Arial,sans-serif;font-size:0.72em;padding:5px 14px;display:flex;align-items:center;gap:0.6em;user-select:none;}
+.xl-icon{background:#155228;color:#8FD14F;border-radius:3px;padding:1px 6px;font-weight:bold;font-size:1em;letter-spacing:-0.05em;}
+.xl-titlebar .xl-fn{flex:1;text-align:center;color:#D0EDD8;font-size:0.95em;}
+.xl-traffic{display:flex;gap:6px;margin-left:auto;}
+.xl-traffic span{width:11px;height:11px;border-radius:50%;display:inline-block;}
+.xl-t-r{background:#FF5F57;}
+.xl-t-y{background:#FEBC2E;}
+.xl-t-g{background:#28C840;}
+.xl-ribbon{background:#F3F3F3;border-bottom:2px solid #1D6A38;padding:4px 12px;font-family:Arial,sans-serif;font-size:0.67em;display:flex;gap:1.5em;color:#444;user-select:none;}
+.xl-ribbon span{cursor:default;padding:3px 7px;border-radius:3px;}
+.xl-ribbon span:hover{background:#E0E0E0;}
+.xl-ribbon .xr-active{background:#E8F5E9;font-weight:bold;border:1px solid #C8E6C9;}
+.xl-body{background:#fff;}
+/* SHEET PANELS */
+.xl-sheet{display:none;}
+.xl-sheet.active{display:block;}
+/* TABLES */
+.xl-tbl-wrap{overflow-x:auto;}
+table.xt{width:100%;border-collapse:collapse;font-family:Arial,sans-serif;font-size:0.71em;min-width:880px;}
+table.xt th{background:#1A1A2E;color:#C9A84C;padding:5px 8px;text-align:center;font-weight:bold;border:1px solid #3A3A5E;white-space:nowrap;}
+table.xt td{padding:3px 8px;border:1px solid #DDD8C8;white-space:nowrap;vertical-align:middle;}
+table.xt tr.alt td{background:#FAF6EE;}
+table.xt tr.tot td{background:#F5E6C8;font-weight:bold;border-top:2px solid #C9A84C;}
+table.xt .rn{background:#F5F5F5;color:#AAA;text-align:center;width:28px;font-size:0.88em;}
+table.xt .ticker{color:#1A1A2E;font-weight:bold;}
+table.xt .num{text-align:right;font-variant-numeric:tabular-nums;}
+table.xt .pos{color:#2E7D32;}
+table.xt .neg{color:#C62828;}
+table.xt .fml{color:#1155CC;background:#EEF3FF;}
+table.xt .hdg{background:#23233f;color:var(--lg);font-style:italic;font-family:Arial,sans-serif;font-size:0.88em;padding:6px 10px;border-bottom:2px solid #C9A84C;}
+.fml-bar{font-family:Arial,sans-serif;font-size:0.64em;color:#1155CC;background:#EEF3FF;padding:5px 12px;border-top:1px solid #CCD;border-bottom:1px solid #CCD;}
+.fml-bar code{background:#DDE8FF;padding:1px 5px;border-radius:2px;font-size:1em;}
+/* CHART */
+.xl-chart-wrap{padding:1.3em 1.5em 1.1em;background:#fff;border-top:1px solid #EEE;}
+.xl-chart-wrap h4{font-family:Arial,sans-serif;font-size:0.76em;color:#444;margin-bottom:0.7em;font-weight:bold;letter-spacing:0.04em;text-transform:uppercase;}
+.xl-chart-inner{position:relative;height:230px;}
+/* PURCHASE PLAN COLOURS */
+.pp-green{background:#C8E6C9;color:#1B5E20;text-align:center;font-weight:bold;}
+.pp-amber{background:#FFE0B2;color:#BF360C;text-align:center;font-weight:bold;}
+.pp-red{background:#FFCDD2;color:#B71C1C;text-align:center;font-weight:bold;}
+/* ALLOC BAR */
+.abar-cell{min-width:100px;}
+.abar{height:10px;background:#EEE;border-radius:5px;overflow:hidden;}
+.abar-fill{height:100%;border-radius:5px;}
+.fill-g{background:#4CAF50;}
+.fill-a{background:#FF9800;}
+.fill-r{background:#F44336;}
+/* CSV */
+.csv-paste{background:#FAFAFA;border:2px dashed #CCC;border-radius:4px;font-family:"Courier New",monospace;font-size:0.67em;color:#555;padding:1em 1.2em;margin:0.8em 1.2em 0.4em;line-height:1.75;}
+.csv-note{font-family:Arial,sans-serif;font-size:0.72em;color:#666;margin:0.3em 1.2em 0;font-style:italic;}
+/* SHEET TABS */
+.xl-tabs{background:#D6D6D6;display:flex;padding:3px 8px 0;gap:1px;border-top:1px solid #B0B0B0;user-select:none;overflow-x:auto;}
+.xl-tab{background:#BDBDBD;color:#444;padding:4px 15px;border-radius:4px 4px 0 0;cursor:pointer;font-family:Arial,sans-serif;font-size:0.68em;white-space:nowrap;border:1px solid #AAA;border-bottom:none;transition:background .1s;}
+.xl-tab:hover{background:#CDCDCD;}
+.xl-tab.active{background:#fff;color:#1A1A2E;font-weight:bold;border-color:#999;}
+.xl-tab.t-dash.active{border-top:2px solid #C9A84C;}
+.xl-tab.t-mt.active{border-top:2px solid #1A1A2E;}
+.xl-tab.t-pp.active{border-top:2px solid #A88830;}
+.xl-tab.t-csv.active{border-top:2px solid #888;}
+/* CTA */
+.cta-box{background:linear-gradient(135deg,#1A1A2E 0%,#23233f 100%);border:2px solid var(--gold);border-radius:8px;padding:2.2em 2.5em;text-align:center;color:#fff;}
+.cta-box h3{color:var(--gold);font-size:1.45em;margin-bottom:0.5em;}
+.cta-box p{color:#CCC;font-size:0.91em;margin-bottom:0.5em;line-height:1.7;max-width:680px;margin-left:auto;margin-right:auto;}
+.incl-list{display:flex;flex-wrap:wrap;justify-content:center;gap:0.45em;margin:1.1em 0 1.5em;}
+.incl-item{font-family:Arial,sans-serif;font-size:0.65em;color:var(--gold);border:1px solid rgba(201,168,76,0.35);padding:0.25em 0.75em;border-radius:20px;background:rgba(201,168,76,0.06);}
+.btn{display:inline-block;font-family:Arial,sans-serif;font-size:0.74em;font-weight:bold;letter-spacing:0.1em;text-transform:uppercase;text-decoration:none;padding:0.75em 1.6em;border-radius:4px;margin:0.3em;cursor:pointer;border:none;}
+.btn-gold{background:var(--gold);color:var(--dark);}
+.btn-gold:hover{background:var(--gd);}
+.btn-line{background:transparent;color:var(--lg);border:1.5px solid var(--gold);}
+.btn-line:hover{background:rgba(201,168,76,0.1);}
+.sheet-note{font-family:Arial,sans-serif;font-size:0.72em;color:#666;font-style:italic;padding:6px 12px 8px;background:#FAFAFA;border-top:1px solid #EEE;}
+</style>
+</head>
+<body>
+<a href="/" id="vaHomeBtn" aria-label="Home" style="position:fixed;top:14px;left:14px;z-index:99999;display:inline-flex;align-items:center;gap:7px;padding:9px 15px;background:rgba(18,22,44,0.9);color:#d9b676;font-family:Georgia,'Times New Roman',serif;font-size:14px;font-weight:bold;letter-spacing:.5px;text-decoration:none;border:1px solid #d9b676;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.35);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);"><span style="font-size:16px;line-height:1;">&#8962;</span> Home</a>
+<header>
+  <div class="brand">Verity Architecture &mdash; Book One</div>
+  <h1>Financially Trapped: Engineering of Persistence</h1>
+  <div class="sub">Excel Portfolio Tracker &mdash; Interactive Demo</div>
+</header>
+<nav>
+  <a href="financially-trapped-hub.html">&larr; Home</a>
+  <a href="#demo">The Spreadsheet</a>
+  <a href="#bundle">Get the Bundle</a>
+  <a href="financially-trapped.html">Proof of Concept</a>
+</nav>
+
+<div class="wrap">
+
+<div class="intro">
+  <h2>See What Comes With the Architect&rsquo;s Bundle</h2>
+  <p>Every portfolio in the Verity system has its own pre-built Excel tracker. Four purpose-built sheets, zero setup required. Drop in your holdings and the formulas handle the rest &mdash; market value, unrealized gain, return %, and a running monthly chart.</p>
+  <div class="badge-row">
+    <span class="badge">4 Sheets Per File</span>
+    <span class="badge">10 Portfolio Trackers</span>
+    <span class="badge">Auto-Calculating Formulas</span>
+    <span class="badge">Built-In Monthly Chart</span>
+    <span class="badge">Traffic-Light Purchase Guide</span>
+    <span class="badge">CSV Import Sheet</span>
+    <span class="badge">Works Offline</span>
+  </div>
+</div>
+
+<!-- ===== EXCEL SHELL ===== -->
+<div id="demo" class="xl-shell">
+
+  <!-- Title bar -->
+  <div class="xl-titlebar">
+    <span class="xl-icon">X</span>
+    <span class="xl-fn">FT_Starter_Portfolio.xlsx &mdash; Excel</span>
+    <div class="xl-traffic">
+      <span class="xl-t-r"></span><span class="xl-t-y"></span><span class="xl-t-g"></span>
+    </div>
+  </div>
+
+  <!-- Fake ribbon -->
+  <div class="xl-ribbon">
+    <span class="xr-active">Home</span>
+    <span>Insert</span>
+    <span>Page Layout</span>
+    <span>Formulas</span>
+    <span>Data</span>
+    <span>View</span>
+  </div>
+
+  <!-- Sheet panels -->
+  <div class="xl-body">
+
+    <!-- DASHBOARD -->
+    <div class="xl-sheet active" id="sh-dash">
+      <div class="xl-tbl-wrap">
+        <table class="xt">
+          <tr><td colspan="14" class="hdg">Verity Architecture &mdash; Financially Trapped Starter Portfolio &nbsp;&bull;&nbsp; TFSA &nbsp;&bull;&nbsp; Wealthsimple &nbsp;&bull;&nbsp; CAD &nbsp;&bull;&nbsp; Reset May 14 2026</td></tr>
+          <tr>
+            <th>#</th><th>Ticker</th><th>Exchange</th><th>Company</th><th>Class</th><th>CCY</th>
+            <th>Qty</th><th>Price</th><th>Mkt Value</th><th>Book Value</th>
+            <th>Unrealized</th><th>Return %</th><th>Div/Share</th><th>Freq</th>
+          </tr>
+          <tr>
+            <td class="rn">1</td><td class="ticker">AMHE</td><td>TSX</td><td>Harvest Amazon EHI ETF</td><td>CA ETF</td><td>CAD</td>
+            <td class="num">0.2029</td><td class="num">$15.50</td>
+            <td class="num fml">$3.14</td><td class="num">$3.00</td>
+            <td class="num fml pos">+$0.14</td><td class="num fml pos">+4.7%</td>
+            <td class="num">$0.08</td><td>Monthly</td>
+          </tr>
+          <tr class="alt">
+            <td class="rn">2</td><td class="ticker">APLE</td><td>TSX</td><td>Harvest Apple EHI ETF</td><td>CA ETF</td><td>CAD</td>
+            <td class="num">0.1677</td><td class="num">$17.20</td>
+            <td class="num fml">$2.88</td><td class="num">$2.75</td>
+            <td class="num fml pos">+$0.13</td><td class="num fml pos">+4.7%</td>
+            <td class="num">$0.08</td><td>Monthly</td>
+          </tr>
+          <tr>
+            <td class="rn">3</td><td class="ticker">BANK</td><td>TSX</td><td>Evolve Cdn Banks &amp; Lifecos ETF</td><td>CA ETF</td><td>CAD</td>
+            <td class="num">0.2817</td><td class="num">$23.80</td>
+            <td class="num fml">$6.70</td><td class="num">$6.50</td>
+            <td class="num fml pos">+$0.20</td><td class="num fml pos">+3.1%</td>
+            <td class="num">$0.14</td><td>Monthly</td>
+          </tr>
+          <tr class="alt">
+            <td class="rn">4</td><td class="ticker">BCEE</td><td>TSX</td><td>Harvest BCE EHI ETF</td><td>CA ETF</td><td>CAD</td>
+            <td class="num">0.2803</td><td class="num">$9.15</td>
+            <td class="num fml">$2.56</td><td class="num">$2.45</td>
+            <td class="num fml pos">+$0.11</td><td class="num fml pos">+4.5%</td>
+            <td class="num">$0.09</td><td>Monthly</td>
+          </tr>
+          <tr>
+            <td class="rn">5</td><td class="ticker">BN</td><td>TSX</td><td>Brookfield Corp.</td><td>CA Stock</td><td>CAD</td>
+            <td class="num">0.0158</td><td class="num">$68.50</td>
+            <td class="num fml">$1.08</td><td class="num">$0.95</td>
+            <td class="num fml pos">+$0.13</td><td class="num fml pos">+13.7%</td>
+            <td class="num">&mdash;</td><td>&mdash;</td>
+          </tr>
+          <tr class="alt">
+            <td class="rn">6</td><td class="ticker">CHP.UN</td><td>TSX</td><td>Choice Properties REIT</td><td>CA REIT</td><td>CAD</td>
+            <td class="num">0.1950</td><td class="num">$14.20</td>
+            <td class="num fml">$2.77</td><td class="num">$2.60</td>
+            <td class="num fml pos">+$0.17</td><td class="num fml pos">+6.5%</td>
+            <td class="num">$0.07</td><td>Monthly</td>
+          </tr>
+          <tr>
+            <td class="rn">7</td><td class="ticker">ENS</td><td>TSX</td><td>E Split Corp.</td><td>CA Split</td><td>CAD</td>
+            <td class="num">0.1589</td><td class="num">$8.45</td>
+            <td class="num fml">$1.34</td><td class="num">$1.25</td>
+            <td class="num fml pos">+$0.09</td><td class="num fml pos">+7.2%</td>
+            <td class="num">$0.10</td><td>Monthly</td>
+          </tr>
+          <tr class="alt">
+            <td class="rn">8</td><td class="ticker">ETSX</td><td>TSX</td><td>Evolve S&amp;P/TSX 60 Enhanced Yield</td><td>CA ETF</td><td>CAD</td>
+            <td class="num">0.1232</td><td class="num">$18.90</td>
+            <td class="num fml">$2.33</td><td class="num">$2.20</td>
+            <td class="num fml pos">+$0.13</td><td class="num fml pos">+5.9%</td>
+            <td class="num">$0.12</td><td>Monthly</td>
+          </tr>
+          <tr>
+            <td class="rn">9</td><td class="ticker">QMAX</td><td>TSX</td><td>Hamilton Tech Yield Maximizer ETF</td><td>CA ETF</td><td>CAD</td>
+            <td class="num">0.1196</td><td class="num">$7.85</td>
+            <td class="num fml">$0.94</td><td class="num">$0.88</td>
+            <td class="num fml pos">+$0.06</td><td class="num fml pos">+6.8%</td>
+            <td class="num">$0.15</td><td>Monthly</td>
+          </tr>
+          <tr class="alt">
+            <td class="rn">10</td><td class="ticker">SGR.UN</td><td>TSX</td><td>Slate Grocery REIT</td><td>CA REIT</td><td>CAD</td>
+            <td class="num">0.1867</td><td class="num">$8.90</td>
+            <td class="num fml">$1.66</td><td class="num">$1.55</td>
+            <td class="num fml pos">+$0.11</td><td class="num fml pos">+7.1%</td>
+            <td class="num">$0.10</td><td>Monthly</td>
+          </tr>
+          <tr>
+            <td class="rn">11</td><td class="ticker">SRU.UN</td><td>TSX</td><td>SmartCentres REIT</td><td>CA REIT</td><td>CAD</td>
+            <td class="num">0.1048</td><td class="num">$24.10</td>
+            <td class="num fml">$2.53</td><td class="num">$2.40</td>
+            <td class="num fml pos">+$0.13</td><td class="num fml pos">+5.4%</td>
+            <td class="num">$0.15</td><td>Monthly</td>
+          </tr>
+          <tr class="alt">
+            <td class="rn">12</td><td class="ticker">VEE</td><td>TSX</td><td>Vanguard FTSE EM All Cap ETF</td><td>CA ETF</td><td>CAD</td>
+            <td class="num">0.3736</td><td class="num">$39.50</td>
+            <td class="num fml">$14.76</td><td class="num">$13.80</td>
+            <td class="num fml pos">+$0.96</td><td class="num fml pos">+7.0%</td>
+            <td class="num">&mdash;</td><td>&mdash;</td>
+          </tr>
+          <tr class="tot">
+            <td class="rn"></td>
+            <td colspan="7"><strong>PORTFOLIO TOTAL &mdash; 12 Positions</strong></td>
+            <td class="num fml"><strong>$42.69</strong></td>
+            <td class="num"><strong>$39.83</strong></td>
+            <td class="num fml pos"><strong>+$2.86</strong></td>
+            <td class="num fml pos"><strong>+7.2%</strong></td>
+            <td colspan="2">&mdash;</td>
+          </tr>
+        </table>
+      </div>
+      <div class="fml-bar">
+        <strong>Blue cells = formulas:</strong>&nbsp;&nbsp;
+        Mkt Value <code>=G7*H7</code> &nbsp;&bull;&nbsp;
+        Unrealized <code>=J7-K7</code> &nbsp;&bull;&nbsp;
+        Return % <code>=L7/K7</code> &nbsp;&bull;&nbsp;
+        Totals <code>=SUM(J7:J36)</code>
+      </div>
+      <div class="sheet-note">Update the Price column (col H) each month from your broker and all values recalculate instantly.</div>
+    </div>
+
+    <!-- MONTHLY TRACKER -->
+    <div class="xl-sheet" id="sh-mt">
+      <div class="xl-tbl-wrap">
+        <table class="xt" style="min-width:580px;">
+          <tr><td colspan="7" class="hdg">Monthly Tracker &mdash; Record a snapshot on the last day of each month. Chart updates automatically.</td></tr>
+          <tr><th>#</th><th>Month</th><th>Date</th><th>Portfolio Value (CAD)</th><th>Book Value</th><th>Unrealized</th><th>Return %</th></tr>
+          <tr>
+            <td class="rn">1</td><td><strong>May 2026</strong></td><td>2026-05-31</td>
+            <td class="num">$31.51</td><td class="num">$31.41</td>
+            <td class="num fml pos">+$0.10</td><td class="num fml pos">+0.3%</td>
+          </tr>
+          <tr class="alt">
+            <td class="rn">2</td>
+            <td colspan="6" style="color:#BBB;font-style:italic;font-family:Arial,sans-serif;font-size:0.9em;padding:5px 10px;">
+              &larr; Row 2 will auto-populate the chart when you add Jun 2026
+            </td>
+          </tr>
+          <tr><td class="rn">3</td><td colspan="6" style="color:#DDD;font-family:Arial,sans-serif;">...</td></tr>
+          <tr class="alt"><td class="rn">4</td><td colspan="6" style="color:#DDD;font-family:Arial,sans-serif;">...</td></tr>
+        </table>
+      </div>
+      <div class="xl-chart-wrap">
+        <h4>Portfolio Value Over Time &mdash; Auto-updates as monthly snapshots are added</h4>
+        <div class="xl-chart-inner"><canvas id="demoChart"></canvas></div>
+      </div>
+      <div class="sheet-note">The line chart is embedded directly in the sheet &mdash; no plugins required. It grows with your data as each month is recorded.</div>
+    </div>
+
+    <!-- PURCHASE PLAN -->
+    <div class="xl-sheet" id="sh-pp">
+      <div class="xl-tbl-wrap">
+        <table class="xt" style="min-width:720px;">
+          <tr><td colspan="8" class="hdg">Purchase Plan &mdash; Current weight vs. target allocation. Traffic-light status guides your next buy.</td></tr>
+          <tr><th>#</th><th>Ticker</th><th>Company</th><th>Mkt Value</th><th>Current Wt</th><th>Target Wt</th><th>Delta</th><th>Status</th></tr>
+          <tr>
+            <td class="rn">1</td><td class="ticker">AMHE</td><td>Harvest Amazon EHI ETF</td>
+            <td class="num fml">$3.14</td><td class="num fml">7.4%</td><td class="num">8.3%</td>
+            <td class="num fml neg">-0.9%</td><td class="pp-amber">&#9650; Add</td>
+          </tr>
+          <tr class="alt">
+            <td class="rn">2</td><td class="ticker">APLE</td><td>Harvest Apple EHI ETF</td>
+            <td class="num fml">$2.88</td><td class="num fml">6.7%</td><td class="num">8.3%</td>
+            <td class="num fml neg">-1.6%</td><td class="pp-amber">&#9650; Add</td>
+          </tr>
+          <tr>
+            <td class="rn">3</td><td class="ticker">BANK</td><td>Evolve Cdn Banks ETF</td>
+            <td class="num fml">$6.70</td><td class="num fml">15.7%</td><td class="num">8.3%</td>
+            <td class="num fml pos">+7.4%</td><td class="pp-red">&#9660; Overweight</td>
+          </tr>
+          <tr class="alt">
+            <td class="rn">4</td><td class="ticker">BN</td><td>Brookfield Corp.</td>
+            <td class="num fml">$1.08</td><td class="num fml">2.5%</td><td class="num">8.3%</td>
+            <td class="num fml neg">-5.8%</td><td class="pp-red">&#9650;&#9650; Underweight</td>
+          </tr>
+          <tr>
+            <td class="rn">5</td><td class="ticker">CHP.UN</td><td>Choice Properties REIT</td>
+            <td class="num fml">$2.77</td><td class="num fml">6.5%</td><td class="num">8.3%</td>
+            <td class="num fml neg">-1.8%</td><td class="pp-amber">&#9650; Add</td>
+          </tr>
+          <tr class="alt">
+            <td class="rn">6</td><td class="ticker">ENS</td><td>E Split Corp.</td>
+            <td class="num fml">$1.34</td><td class="num fml">3.1%</td><td class="num">8.3%</td>
+            <td class="num fml neg">-5.2%</td><td class="pp-red">&#9650;&#9650; Underweight</td>
+          </tr>
+          <tr>
+            <td class="rn">7</td><td class="ticker">SGR.UN</td><td>Slate Grocery REIT</td>
+            <td class="num fml">$1.66</td><td class="num fml">3.9%</td><td class="num">8.3%</td>
+            <td class="num fml neg">-4.4%</td><td class="pp-red">&#9650;&#9650; Underweight</td>
+          </tr>
+          <tr class="alt">
+            <td class="rn">8</td><td class="ticker">VEE</td><td>Vanguard FTSE EM All Cap ETF</td>
+            <td class="num fml">$14.76</td><td class="num fml">34.6%</td><td class="num">8.3%</td>
+            <td class="num fml pos">+26.3%</td><td class="pp-red">&#9660; Overweight</td>
+          </tr>
+          <tr class="tot">
+            <td></td><td colspan="2"><strong>PORTFOLIO TOTAL</strong></td>
+            <td class="num fml"><strong>$42.69</strong></td>
+            <td class="num fml"><strong>100%</strong></td>
+            <td class="num"><strong>100%</strong></td>
+            <td class="num">&mdash;</td><td><strong>Auto-calculated</strong></td>
+          </tr>
+        </table>
+      </div>
+      <div class="fml-bar">
+        <strong>Traffic-light logic:</strong>&nbsp;&nbsp;
+        Current Wt <code>=J7/SUM($J$7:$J$36)</code> &nbsp;&bull;&nbsp;
+        Delta <code>=F7-E7</code> &nbsp;&bull;&nbsp;
+        Status uses <code>IF()</code> with conditional formatting &mdash; Green / Amber / Red auto-applied
+      </div>
+      <div class="sheet-note">Green = within 1% of target. Amber = 1%&ndash;3% below target. Red = overweight or more than 3% underweight. Your $1/day buys focus red and amber positions first.</div>
+    </div>
+
+    <!-- CSV IMPORT -->
+    <div class="xl-sheet" id="sh-csv">
+      <div class="xl-tbl-wrap">
+        <table class="xt" style="min-width:540px;">
+          <tr><td colspan="5" class="hdg">CSV Import &mdash; Paste your Wealthsimple activity export starting at row 10. Summary block auto-calculates from the pasted data.</td></tr>
+          <tr><th>A</th><th>B</th><th>C (Qty)</th><th>D (Price)</th><th>E (Amount)</th></tr>
+          <tr><td colspan="5" style="color:#999;font-style:italic;font-family:Arial,sans-serif;font-size:0.88em;padding:6px 10px;background:#FAFAFA;">Rows 1&ndash;9: Instructions &amp; column headers &mdash; protected, do not edit</td></tr>
+        </table>
+      </div>
+      <p class="csv-note">Paste Wealthsimple CSV export below &mdash; transactions auto-populate the summary:</p>
+      <div class="csv-paste">
+Symbol,Description,Quantity,Price,Amount,Type,Date<br>
+VEE,"Buy 0.3736 shares of VEE",0.3736,39.50,-14.76,Buy,2026-05-14<br>
+BANK,"Buy 0.2817 shares of BANK",0.2817,23.80,-6.70,Buy,2026-05-16<br>
+AMHE,"Buy 0.2029 shares of AMHE",0.2029,15.50,-3.14,Buy,2026-05-15<br>
+BCEE,"Buy 0.2803 shares of BCEE",0.2803,9.15,-2.56,Buy,2026-05-17<br>
+<span style="color:#1155CC;">&larr; Continue pasting rows here (up to row 60)&hellip;</span>
+      </div>
+      <div class="xl-tbl-wrap" style="margin-top:10px;">
+        <table class="xt" style="min-width:380px;">
+          <tr><td colspan="2" class="hdg">Auto-Summary Block (rows 63&ndash;68) &mdash; Do not edit</td></tr>
+          <tr><th>Field</th><th>Formula Result</th></tr>
+          <tr><td>Total Market Value</td><td class="num fml">$42.69</td></tr>
+          <tr class="alt"><td>Total Book Value</td><td class="num fml">$39.83</td></tr>
+          <tr><td>Total Unrealized</td><td class="num fml pos">+$2.86</td></tr>
+          <tr class="alt"><td>Position Count</td><td class="num fml">12</td></tr>
+          <tr><td>Snapshot Date</td><td class="fml">2026-05-31</td></tr>
+        </table>
+      </div>
+      <div class="sheet-note">Export your activity from Wealthsimple &rarr; paste here &rarr; copy the summary block values into the Dashboard. No manual entry needed.</div>
+    </div>
+
+  </div><!-- /.xl-body -->
+
+  <!-- Sheet tabs -->
+  <div class="xl-tabs">
+    <div class="xl-tab t-dash active" onclick="switchSheet(this,'dash')">&#128200; Dashboard</div>
+    <div class="xl-tab t-mt" onclick="switchSheet(this,'mt')">&#128202; Monthly Tracker</div>
+    <div class="xl-tab t-pp" onclick="switchSheet(this,'pp')">&#9776; Purchase Plan</div>
+    <div class="xl-tab t-csv" onclick="switchSheet(this,'csv')">&#128450; CSV Import</div>
+  </div>
+
+</div><!-- /.xl-shell -->
+
+<!-- CTA -->
+<div id="bundle" class="cta-box">
+  <h3>Get All 10 Portfolio Trackers</h3>
+  <p>Every portfolio in the Verity Architecture system has its own pre-built tracker in exactly this format. Pre-populated with tickers, classes, dividend schedules, and historical data. Blank versions included so you can adapt them to your own holdings.</p>
+  <div class="incl-list">
+    <span class="incl-item">FT Starter</span>
+    <span class="incl-item">Centurion &mdash; 100 Positions</span>
+    <span class="incl-item">Fortress 200 USD</span>
+    <span class="incl-item">Quiet Titan TFSA</span>
+    <span class="incl-item">Rebate Portfolio</span>
+    <span class="incl-item">Tactical Tax Free</span>
+    <span class="incl-item">REITs Portfolio</span>
+    <span class="incl-item">Developer Portfolio</span>
+    <span class="incl-item">WhiteSwan</span>
+    <span class="incl-item">10 ETF RRSP</span>
+  </div>
+  <a class="btn btn-gold" href="financially-trapped-hub.html#worksheets">Architect&rsquo;s Bundle &mdash; $29.99 CAD</a>
+  <a class="btn btn-line" href="financially-trapped-hub.html">Back to Home</a>
+</div>
+
+</div><!-- /.wrap -->
+
+<script>
+function switchSheet(tab, id) {
+  document.querySelectorAll('.xl-sheet').forEach(function(el){ el.classList.remove('active'); });
+  document.querySelectorAll('.xl-tab').forEach(function(el){ el.classList.remove('active'); });
+  document.getElementById('sh-' + id).classList.add('active');
+  tab.classList.add('active');
+  if (id === 'mt' && !window._chartBuilt) { buildChart(); }
+}
+
+function buildChart() {
+  window._chartBuilt = true;
+  var ctx = document.getElementById('demoChart').getContext('2d');
+  var GOLD = '#C9A84C';
+  var GOLDDIM = '#A88830';
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: ['May 2026', 'Jun 2026', 'Jul 2026', 'Aug 2026', 'Sep 2026', 'Oct 2026', 'Nov 2026', 'Dec 2026'],
+      datasets: [
+        {
+          label: 'Portfolio Value (CAD)',
+          data: [31.51, null, null, null, null, null, null, null],
+          borderColor: GOLD,
+          backgroundColor: 'rgba(201,168,76,0.10)',
+          borderWidth: 2.5,
+          pointRadius: [6, 0, 0, 0, 0, 0, 0, 0],
+          pointBackgroundColor: GOLD,
+          fill: true,
+          tension: 0.35,
+          spanGaps: false
+        },
+        {
+          label: 'Book Value',
+          data: [31.41, null, null, null, null, null, null, null],
+          borderColor: '#999',
+          backgroundColor: 'transparent',
+          borderWidth: 1.5,
+          borderDash: [5, 4],
+          pointRadius: [4, 0, 0, 0, 0, 0, 0, 0],
+          pointBackgroundColor: '#999',
+          fill: false,
+          tension: 0,
+          spanGaps: false
+        }
+      ]
+    },
+    options: {
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          labels: { color: '#333', font: { family: 'Arial', size: 11 }, boxWidth: 20 }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              if (ctx.parsed.y === null) return ctx.dataset.label + ': (not yet recorded)';
+              return ctx.dataset.label + ': $' + ctx.parsed.y.toFixed(2) + ' CAD';
+            }
+          }
+        },
+        annotation: {}
+      },
+      scales: {
+        y: {
+          beginAtZero: false,
+          ticks: {
+            callback: function(v) { return '$' + v.toFixed(2); },
+            color: '#555',
+            font: { family: 'Arial', size: 10 }
+          },
+          grid: { color: 'rgba(0,0,0,0.06)' }
+        },
+        x: {
+          ticks: { color: '#555', font: { family: 'Arial', size: 10 } },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+}
+</script>
+</body>
+</html>

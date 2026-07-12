@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>WS13: DRIP: The Automatic Refueler | Financially Trapped</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:20px;}
+body{background:#0e0e1c;color:#e8e0cc;font-family:Georgia,serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;}
+#player{position:relative;width:100vw;height:100vh;background:#13132a;border:none;display:flex;flex-direction:column;overflow:hidden;}
+#prog-bar{height:16px;background:rgba(201,168,76,.12);flex-shrink:0;cursor:pointer;position:relative;user-select:none;border-top:1px solid rgba(201,168,76,.2);}
+#prog-bar:hover{background:rgba(201,168,76,.22);}
+#prog-fill{height:100%;width:0;background:#C9A84C;pointer-events:none;}
+#prog-thumb{position:absolute;top:50%;right:auto;width:20px;height:20px;border-radius:50%;background:#C9A84C;border:2px solid #fff;transform:translate(-50%,-50%);left:0;pointer-events:none;box-shadow:0 0 10px rgba(201,168,76,.7);opacity:0;transition:opacity .15s;}
+#prog-bar:hover #prog-thumb{opacity:1;}
+#fs-btn{font-family:Arial,sans-serif;font-size:0.8em;font-weight:bold;letter-spacing:.08em;color:#888;border:1px solid rgba(255,255,255,.18);background:none;padding:.38em .95em;border-radius:4px;cursor:pointer;white-space:nowrap;}
+#fs-btn:hover{color:#C9A84C;border-color:rgba(201,168,76,.5);}
+#voice-btn{font-family:Arial,sans-serif;font-size:0.8em;letter-spacing:.06em;color:#aaa;border:1px solid rgba(255,255,255,.18);background:none;padding:.38em .95em;border-radius:4px;cursor:pointer;}
+#voice-btn:hover{color:#C9A84C;border-color:rgba(201,168,76,.5);}
+#stage{flex:1;position:relative;overflow:hidden;}
+.scene{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .5s;}
+.scene.active{opacity:1;pointer-events:auto;}
+#s-play{cursor:pointer;background:radial-gradient(ellipse at center,#1e1e3a 0%,#0e0e1c 75%);}
+.ch-tag{font-family:Arial,sans-serif;font-size:0.85em;font-weight:bold;letter-spacing:.2em;text-transform:uppercase;color:#C9A84C;margin-bottom:.6em;}
+.ch-num{font-size:clamp(2.6em,7vw,4.5em);font-weight:bold;color:#C9A84C;line-height:1;text-shadow:0 0 40px rgba(201,168,76,.45);}
+.ch-title{font-size:clamp(1.1em,2.8vw,1.7em);color:#e8e0cc;margin-top:.35em;letter-spacing:.03em;}
+.ch-sub{font-size:0.9em;color:#bbb;font-style:italic;margin-top:.5em;}
+.play-ring{width:90px;height:90px;border-radius:50%;border:3px solid #C9A84C;display:flex;align-items:center;justify-content:center;margin-top:1.5em;transition:box-shadow .2s,transform .15s;}
+#s-play:hover .play-ring{box-shadow:0 0 32px rgba(201,168,76,.5);transform:scale(1.06);}
+.play-tri{width:0;height:0;border-top:18px solid transparent;border-bottom:18px solid transparent;border-left:28px solid #C9A84C;margin-left:7px;}
+#top-bar{background:#0a0a18;border-bottom:1px solid rgba(201,168,76,.2);padding:.6em 1.2em .5em;flex-shrink:0;}
+#ch-badge{font-family:Arial,sans-serif;font-size:0.72em;font-weight:bold;letter-spacing:.14em;text-transform:uppercase;color:#C9A84C;opacity:0;transition:opacity .5s;margin-bottom:.25em;}
+#ch-badge.vis{opacity:1;}
+#subtitle{font-size:1.08em;color:#fff;line-height:1.6;min-height:2.4em;}
+#subtitle span{background:none;padding:0;letter-spacing:.01em;color:#f0e8d0;}
+#controls{height:64px;display:flex;align-items:center;gap:.9em;padding:0 1.2em;background:#0a0a18;border-top:1px solid rgba(201,168,76,.2);flex-shrink:0;}
+#pause-btn{font-family:Arial,sans-serif;font-size:0.88em;font-weight:bold;letter-spacing:.1em;text-transform:uppercase;color:#C9A84C;border:2px solid rgba(201,168,76,.55);background:none;padding:.4em 1.1em;border-radius:4px;cursor:pointer;transition:background .15s;}
+#pause-btn:hover{background:rgba(201,168,76,.15);}
+#skip-btn{font-family:Arial,sans-serif;font-size:0.8em;letter-spacing:.08em;text-transform:uppercase;color:#999;border:1px solid rgba(255,255,255,.18);background:none;padding:.38em .95em;border-radius:4px;cursor:pointer;}
+#skip-btn:hover{color:#eee;}
+.ctrl-label{font-family:Arial,sans-serif;font-size:0.75em;color:#666;margin-left:auto;}
+.sc-wrap{width:92%;max-width:1400px;max-height:calc(100% - 130px);overflow-y:auto;padding:.4em 0;}
+.sc-wrap::-webkit-scrollbar{width:6px;}
+.sc-wrap::-webkit-scrollbar-thumb{background:rgba(201,168,76,.35);border-radius:3px;}
+.ws-shell{background:#0c0c20;border:1.5px solid rgba(201,168,76,.35);border-radius:6px;overflow:hidden;font-family:Arial,sans-serif;}
+.ws-hdr{padding:.65em 1.1em;border-bottom:1px solid rgba(201,168,76,.18);}
+.ws-hdr-title{font-size:0.72em;font-weight:bold;letter-spacing:.12em;text-transform:uppercase;color:#C9A84C;}
+.ws-hdr-sheet{font-size:0.95em;font-weight:bold;color:#e8e0cc;margin-top:.25em;}
+.ws-hdr-sub{font-size:0.76em;color:#999;font-style:italic;margin-top:.15em;}
+.ws-sec-band{background:rgba(201,168,76,.12);padding:.5em 1.1em;font-size:0.82em;font-weight:bold;letter-spacing:.07em;color:#C9A84C;border-top:1px solid rgba(201,168,76,.25);border-bottom:1px solid rgba(201,168,76,.18);}
+.ws-tbl{width:100%;border-collapse:collapse;}
+.ws-tbl th{background:rgba(201,168,76,.08);color:#C9A84C;font-size:0.8em;font-weight:bold;letter-spacing:.09em;padding:.55em .9em;border-bottom:1px solid rgba(201,168,76,.25);text-align:left;white-space:nowrap;}
+.ws-tbl td{font-size:0.88em;padding:.55em .9em;border-bottom:1px solid rgba(255,255,255,.05);color:#333;vertical-align:middle;}
+.ws-tbl td.filled{color:#d8cfb8;}
+.ws-tbl td.gold-val{color:#C9A84C;font-weight:bold;}
+.ws-tbl tr.active-row>td{background:rgba(201,168,76,.07);}
+.ws-tbl td.hl{background:rgba(201,168,76,.22)!important;color:#fff!important;border:2px solid rgba(201,168,76,.8)!important;border-radius:3px;}
+.ws-tbl tr.total-row>td{border-top:1.5px solid rgba(201,168,76,.4);color:#C9A84C;font-weight:bold;font-size:0.88em;padding:.55em .9em;}
+.ws-tbl td.empty-cell{color:#1e1e30;}
+.ws-calc-tbl{width:100%;border-collapse:collapse;}
+.ws-calc-tbl th{background:rgba(201,168,76,.08);color:#C9A84C;font-size:0.8em;font-weight:bold;letter-spacing:.09em;padding:.55em .9em;border-bottom:1px solid rgba(201,168,76,.25);text-align:left;}
+.ws-calc-tbl td{font-size:0.88em;padding:.65em .9em;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:middle;}
+.ws-calc-tbl td.calc-label{color:#bbb;white-space:nowrap;width:55%;}
+.ws-calc-tbl td.calc-val{color:#222238;width:45%;}
+.ws-calc-tbl td.calc-val.filled{color:#d8cfb8;}
+.ws-calc-tbl td.calc-val.gold-fill{color:#C9A84C;font-weight:bold;}
+.ws-calc-tbl td.hl{background:rgba(201,168,76,.22)!important;color:#fff!important;border:2px solid rgba(201,168,76,.8)!important;border-radius:3px;}
+.ws-quote-row{padding:.85em 1.1em;font-size:0.82em;color:#1e1e30;font-style:italic;border-top:1px solid rgba(255,255,255,.05);transition:color .6s;}
+.ws-quote-row.show{color:#C9A84C;}
+#s1 .ws-eyebrow{font-family:Arial,sans-serif;font-size:0.85em;font-weight:bold;letter-spacing:.2em;text-transform:uppercase;color:#C9A84C;margin-bottom:.6em;text-align:center;}
+#s1 .ws-title{font-size:clamp(1.6em,4vw,2.6em);font-weight:bold;color:#C9A84C;text-align:center;text-shadow:0 0 28px rgba(201,168,76,.35);}
+#s1 .ws-sub2{font-size:0.88em;color:#bbb;text-align:center;margin-top:.45em;font-style:italic;}
+#s1 .ws-desc{font-size:0.92em;color:#c8bfa8;text-align:center;margin-top:1.1em;line-height:1.75;max-width:600px;margin-left:auto;margin-right:auto;}
+#s-cta{text-align:center;}
+#s-cta .cta-done{font-size:0.9em;color:#aaa;margin-bottom:.8em;}
+#s-cta .cta-title{font-size:clamp(1.3em,3.2vw,2em);color:#C9A84C;margin-bottom:.4em;}
+.cta-btns{display:flex;gap:.9em;flex-wrap:wrap;justify-content:center;margin-top:1.2em;}
+.cta-btn{font-family:Arial,sans-serif;font-size:0.85em;font-weight:bold;letter-spacing:.1em;text-transform:uppercase;padding:.7em 1.5em;border-radius:4px;text-decoration:none;border:2px solid #C9A84C;color:#C9A84C;transition:background .15s;}
+.cta-btn.gold{background:#C9A84C;color:#0e0e1c;}
+.cta-btn:hover{background:rgba(201,168,76,.18);}
+.cta-btn.gold:hover{background:#b8953e;}
+</style>
+<link rel="stylesheet" href="ws-shared.css">
+</head>
+<body>
+<a href="/" id="vaHomeBtn" aria-label="Home" style="position:fixed;top:14px;left:14px;z-index:99999;display:inline-flex;align-items:center;gap:7px;padding:9px 15px;background:rgba(18,22,44,0.9);color:#d9b676;font-family:Georgia,'Times New Roman',serif;font-size:14px;font-weight:bold;letter-spacing:.5px;text-decoration:none;border:1px solid #d9b676;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.35);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);"><span style="font-size:16px;line-height:1;">&#8962;</span> Home</a>
+<div id="player">
+<div id="top-bar">
+<div id="ch-badge">Chapter 13 · DRIP: The Automatic Refueler</div>
+<div id="subtitle"><span id="sub-text"></span></div>
+</div>
+<div id="stage">
+<div class="scene active" id="s-play" onclick="startAnim()">
+<div class="ch-tag">Financially Trapped &middot; Worksheet Tutorial</div>
+<div class="ch-num">WS 13</div>
+<div class="ch-title">DRIP: The Automatic Refueler</div>
+<div class="ch-sub">DRIP Activation Log · Valve Readiness</div>
+<div class="play-ring"><div class="play-tri"></div></div>
+</div>
+<div class="scene" id="s1">
+<div class="sc-wrap" style="text-align:center;">
+<div class="ws-eyebrow">Worksheet 13 of 16</div>
+<div class="ws-title">DRIP: The Automatic Refueler</div>
+<div class="ws-sub2" id="ws-sub2"></div>
+<div class="ws-desc" id="s1desc"></div>
+</div>
+</div>
+
+    <div class="scene" id="s3">
+      <div class="sc-wrap">
+        <div class="ws-shell">
+          <div class="ws-hdr">
+            <div class="ws-hdr-title">Financially Trapped &middot; The Architect's Working Documents</div>
+            <div class="ws-hdr-sheet">Worksheet 13: DRIP — The Automatic Refueler</div>
+            <div class="ws-hdr-sub">DRIP Activation Log &middot; Valve Readiness Assessment</div>
+          </div>
+          <div class="ws-sec-band">[A] DRIP Activation Log &mdash; Every position, every platform, confirmed active</div>
+          <table class="ws-tbl">
+            <thead><tr><th>POSITION / TICKER</th><th>ENGINE</th><th>PLATFORM</th><th>DRIP STATUS</th><th>FRACTIONAL?</th><th>MONTHLY ($)</th></tr></thead>
+          <tbody>
+            <tr id="dr1"><td id="dp1a" class="empty-cell">&middot;</td><td id="dp1b" class="empty-cell">&middot;</td><td id="dp1c" class="empty-cell">&middot;</td><td id="dp1d" class="empty-cell">&middot;</td><td id="dp1e" class="empty-cell">&middot;</td><td id="dp1f" class="empty-cell">&middot;</td></tr>
+            <tr id="dr2"><td id="dp2a" class="empty-cell">&middot;</td><td id="dp2b" class="empty-cell">&middot;</td><td id="dp2c" class="empty-cell">&middot;</td><td id="dp2d" class="empty-cell">&middot;</td><td id="dp2e" class="empty-cell">&middot;</td><td id="dp2f" class="empty-cell">&middot;</td></tr>
+            <tr id="dr3"><td id="dp3a" class="empty-cell">&middot;</td><td id="dp3b" class="empty-cell">&middot;</td><td id="dp3c" class="empty-cell">&middot;</td><td id="dp3d" class="empty-cell">&middot;</td><td id="dp3e" class="empty-cell">&middot;</td><td id="dp3f" class="empty-cell">&middot;</td></tr>
+            <tr id="dr4"><td id="dp4a" class="empty-cell">&middot;</td><td id="dp4b" class="empty-cell">&middot;</td><td id="dp4c" class="empty-cell">&middot;</td><td id="dp4d" class="empty-cell">&middot;</td><td id="dp4e" class="empty-cell">&middot;</td><td id="dp4f" class="empty-cell">&middot;</td></tr>
+            <tr><td class="empty-cell">&middot;</td><td class="empty-cell">&middot;</td><td class="empty-cell">&middot;</td><td class="empty-cell">&middot;</td><td class="empty-cell">&middot;</td><td class="empty-cell">&middot;</td></tr>
+            <tr class="total-row"><td colspan="5">TOTAL MONTHLY DRIP REINVESTMENT</td><td id="drip-total" class="gold-val">$___</td></tr>
+          </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="scene" id="s4">
+      <div class="sc-wrap">
+        <div class="ws-shell">
+          <div class="ws-hdr">
+            <div class="ws-hdr-title">Financially Trapped &middot; The Architect's Working Documents</div>
+            <div class="ws-hdr-sheet">Worksheet 13: DRIP — The Automatic Refueler</div>
+          </div>
+          <div class="ws-sec-band">[B] Valve Readiness &mdash; Are your income valves open and confirmed?</div>
+          <table class="ws-tbl">
+            <thead><tr><th>VALVE</th><th>DESCRIPTION</th><th>STATUS</th><th>NOTES</th></tr></thead>
+          <tbody>
+            <tr id="vv1"><td id="vl1a" class="empty-cell">&middot;</td><td id="vl1b" class="empty-cell">&middot;</td><td id="vl1c" class="empty-cell">&middot;</td><td id="vl1d" class="empty-cell">&middot;</td></tr>
+            <tr id="vv2"><td id="vl2a" class="empty-cell">&middot;</td><td id="vl2b" class="empty-cell">&middot;</td><td id="vl2c" class="empty-cell">&middot;</td><td id="vl2d" class="empty-cell">&middot;</td></tr>
+            <tr id="vv3"><td id="vl3a" class="empty-cell">&middot;</td><td id="vl3b" class="empty-cell">&middot;</td><td id="vl3c" class="empty-cell">&middot;</td><td id="vl3d" class="empty-cell">&middot;</td></tr>
+          </tbody>
+          </table>
+          <div class="ws-quote-row" id="wsQuote13">"Don't eat your seed corn. Plant it until you own the whole field."</div>
+        </div>
+      </div>
+    </div>
+<div class="scene" id="s-cta">
+<div class="cta-done">Worksheet 13 complete</div>
+<div class="cta-title">DRIP: The Automatic Refueler</div>
+<div style="font-size:.78em;color:#aaa;font-style:italic;">DRIP confirmed on every position. Valves mapped. The machine is refueling itself, automatically, every month.</div>
+<div class="cta-btns">
+<a class="cta-btn gold" href="financially-trapped-hub.html#tutorials">Back to All Tutorials</a>
+<a class="cta-btn" href="#" onclick="resetAnim();return false;">Watch Again</a>
+</div>
+</div>
+</div>
+<div id="controls">
+<button id="pause-btn" onclick="togglePause()" style="display:none;">&#9208; Pause</button>
+<button id="skip-btn" onclick="skipToEnd()" style="display:none;">Skip &#8594;</button>
+<button id="voice-btn" onclick="toggleVoice()">&#128266; Voice</button>
+<div class="ctrl-label" id="ctrl-label">Click play to begin</div>
+<button id="fs-btn" onclick="toggleFullscreen()">&#9974; Fullscreen</button>
+</div>
+<div id="prog-bar" title="Click to seek">
+<div id="prog-fill"></div>
+<div id="prog-thumb"></div>
+</div>
+</div>
+<script>
+var SEQ=[8000,50000,45000];
+
+var CLK={elapsed:0,lastTick:0,running:false,raf:null,speechPaused:false};
+var EVENTS=[];var TOTAL_MS=0;
+var progEl=document.getElementById('prog-fill');var progThumb=document.getElementById('prog-thumb');
+var subEl=document.getElementById('sub-text');var pauseBtn=document.getElementById('pause-btn');
+var skipBtn=document.getElementById('skip-btn');var ctrlLabel=document.getElementById('ctrl-label');
+var VOICE_ON=true;var synth=window.speechSynthesis||null;var VOX=[];
+function loadV(){if(synth)VOX=synth.getVoices();}
+if(synth){loadV();if(synth.onvoiceschanged!==undefined)synth.onvoiceschanged=loadV;}
+function speak(txt){if(!VOICE_ON||!synth||!txt)return;synth.cancel();var u=new SpeechSynthesisUtterance(txt.replace(/[""''"']/g,"'"));u.rate=0.88;u.pitch=1.0;u.volume=1.0;var voices=VOX.length?VOX:synth.getVoices();var v=voices.find(function(x){return/samantha|karen|moira|victoria|allison|ava|alice|tessa|zoe/i.test(x.name);})||voices.find(function(x){return x.lang.startsWith('en')&&x.localService;})||voices.find(function(x){return x.lang.startsWith('en');});if(v)u.voice=v;CLK.speechPaused=true;u.onend=function(){CLK.speechPaused=false;if(CLK.running)CLK.lastTick=performance.now();};u.onerror=function(){CLK.speechPaused=false;if(CLK.running)CLK.lastTick=performance.now();};synth.speak(u);}
+function toggleVoice(){VOICE_ON=!VOICE_ON;if(!VOICE_ON&&synth)synth.cancel();document.getElementById('voice-btn').textContent=VOICE_ON?'🔊 Voice':'🔇 Muted';}
+function showScene(id){document.querySelectorAll('.scene').forEach(function(s){s.classList.remove('active');});var el=document.getElementById(id);if(el)el.classList.add('active');}
+function setSub(t){subEl.textContent=t;speak(t);}function clrSub(){subEl.textContent='';if(synth)synth.cancel();}
+function hl(id){document.querySelectorAll('.hl').forEach(function(c){c.classList.remove('hl');});var el=document.getElementById(id);if(el)el.classList.add('hl');}
+function fill(id,val,cls){var el=document.getElementById(id);if(!el)return;el.textContent=val;el.classList.remove('empty-cell','hl');el.classList.add(cls||'filled');}
+function hlOff(){document.querySelectorAll('.hl').forEach(function(c){c.classList.remove('hl');});}
+function clkTick(now){if(!CLK.running)return;if(!CLK.speechPaused){CLK.elapsed+=now-CLK.lastTick;EVENTS.forEach(function(ev){if(!ev.fired&&CLK.elapsed>=ev.t){ev.fn();ev.fired=true;}});var pct=Math.min(CLK.elapsed/TOTAL_MS*100,100);progEl.style.width=pct+'%';progThumb.style.left=pct+'%';}CLK.lastTick=now;CLK.raf=requestAnimationFrame(clkTick);}
+function startAnim(){document.getElementById('s-play').classList.remove('active');buildEvents();CLK.elapsed=0;CLK.running=true;CLK.lastTick=performance.now();CLK.raf=requestAnimationFrame(clkTick);}
+function togglePause(){if(CLK.running){CLK.running=false;cancelAnimationFrame(CLK.raf);if(synth)synth.cancel();pauseBtn.textContent='▶ Resume';}else{CLK.running=true;CLK.lastTick=performance.now();CLK.raf=requestAnimationFrame(clkTick);pauseBtn.textContent='⏸ Pause';}}
+function skipToEnd(){CLK.running=false;cancelAnimationFrame(CLK.raf);if(synth)synth.cancel();EVENTS.forEach(function(ev){if(!ev.fired){ev.fn();ev.fired=true;}});progEl.style.width='100%';}
+function resetAnim(){CLK.running=false;cancelAnimationFrame(CLK.raf);if(synth)synth.cancel();CLK.elapsed=0;hardReset();progEl.style.width='0';progThumb.style.left='0';ctrlLabel.textContent='Click play to begin';showScene('s-play');}
+var progBar=document.getElementById('prog-bar');var seeking=false;
+function seekTo(pct){var targetMs=pct*TOTAL_MS;CLK.running=false;cancelAnimationFrame(CLK.raf);CLK.speechPaused=false;if(synth)synth.cancel();hardReset();CLK.elapsed=targetMs;EVENTS.forEach(function(ev){if(ev.t<=targetMs){ev.fn();ev.fired=true;}});progEl.style.width=(pct*100)+'%';progThumb.style.left=(pct*100)+'%';if(targetMs>0){CLK.running=true;CLK.lastTick=performance.now();CLK.raf=requestAnimationFrame(clkTick);pauseBtn.textContent='⏸ Pause';}}
+function getSeekPct(e){var r=progBar.getBoundingClientRect();var x=(e.touches?e.touches[0].clientX:e.clientX)-r.left;return Math.max(0,Math.min(1,x/r.width));}
+progBar.addEventListener('mousedown',function(e){if(!CLK.elapsed&&!CLK.running)return;seeking=true;seekTo(getSeekPct(e));});
+progBar.addEventListener('mousemove',function(e){var p=getSeekPct(e);progThumb.style.left=(p*100)+'%';if(seeking)seekTo(p);});
+progBar.addEventListener('mouseup',function(){seeking=false;});document.addEventListener('mouseup',function(){seeking=false;});
+progBar.addEventListener('touchstart',function(e){if(!CLK.elapsed&&!CLK.running)return;e.preventDefault();seeking=true;seekTo(getSeekPct(e));},{passive:false});
+progBar.addEventListener('touchmove',function(e){e.preventDefault();if(seeking)seekTo(getSeekPct(e));},{passive:false});
+progBar.addEventListener('touchend',function(){seeking=false;});
+function toggleFullscreen(){var el=document.getElementById('player');var btn=document.getElementById('fs-btn');if(!document.fullscreenElement){(el.requestFullscreen||el.webkitRequestFullscreen||el.mozRequestFullScreen).call(el);btn.textContent='✕ Exit Full';}else{(document.exitFullscreen||document.webkitExitFullscreen||document.mozCancelFullScreen).call(document);btn.textContent='⛶ Fullscreen';}}
+document.addEventListener('fullscreenchange',function(){if(!document.fullscreenElement)document.getElementById('fs-btn').textContent='⛶ Fullscreen';});
+
+
+function buildEvents(){
+  EVENTS=[];var t=0;TOTAL_MS=SEQ[0]+SEQ[1]+SEQ[2];
+  function at(off,fn){EVENTS.push({t:t+off,fired:false,fn:fn});}
+  at(0,function(){
+    showScene('s1');document.getElementById('ch-badge').classList.add('vis');
+    pauseBtn.style.display='inline-block';skipBtn.style.display='inline-block';
+    ctrlLabel.textContent='WS 13 of 16';
+    document.getElementById('ws-sub2').textContent='DRIP Activation Log · Valve Readiness';
+    setSub('Worksheet 13: DRIP — The Automatic Refueler. A DRIP, the Dividend Reinvestment Plan, is the mechanism that makes compound growth automatic. Every dividend reinvests as more shares, which pay more dividends.');
+  });
+  at(5000,function(){document.getElementById('s1desc').textContent='Without DRIP, dividends sit as cash. With DRIP, dividends immediately purchase fractional shares, compounding your position every single month without any action from you.';});
+  at(9000,function(){setSub('This worksheet confirms DRIP is active on every position and calculates total monthly automatic reinvestment. This is the machine refueling itself.');});
+  t+=SEQ[0];
+
+  at(0,function(){showScene('s3');setSub('Section A: DRIP Activation Log. List every position you hold. Confirm DRIP status individually. Do not assume — verify.');});
+  at(4000,function(){hl('dp1a');setSub('POSITION 1: BANK.TO. Your largest position. The one that should have been DRIP-enabled from day one. Confirm it here.');});
+  at(8000,function(){fill('dp1a','BANK.TO');hl('dp1b');setSub('ENGINE: Which bill is this position assigned to eliminate? Name it. Every position should have a declared target.');});
+  at(12000,function(){fill('dp1b','Streaming Bill');fill('dp1c','Wealthsimple Trade');hl('dp1d');setSub('DRIP STATUS: Go into your brokerage account settings right now and confirm DRIP is toggled on for this position. Do not guess.');});
+  at(17000,function(){fill('dp1d','ACTIVE');hl('dp1e');setSub('FRACTIONAL DRIP: Can this platform reinvest partial shares? Wealthsimple Trade allows fractional reinvestment, meaning every cent of dividend is immediately put to work.');});
+  at(22000,function(){fill('dp1e','YES');hl('dp1f');setSub('MONTHLY REINVESTMENT: How much does DRIP reinvest per month from this position? Check your transaction history for the average.');});
+  at(27000,function(){fill('dp1f','$1.15');hlOff();document.getElementById('drip-total').textContent='$1.15';setSub('BANK.TO: DRIP active, fractional, $1.15 per month reinvested automatically. Now log every other position.');});
+  at(32000,function(){fill('dp2a','QMAX.TO');fill('dp2b','Cell Phone');fill('dp2c','Wealthsimple Trade');fill('dp2d','ACTIVE');fill('dp2e','YES');fill('dp2f','$2.80');hlOff();document.getElementById('drip-total').textContent='$3.95';});
+  at(38000,function(){fill('dp3a','ENS.TO');fill('dp3b','Internet Bill');fill('dp3c','Wealthsimple Trade');fill('dp3d','ACTIVE');fill('dp3e','YES');fill('dp3f','$0.65');hlOff();document.getElementById('drip-total').textContent='$4.60';});
+  at(43000,function(){fill('dp4a','SRU.UN');fill('dp4b','Grocery Bill');fill('dp4c','Wealthsimple Trade');fill('dp4d','ACTIVE');fill('dp4e','YES');fill('dp4f','$1.30');hlOff();document.getElementById('drip-total').textContent='$5.90';setSub('$5.90 per month reinvesting automatically. That is $70.80 per year buying more shares while you sleep. No trades. No decisions. Just compounding.');});
+  t+=SEQ[1];
+
+  at(0,function(){showScene('s4');setSub('Section B: Valve Readiness. The Three Valves represent income thresholds. This table tracks your progress toward each one.');});
+  at(4500,function(){hl('vl1a');setSub('VALVE 1: The Coffee Valve. $50 per month in dividend income. Small but real. This proves the machine works. It pays for something daily.');});
+  at(9000,function(){fill('vl1a','Valve 1 - Coffee');fill('vl1b','$50/mo in dividends ($600 annual)');fill('vl1c','APPROACHING');fill('vl1d','Current: $35/mo - on track');hlOff();setSub('Valve 1 approaching. $35 per month now. $15 short of $50. At current DRIP rates, you cross this threshold in a few months.');});
+  at(15000,function(){hl('vl2a');setSub('VALVE 2: The Grocery Valve. $500 per month in dividend income. This is food security from passive income. A fundamentally different life.');});
+  at(19500,function(){fill('vl2a','Valve 2 - Grocery');fill('vl2b','$500/mo in dividends ($6,000 annual)');fill('vl2c','BUILDING');fill('vl2d','Capital needed: $41,667 at 12% yield');hlOff();setSub('Valve 2 requires roughly $42,000 in income-producing assets at 12 percent yield. This is the multi-year mission.');});
+  at(26000,function(){hl('vl3a');setSub('VALVE 3: The Freedom Valve. $2,000 per month. Your rent, your food, your basics — all covered by dividends. You no longer need a job to survive.');});
+  at(31000,function(){fill('vl3a','Valve 3 - Freedom');fill('vl3b','$2,000/mo in dividends ($24,000 annual)');fill('vl3c','TARGET');fill('vl3d','Capital needed: $200,000 at 12% yield');hlOff();setSub('Valve 3 is the destination. $200,000 in engines at 12 percent yield. Activate it and you are financially independent. The DRIP is compounding toward it right now.');});
+  at(38000,function(){document.getElementById('wsQuote13').classList.add('show');setSub("Don't eat your seed corn. Plant it until you own the whole field.");});
+  t+=SEQ[2];
+  at(0,function(){showScene('s-cta');clrSub();pauseBtn.style.display='none';skipBtn.style.display='none';ctrlLabel.textContent='Worksheet 13 complete';CLK.running=false;});
+}
+
+
+function hardReset(){
+  CLK.running=false;cancelAnimationFrame(CLK.raf);if(synth)synth.cancel();
+  ['dp1a','dp1b','dp1c','dp1d','dp1e','dp1f','dp2a','dp2b','dp2c','dp2d','dp2e','dp2f','dp3a','dp3b','dp3c','dp3d','dp3e','dp3f','dp4a','dp4b','dp4c','dp4d','dp4e','dp4f'].forEach(function(id){var el=document.getElementById(id);if(el){el.textContent='·';el.className='empty-cell';}});
+  var dt=document.getElementById('drip-total');if(dt)dt.textContent='$___';
+  ['vl1a','vl1b','vl1c','vl1d','vl2a','vl2b','vl2c','vl2d','vl3a','vl3b','vl3c','vl3d'].forEach(function(id){var el=document.getElementById(id);if(el){el.textContent='·';el.className='empty-cell';}});
+  document.getElementById('wsQuote13').classList.remove('show');
+}
+</script>
+<script src="ws-shared.js"></script>
+</body>
+</html>lementById('ws-sub2').textContent='';
+  document.getElementById('ch-badge').classList.remove('vis');
+  pauseBtn.style.display='none';skipBtn.style.display='none';pauseBtn.textContent='⏸ Pause';setSub('');buildEvents();
+}
+
+</script>
+</body>
+</html>

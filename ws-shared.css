@@ -1,0 +1,170 @@
+/* ── Worksheet Tutorial Theme ─────────────────────────────────────────────
+   Overrides the dark tutorial theme to match FT_Worksheets_Interactive.html
+   Color palette:  --dark #1A1A2E  --gold #C9A84C  --cream #F0EFE8
+   ──────────────────────────────────────────────────────────────────────── */
+
+/* Worksheet shell — white card matching the interactive file */
+.ws-shell {
+  background: #FFF !important;
+  border: 2px solid #C9A84C !important;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 18px rgba(26,26,46,0.18) !important;
+}
+
+/* Header inside shell */
+.ws-hdr {
+  background: #FFF !important;
+  border-bottom: 2px solid #C9A84C !important;
+  padding: .65em 1.1em !important;
+}
+.ws-hdr-title {
+  color: #C9A84C !important;
+  letter-spacing: .14em !important;
+}
+.ws-hdr-sheet {
+  color: #1A1A2E !important;
+}
+.ws-hdr-sub {
+  color: #555 !important;
+}
+
+/* Section band — navy with gold text, matching sec-header in interactive */
+.ws-sec-band {
+  background: #1A1A2E !important;
+  color: #C9A84C !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  padding: .5em 1.1em !important;
+  font-family: Arial, sans-serif !important;
+  font-size: .82em !important;
+  font-weight: bold !important;
+  letter-spacing: .07em !important;
+}
+
+/* Table headers — navy background, gold uppercase text */
+.ws-tbl th {
+  background: #1A1A2E !important;
+  color: #C9A84C !important;
+  border-bottom: none !important;
+  border-right: 1px solid rgba(201,168,76,0.3) !important;
+  font-family: Arial, sans-serif !important;
+  font-size: .78em !important;
+  font-weight: bold !important;
+  letter-spacing: .08em !important;
+  text-transform: uppercase !important;
+  padding: .55em .9em !important;
+  white-space: nowrap !important;
+}
+.ws-tbl th:last-child { border-right: none !important; }
+
+/* Table cells — light theme */
+.ws-tbl td {
+  color: #1A1A2E !important;
+  border-bottom: 1px solid #DDD !important;
+  border-right: 1px solid #EEE !important;
+  padding: .45em .7em !important;
+  vertical-align: middle !important;
+  background: #FFF !important;
+}
+.ws-tbl td:last-child { border-right: none !important; }
+.ws-tbl tr:nth-child(even) td { background: #FAFAF6 !important; }
+
+/* Filled cells (animated in) */
+.ws-tbl td.filled { color: #1A1A2E !important; }
+
+/* Empty placeholder cells */
+.ws-tbl td.empty-cell {
+  color: #D0CFC8 !important;
+  background: #FAFAF6 !important;
+  font-size: .85em !important;
+}
+
+/* Highlighted cell (animation spotlight) */
+.ws-tbl td.hl {
+  background: rgba(201,168,76,0.28) !important;
+  color: #1A1A2E !important;
+  border: 2px solid #C9A84C !important;
+  border-radius: 3px !important;
+}
+
+/* Active row */
+.ws-tbl tr.active-row > td { background: #F5E6C8 !important; }
+
+/* Gold values */
+.ws-tbl td.gold-val { color: #C9A84C !important; font-weight: bold !important; }
+
+/* Total / footer row */
+.ws-tbl tr.total-row > td {
+  background: #F5E6C8 !important;
+  border-top: 2px solid #C9A84C !important;
+  color: #1A1A2E !important;
+  font-weight: bold !important;
+  font-size: .88em !important;
+  padding: .55em .9em !important;
+}
+.ws-tbl tr.total-row > td.gold-val { color: #C9A84C !important; }
+
+/* ── Calc table (2-col metric/value) ──────────────────────────────────── */
+.ws-calc-tbl { width: 100%; border-collapse: collapse; }
+.ws-calc-tbl th {
+  background: #1A1A2E !important;
+  color: #C9A84C !important;
+  border-bottom: none !important;
+  font-family: Arial, sans-serif !important;
+  font-size: .78em !important;
+  font-weight: bold !important;
+  letter-spacing: .08em !important;
+  padding: .55em .9em !important;
+  text-align: left !important;
+}
+.ws-calc-tbl td {
+  border-bottom: 1px solid #DDD !important;
+  padding: .6em .9em !important;
+  vertical-align: middle !important;
+}
+.ws-calc-tbl td.calc-label { color: #555 !important; }
+.ws-calc-tbl td.calc-val { color: #1A1A2E !important; }
+.ws-calc-tbl td.calc-val.filled { color: #1A1A2E !important; }
+.ws-calc-tbl td.calc-val.gold-fill { color: #C9A84C !important; font-weight: bold !important; }
+.ws-calc-tbl td.hl {
+  background: rgba(201,168,76,0.28) !important;
+  color: #1A1A2E !important;
+  border: 2px solid #C9A84C !important;
+  border-radius: 3px !important;
+}
+.ws-calc-tbl tr.highlight-row td { background: #F5E6C8 !important; }
+.ws-calc-tbl tr:nth-child(even) td { background: #FAFAF6 !important; }
+
+/* ── Quote bar ────────────────────────────────────────────────────────── */
+.ws-quote-row {
+  background: #1A1A2E !important;
+  color: rgba(201,168,76,0.15) !important;
+  font-style: italic !important;
+  padding: .85em 1.1em !important;
+  border-top: none !important;
+  transition: color .6s !important;
+  text-align: center !important;
+  letter-spacing: .02em !important;
+}
+.ws-quote-row.show { color: #C9A84C !important; }
+
+/* ── Scene s1 title card — keep legible on cream stage bg ────────────── */
+#s1 .ws-title { text-shadow: none !important; }
+
+/* ── Compact sizing — ensures large tables fit in the tutorial viewport ── */
+/* Scale the shell down from the html{font-size:20px} base */
+.ws-shell { font-size: 0.78rem !important; }
+
+/* Tighter cell padding */
+.ws-tbl th  { padding: .38em .65em !important; }
+.ws-tbl td  { padding: .32em .58em !important; }
+.ws-tbl tr.total-row > td { padding: .4em .65em !important; }
+.ws-calc-tbl th { padding: .38em .65em !important; }
+.ws-calc-tbl td { padding: .34em .58em !important; }
+
+/* Tighter header and section band */
+.ws-hdr     { padding: .42em .9em !important; }
+.ws-sec-band { padding: .32em .9em !important; }
+
+/* Give the scrollable content area as much room as possible */
+.sc-wrap { max-height: calc(100vh - 195px) !important; }

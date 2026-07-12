@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WS1: The Shopping Cart Protocol | Financially Trapped</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:20px;}
+body{background:#0e0e1c;color:#e8e0cc;font-family:Georgia,serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;}
+
+#player{position:relative;width:100vw;height:100vh;background:#13132a;border:none;display:flex;flex-direction:column;overflow:hidden;}
+#prog-bar{height:16px;background:rgba(201,168,76,.12);flex-shrink:0;cursor:pointer;position:relative;user-select:none;border-top:1px solid rgba(201,168,76,.2);}
+#prog-bar:hover{background:rgba(201,168,76,.22);}
+#prog-fill{height:100%;width:0;background:#C9A84C;pointer-events:none;}
+#prog-thumb{position:absolute;top:50%;right:auto;width:20px;height:20px;border-radius:50%;background:#C9A84C;border:2px solid #fff;transform:translate(-50%,-50%);left:0;pointer-events:none;box-shadow:0 0 10px rgba(201,168,76,.7);opacity:0;transition:opacity .15s;}
+#prog-bar:hover #prog-thumb{opacity:1;}
+#fs-btn{font-family:Arial,sans-serif;font-size:0.8em;font-weight:bold;letter-spacing:.08em;color:#888;border:1px solid rgba(255,255,255,.18);background:none;padding:.38em .95em;border-radius:4px;cursor:pointer;white-space:nowrap;}
+#fs-btn:hover{color:#C9A84C;border-color:rgba(201,168,76,.5);}
+#voice-btn{font-family:Arial,sans-serif;font-size:0.8em;letter-spacing:.06em;color:#aaa;border:1px solid rgba(255,255,255,.18);background:none;padding:.38em .95em;border-radius:4px;cursor:pointer;}
+#voice-btn:hover{color:#C9A84C;border-color:rgba(201,168,76,.5);}
+#stage{flex:1;position:relative;overflow:hidden;}
+
+.scene{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .5s;}
+.scene.active{opacity:1;pointer-events:auto;}
+
+/* Play screen */
+#s-play{cursor:pointer;background:radial-gradient(ellipse at center,#1e1e3a 0%,#0e0e1c 75%);}
+.ch-tag{font-family:Arial,sans-serif;font-size:0.85em;font-weight:bold;letter-spacing:.2em;text-transform:uppercase;color:#C9A84C;margin-bottom:.6em;}
+.ch-num{font-size:clamp(2.6em,7vw,4.5em);font-weight:bold;color:#C9A84C;line-height:1;text-shadow:0 0 40px rgba(201,168,76,.45);}
+.ch-title{font-size:clamp(1.1em,2.8vw,1.7em);color:#e8e0cc;margin-top:.35em;letter-spacing:.03em;}
+.ch-sub{font-size:0.9em;color:#bbb;font-style:italic;margin-top:.5em;}
+.play-ring{width:90px;height:90px;border-radius:50%;border:3px solid #C9A84C;display:flex;align-items:center;justify-content:center;margin-top:1.5em;transition:box-shadow .2s,transform .15s;}
+#s-play:hover .play-ring{box-shadow:0 0 32px rgba(201,168,76,.5);transform:scale(1.06);}
+.play-tri{width:0;height:0;border-top:18px solid transparent;border-bottom:18px solid transparent;border-left:28px solid #C9A84C;margin-left:7px;}
+
+/* top-bar: holds chapter badge + subtitle */
+#top-bar{background:#0a0a18;border-bottom:1px solid rgba(201,168,76,.2);padding:.6em 1.2em .5em;flex-shrink:0;}
+#ch-badge{font-family:Arial,sans-serif;font-size:0.72em;font-weight:bold;letter-spacing:.14em;text-transform:uppercase;color:#C9A84C;opacity:0;transition:opacity .5s;margin-bottom:.25em;}
+#ch-badge.vis{opacity:1;}
+
+/* Subtitle in top-bar */
+#subtitle{font-size:1.08em;color:#fff;line-height:1.6;min-height:2.4em;}
+#subtitle span{background:none;padding:0;letter-spacing:.01em;color:#f0e8d0;}
+
+/* Controls */
+#controls{height:64px;display:flex;align-items:center;gap:.9em;padding:0 1.2em;background:#0a0a18;border-top:1px solid rgba(201,168,76,.2);flex-shrink:0;}
+#pause-btn{font-family:Arial,sans-serif;font-size:0.88em;font-weight:bold;letter-spacing:.1em;text-transform:uppercase;color:#C9A84C;border:2px solid rgba(201,168,76,.55);background:none;padding:.4em 1.1em;border-radius:4px;cursor:pointer;transition:background .15s;}
+#pause-btn:hover{background:rgba(201,168,76,.15);}
+#skip-btn{font-family:Arial,sans-serif;font-size:0.8em;letter-spacing:.08em;text-transform:uppercase;color:#999;border:1px solid rgba(255,255,255,.18);background:none;padding:.38em .95em;border-radius:4px;cursor:pointer;}
+#skip-btn:hover{color:#eee;}
+.ctrl-label{font-family:Arial,sans-serif;font-size:0.75em;color:#666;margin-left:auto;}
+
+/* Scrollable scene wrapper */
+.sc-wrap{width:92%;max-width:1400px;max-height:calc(100% - 130px);overflow-y:auto;padding:.4em 0;}
+.sc-wrap::-webkit-scrollbar{width:6px;}
+.sc-wrap::-webkit-scrollbar-thumb{background:rgba(201,168,76,.35);border-radius:3px;}
+
+/* ── Worksheet Shell ── */
+.ws-shell{background:#0c0c20;border:1.5px solid rgba(201,168,76,.35);border-radius:6px;overflow:hidden;font-family:Arial,sans-serif;}
+
+/* Header rows */
+.ws-hdr{padding:.65em 1.1em;border-bottom:1px solid rgba(201,168,76,.18);}
+.ws-hdr-title{font-size:0.72em;font-weight:bold;letter-spacing:.12em;text-transform:uppercase;color:#C9A84C;}
+.ws-hdr-sheet{font-size:0.95em;font-weight:bold;color:#e8e0cc;margin-top:.25em;}
+.ws-hdr-sub{font-size:0.76em;color:#999;font-style:italic;margin-top:.15em;}
+
+/* Section band */
+.ws-sec-band{background:rgba(201,168,76,.12);padding:.5em 1.1em;font-size:0.82em;font-weight:bold;letter-spacing:.07em;color:#C9A84C;border-top:1px solid rgba(201,168,76,.25);border-bottom:1px solid rgba(201,168,76,.18);}
+
+/* Found Money Table */
+.ws-tbl{width:100%;border-collapse:collapse;}
+.ws-tbl th{background:rgba(201,168,76,.08);color:#C9A84C;font-size:0.8em;font-weight:bold;letter-spacing:.09em;padding:.55em .9em;border-bottom:1px solid rgba(201,168,76,.25);text-align:left;white-space:nowrap;}
+.ws-tbl td{font-size:0.88em;padding:.55em .9em;border-bottom:1px solid rgba(255,255,255,.05);color:#444;vertical-align:middle;}
+.ws-tbl td.filled{color:#d8cfb8;}
+.ws-tbl td.gold-val{color:#C9A84C;font-weight:bold;}
+.ws-tbl tr.active-row>td{background:rgba(201,168,76,.07);}
+.ws-tbl td.hl{background:rgba(201,168,76,.22)!important;color:#fff!important;border:2px solid rgba(201,168,76,.8)!important;border-radius:3px;}
+.ws-tbl tr.total-row>td{border-top:1.5px solid rgba(201,168,76,.4);color:#C9A84C;font-weight:bold;font-size:0.88em;padding:.55em .9em;}
+.ws-tbl td.empty-cell{color:#222238;}
+
+/* Checklist */
+.ws-chk-tbl{width:100%;border-collapse:collapse;}
+.ws-chk-tbl th{background:rgba(201,168,76,.08);color:#C9A84C;font-size:0.8em;font-weight:bold;letter-spacing:.09em;padding:.55em .9em;border-bottom:1px solid rgba(201,168,76,.25);text-align:left;}
+.ws-chk-tbl td{font-size:0.88em;padding:.65em .9em;border-bottom:1px solid rgba(255,255,255,.05);color:#555;vertical-align:top;line-height:1.5;}
+.ws-chk-tbl tr.ci-show td{color:#c8bfa8;}
+.ws-chk-tbl tr.ci-done td.chk-done-cell{color:#C9A84C;font-weight:bold;}
+.ws-chk-tbl tr.ci-done td{color:#e8e0cc;}
+.chk-cell{width:72px;white-space:nowrap;}
+
+/* Injection C */
+.ws-inj-tbl{width:100%;border-collapse:collapse;}
+.ws-inj-tbl th{background:rgba(201,168,76,.08);color:#C9A84C;font-size:0.8em;font-weight:bold;letter-spacing:.09em;padding:.55em .9em;border-bottom:1px solid rgba(201,168,76,.25);text-align:left;}
+.ws-inj-tbl td{font-size:0.88em;padding:.65em .9em;border-bottom:1px solid rgba(255,255,255,.05);color:#555;vertical-align:middle;}
+.ws-inj-tbl td.field-label{color:#bbb;white-space:nowrap;width:42%;}
+.ws-inj-tbl td.field-val{color:#222238;}
+.ws-inj-tbl td.field-val.filled{color:#d8cfb8;}
+.ws-inj-tbl td.field-val.hl{background:rgba(201,168,76,.22)!important;color:#fff!important;border:2px solid rgba(201,168,76,.8)!important;border-radius:3px;}
+.ws-inj-tbl tr.active-row td{background:rgba(201,168,76,.06);}
+
+/* Quote row */
+.ws-quote-row{padding:.85em 1.1em;font-size:0.82em;color:#333;font-style:italic;border-top:1px solid rgba(255,255,255,.05);}
+.ws-quote-row.show{color:#C9A84C;}
+
+/* S1 title */
+#s1 .ws-eyebrow{font-family:Arial,sans-serif;font-size:0.85em;font-weight:bold;letter-spacing:.2em;text-transform:uppercase;color:#C9A84C;margin-bottom:.6em;text-align:center;}
+#s1 .ws-title{font-size:clamp(1.6em,4vw,2.6em);font-weight:bold;color:#C9A84C;text-align:center;text-shadow:0 0 28px rgba(201,168,76,.35);}
+#s1 .ws-sub2{font-size:0.88em;color:#bbb;text-align:center;margin-top:.45em;font-style:italic;}
+#s1 .ws-desc{font-size:0.92em;color:#c8bfa8;text-align:center;margin-top:1.1em;line-height:1.75;max-width:600px;margin-left:auto;margin-right:auto;}
+
+/* CTA */
+#s-cta{text-align:center;}
+#s-cta .cta-done{font-size:0.9em;color:#aaa;margin-bottom:.8em;}
+#s-cta .cta-title{font-size:clamp(1.3em,3.2vw,2em);color:#C9A84C;margin-bottom:.4em;}
+.cta-btns{display:flex;gap:.9em;flex-wrap:wrap;justify-content:center;margin-top:1.2em;}
+.cta-btn{font-family:Arial,sans-serif;font-size:0.85em;font-weight:bold;letter-spacing:.1em;text-transform:uppercase;padding:.7em 1.5em;border-radius:4px;text-decoration:none;border:2px solid #C9A84C;color:#C9A84C;transition:background .15s;}
+.cta-btn.gold{background:#C9A84C;color:#0e0e1c;}
+.cta-btn:hover{background:rgba(201,168,76,.18);}
+.cta-btn.gold:hover{background:#b8953e;}
+</style>
+<link rel="stylesheet" href="ws-shared.css">
+</head>
+<body>
+<a href="/" id="vaHomeBtn" aria-label="Home" style="position:fixed;top:14px;left:14px;z-index:99999;display:inline-flex;align-items:center;gap:7px;padding:9px 15px;background:rgba(18,22,44,0.9);color:#d9b676;font-family:Georgia,'Times New Roman',serif;font-size:14px;font-weight:bold;letter-spacing:.5px;text-decoration:none;border:1px solid #d9b676;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.35);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);"><span style="font-size:16px;line-height:1;">&#8962;</span> Home</a>
+<div id="player">
+
+  <!-- TOP: task instructions -->
+  <div id="top-bar">
+    <div id="ch-badge">Chapter 1 · The Shopping Cart Protocol</div>
+    <div id="subtitle"><span id="sub-text"></span></div>
+  </div>
+
+  <div id="stage">
+
+    <!-- PLAY -->
+    <div class="scene active" id="s-play" onclick="startAnim()">
+      <div class="ch-tag">Financially Trapped · Worksheet Tutorial</div>
+      <div class="ch-num">WS 1</div>
+      <div class="ch-title">The Shopping Cart Protocol</div>
+      <div class="ch-sub">Found Money Log · TFSA Setup Checklist · First Injection Record</div>
+      <div class="play-ring"><div class="play-tri"></div></div>
+    </div>
+
+    <!-- S1: TITLE -->
+    <div class="scene" id="s1">
+      <div class="sc-wrap" style="text-align:center;">
+        <div class="ws-eyebrow">Worksheet 1 of 16</div>
+        <div class="ws-title">The Shopping Cart Protocol</div>
+        <div class="ws-sub2">Found Money Log · TFSA Setup Checklist · First Injection Record</div>
+        <div class="ws-desc" id="s1desc"></div>
+      </div>
+    </div>
+
+    <!-- S3: SECTION A — FOUND MONEY LOG -->
+    <div class="scene" id="s3">
+      <div class="sc-wrap">
+        <div class="ws-shell">
+          <div class="ws-hdr">
+            <div class="ws-hdr-title">Financially Trapped · The Architect's Working Documents</div>
+            <div class="ws-hdr-sheet">Worksheet 1: The Shopping Cart Protocol</div>
+            <div class="ws-hdr-sub">Found Money Log · TFSA Setup Checklist · First Injection Record</div>
+          </div>
+          <div class="ws-sec-band">[A]  Found Money Log — Every zero-cost dollar goes directly into the machine</div>
+          <table class="ws-tbl" id="fmTable">
+            <thead>
+              <tr><th>DATE</th><th>SOURCE</th><th>AMOUNT ($)</th><th>DEPLOYED TO</th><th>NOTES</th></tr>
+            </thead>
+            <tbody id="fmBody">
+              <!-- rows 7-19 = 13 input rows -->
+              <tr id="fr1"><td id="f1a" class="empty-cell">·</td><td id="f1b" class="empty-cell">·</td><td id="f1c" class="empty-cell">·</td><td id="f1d" class="empty-cell">·</td><td id="f1e" class="empty-cell">·</td></tr>
+              <tr id="fr2"><td id="f2a" class="empty-cell">·</td><td id="f2b" class="empty-cell">·</td><td id="f2c" class="empty-cell">·</td><td id="f2d" class="empty-cell">·</td><td id="f2e" class="empty-cell">·</td></tr>
+              <tr id="fr3"><td id="f3a" class="empty-cell">·</td><td id="f3b" class="empty-cell">·</td><td id="f3c" class="empty-cell">·</td><td id="f3d" class="empty-cell">·</td><td id="f3e" class="empty-cell">·</td></tr>
+              <tr><td class="empty-cell">·</td><td class="empty-cell">·</td><td class="empty-cell">·</td><td class="empty-cell">·</td><td class="empty-cell">·</td></tr>
+              <tr><td class="empty-cell">·</td><td class="empty-cell">·</td><td class="empty-cell">·</td><td class="empty-cell">·</td><td class="empty-cell">·</td></tr>
+              <tr><td class="empty-cell">·</td><td class="empty-cell">·</td><td class="empty-cell">·</td><td class="empty-cell">·</td><td class="empty-cell">·</td></tr>
+              <tr><td class="empty-cell">·</td><td class="empty-cell">·</td><td class="empty-cell">·</td><td class="empty-cell">·</td><td class="empty-cell">·</td></tr>
+              <tr><td class="empty-cell">·</td><td class="empty-cell">·</td><td class="empty-cell">·</td><td class="empty-cell">·</td><td class="empty-cell">·</td></tr>
+              <tr><td class="empty-cell">·</td><td class="empty-cell">·</td><td class="empty-cell">·</td><td class="empty-cell">·</td><td class="empty-cell">·</td></tr>
+              <tr><td class="empty-cell">·</td><td class="empty-cell">·</td><td class="empty-cell">·</td><td class="empty-cell">·</td><td class="empty-cell">·</td></tr>
+              <tr><td class="empty-cell">·</td><td class="empty-cell">·</td><td class="empty-cell">·</td><td class="empty-cell">·</td><td class="empty-cell">·</td></tr>
+              <tr><td class="empty-cell">·</td><td class="empty-cell">·</td><td class="empty-cell">·</td><td class="empty-cell">·</td><td class="empty-cell">·</td></tr>
+              <tr><td class="empty-cell">·</td><td class="empty-cell">·</td><td class="empty-cell">·</td><td class="empty-cell">·</td><td class="empty-cell">·</td></tr>
+              <tr class="total-row"><td colspan="2">TOTAL FOUND CAPITAL</td><td id="fmTotal" class="gold-val">$0.00</td><td colspan="2"></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- S4: SECTION B — TFSA CHECKLIST -->
+    <div class="scene" id="s4">
+      <div class="sc-wrap">
+        <div class="ws-shell">
+          <div class="ws-hdr">
+            <div class="ws-hdr-title">Financially Trapped · The Architect's Working Documents</div>
+            <div class="ws-hdr-sheet">Worksheet 1: The Shopping Cart Protocol</div>
+          </div>
+          <div class="ws-sec-band">[B]  TFSA Setup Checklist</div>
+          <table class="ws-chk-tbl">
+            <thead><tr><th class="chk-cell">DONE?</th><th>TASK</th></tr></thead>
+            <tbody>
+              <tr id="ci1"><td class="chk-cell chk-done-cell" id="cib1">☐ No</td><td id="cit1">Choose a self-directed brokerage (Wealthsimple Trade)</td></tr>
+              <tr id="ci2"><td class="chk-cell chk-done-cell" id="cib2">☐ No</td><td id="cit2">Open a TFSA account — Engine 1 (Rebate Portfolio)</td></tr>
+              <tr id="ci3"><td class="chk-cell chk-done-cell" id="cib3">☐ No</td><td id="cit3">Confirm contribution room via CRA My Account</td></tr>
+              <tr id="ci4"><td class="chk-cell chk-done-cell" id="cib4">☐ No</td><td id="cit4">Set up a recurring bi-weekly transfer (even $25 counts)</td></tr>
+              <tr id="ci5"><td class="chk-cell chk-done-cell" id="cib5">☐ No</td><td id="cit5">Purchase first income-generating position (target: 12%+ yield)</td></tr>
+              <tr id="ci6"><td class="chk-cell chk-done-cell" id="cib6">☐ No</td><td id="cit6">Activate DRIP on first position</td></tr>
+              <tr id="ci7"><td class="chk-cell chk-done-cell" id="cib7">☐ No</td><td id="cit7">Record first dividend received</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- S5: SECTION C — FIRST INJECTION RECORD -->
+    <div class="scene" id="s5">
+      <div class="sc-wrap">
+        <div class="ws-shell">
+          <div class="ws-hdr">
+            <div class="ws-hdr-title">Financially Trapped · The Architect's Working Documents</div>
+            <div class="ws-hdr-sheet">Worksheet 1: The Shopping Cart Protocol</div>
+          </div>
+          <div class="ws-sec-band">[C]  First Injection Record</div>
+          <table class="ws-inj-tbl">
+            <thead><tr><th>FIELD</th><th>YOUR ENTRY</th></tr></thead>
+            <tbody>
+              <tr id="ir1"><td class="field-label">Date of first injection</td><td class="field-val" id="iv1"></td></tr>
+              <tr id="ir2"><td class="field-label">Amount deployed ($)</td><td class="field-val" id="iv2"></td></tr>
+              <tr id="ir3" class="active-row"><td class="field-label">Platform</td><td class="field-val filled" id="iv3">Wealthsimple Trade</td></tr>
+              <tr id="ir4"><td class="field-label">Ticker purchased</td><td class="field-val" id="iv4"></td></tr>
+              <tr id="ir5"><td class="field-label">Units acquired</td><td class="field-val" id="iv5"></td></tr>
+              <tr id="ir6"><td class="field-label">Estimated annual dividend ($)</td><td class="field-val" id="iv6"></td></tr>
+              <tr id="ir7"><td class="field-label">First bill this will execute</td><td class="field-val" id="iv7"></td></tr>
+            </tbody>
+          </table>
+          <div class="ws-quote-row" id="wsQuote">"Every zero-cost dollar is a soldier that doesn't cost you a knee."</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="scene" id="s-cta">
+      <div class="cta-done">Worksheet 1 complete</div>
+      <div class="cta-title">The Shopping Cart Protocol</div>
+      <div style="font-size:.78em;color:#aaa;font-style:italic;">You've built the log. You've set up the machine. You've made the first injection.</div>
+      <div class="cta-btns">
+        <a class="cta-btn gold" href="financially-trapped-hub.html#tutorials">Back to All Tutorials</a>
+        <a class="cta-btn" href="#" onclick="resetAnim();return false;">Watch Again</a>
+      </div>
+    </div>
+
+  </div><!-- #stage -->
+
+  <div id="controls">
+    <button id="pause-btn" onclick="togglePause()" style="display:none;">⏸ Pause</button>
+    <button id="skip-btn" onclick="skipToEnd()" style="display:none;">Skip →</button>
+    <button id="voice-btn" onclick="toggleVoice()">🔊 Voice</button>
+    <div class="ctrl-label" id="ctrl-label">Click play to begin</div>
+    <button id="fs-btn" onclick="toggleFullscreen()" title="Fullscreen">&#x26F6; Fullscreen</button>
+  </div>
+  <!-- BOTTOM: progress scrubber -->
+  <div id="prog-bar" title="Click to seek">
+    <div id="prog-fill"></div>
+    <div id="prog-thumb"></div>
+  </div>
+</div>
+
+<script>
+var CLK={elapsed:0,lastTick:0,running:false,raf:null,speechPaused:false};
+var EVENTS=[];
+var TOTAL_MS=0;
+var progEl=document.getElementById('prog-fill');
+var subEl=document.getElementById('sub-text');
+var pauseBtn=document.getElementById('pause-btn');
+var skipBtn=document.getElementById('skip-btn');
+var ctrlLabel=document.getElementById('ctrl-label');
+
+var VOICE_ON=true;var synth=window.speechSynthesis||null;var VOX=[];
+function loadV(){if(synth)VOX=synth.getVoices();}
+if(synth){loadV();if(synth.onvoiceschanged!==undefined)synth.onvoiceschanged=loadV;}
+function speak(txt){if(!VOICE_ON||!synth||!txt)return;synth.cancel();var u=new SpeechSynthesisUtterance(txt.replace(/[""''"']/g,"'"));u.rate=0.88;u.pitch=1.0;u.volume=1.0;var voices=VOX.length?VOX:synth.getVoices();var v=voices.find(function(x){return/samantha|karen|moira|victoria|allison|ava|alice|tessa|zoe/i.test(x.name);})||voices.find(function(x){return x.lang.startsWith('en')&&x.localService;})||voices.find(function(x){return x.lang.startsWith('en');});if(v)u.voice=v;CLK.speechPaused=true;u.onend=function(){CLK.speechPaused=false;if(CLK.running)CLK.lastTick=performance.now();};u.onerror=function(){CLK.speechPaused=false;if(CLK.running)CLK.lastTick=performance.now();};synth.speak(u);}
+function toggleVoice(){VOICE_ON=!VOICE_ON;if(!VOICE_ON&&synth)synth.cancel();document.getElementById('voice-btn').textContent=VOICE_ON?'🔊 Voice':'🔇 Muted';}
+
+function showScene(id){document.querySelectorAll('.scene').forEach(function(s){s.classList.remove('active');});document.getElementById(id).classList.add('active');}
+function setSub(t){subEl.textContent=t;speak(t);}
+function clrSub(){subEl.textContent='';if(synth)synth.cancel();}
+
+// Found money helpers
+function hlFM(id){document.querySelectorAll('.ws-tbl td.hl').forEach(function(c){c.classList.remove('hl');});var el=document.getElementById(id);if(el)el.classList.add('hl');}
+function fillFM(id,val){var el=document.getElementById(id);if(el){el.textContent=val;el.classList.remove('empty-cell','hl');el.classList.add('filled');}}
+function setTotal(v){var el=document.getElementById('fmTotal');if(el)el.textContent=v;}
+
+// Checklist helpers
+function ciShow(n){var r=document.getElementById('ci'+n);if(r)r.classList.add('ci-show');}
+function ciDone(n){var r=document.getElementById('ci'+n);var b=document.getElementById('cib'+n);if(r)r.classList.add('ci-done');if(b)b.textContent='☑ Yes';}
+
+// Injection helpers
+function hlINJ(n){document.querySelectorAll('.ws-inj-tbl td.hl').forEach(function(c){c.classList.remove('hl');});var el=document.getElementById('iv'+n);if(el)el.classList.add('hl');}
+function fillINJ(n,val){var el=document.getElementById('iv'+n);var row=document.getElementById('ir'+n);if(el){el.textContent=val;el.classList.remove('hl');el.classList.add('filled');}if(row)row.classList.remove('active-row');}
+
+// SEQ durations
+var SEQ=[8000,42000,34000,36000,9999];
+// s1, s3(foundmoney), s4(checklist), s5(injection), s-cta
+
+function buildEvents(){
+  EVENTS=[];
+  var t=0;
+  TOTAL_MS=SEQ[0]+SEQ[1]+SEQ[2]+SEQ[3];
+
+  function at(off,fn){EVENTS.push({t:t+off,fired:false,fn:fn});}
+
+  // ── S1 Title
+  at(0,function(){
+    showScene('s1');
+    document.getElementById('ch-badge').classList.add('vis');
+    pauseBtn.style.display='inline-block';skipBtn.style.display='inline-block';
+    ctrlLabel.textContent='WS 1 of 16';
+    setSub('Welcome to Worksheet 1 — The Shopping Cart Protocol.');
+  });
+  at(2000,function(){document.getElementById('s1desc').textContent='This is where you stop looking for money you don\'t have, and start capturing money you\'re already spending.';});
+  at(5500,function(){setSub('Found money is any dollar already leaving your hands — redirected into an income-generating position instead.');});
+  t+=SEQ[0];
+
+  // ── S3 Found Money Log
+  at(0,function(){showScene('s3');setSub('Section A: The Found Money Log. 13 input rows. Every zero-cost dollar you redirect — logged here permanently.');});
+  at(2800,function(){setSub('The column headers match the worksheet exactly: DATE · SOURCE · AMOUNT · DEPLOYED TO · NOTES.');});
+  // Row 1
+  at(5500,function(){hlFM('f1a');setSub('DATE — When did you redirect this dollar? Enter the exact date.');});
+  at(7200,function(){fillFM('f1a','May 14 2026');hlFM('f1b');setSub('SOURCE — Where did it come from? A cancelled subscription, dropped plan, skipped purchase.');});
+  at(9500,function(){fillFM('f1b','Canceled Netflix');hlFM('f1c');setSub('AMOUNT — How much per month are you redirecting?');});
+  at(11000,function(){fillFM('f1c','$17.00');hlFM('f1d');setSub('DEPLOYED TO — Which ticker, which account? Every found dollar needs a specific destination.');});
+  at(12800,function(){fillFM('f1d','BANK.TO (TFSA)');hlFM('f1e');setSub('NOTES — Any context that helps you remember why this dollar was redirected.');});
+  at(14500,function(){fillFM('f1e','Streaming I wasn\'t watching');document.querySelectorAll('.ws-tbl td.hl').forEach(function(c){c.classList.remove('hl');});setTotal('$17.00');setSub('Row 1 complete. $17/month. One soldier deployed. It never calls in sick.');});
+  // Row 2
+  at(17000,function(){hlFM('f2a');setSub('Row 2 — another source. Sources don\'t have to be dramatic. Switching phone plans counts.');});
+  at(18200,function(){fillFM('f2a','May 15 2026');hlFM('f2b');});
+  at(19500,function(){fillFM('f2b','Switched cell plan');hlFM('f2c');setSub('Moved from Rogers to Koodo. Same service. $25/month freed.');});
+  at(21000,function(){fillFM('f2c','$25.00');hlFM('f2d');});
+  at(22500,function(){fillFM('f2d','QMAX.TO (TFSA)');hlFM('f2e');});
+  at(24000,function(){fillFM('f2e','Rogers → Koodo');document.querySelectorAll('.ws-tbl td.hl').forEach(function(c){c.classList.remove('hl');});setTotal('$42.00');});
+  // Row 3
+  at(26000,function(){hlFM('f3a');setSub('Row 3 — even small daily habits add up. 20 coffees at home = $60/month.');});
+  at(27500,function(){fillFM('f3a','May 16 2026');hlFM('f3b');});
+  at(29000,function(){fillFM('f3b','Coffee at home');hlFM('f3c');});
+  at(30500,function(){fillFM('f3c','$60.00');hlFM('f3d');});
+  at(32000,function(){fillFM('f3d','ENS.TO (TFSA)');hlFM('f3e');});
+  at(33500,function(){fillFM('f3e','20 days × $3 saved');document.querySelectorAll('.ws-tbl td.hl').forEach(function(c){c.classList.remove('hl');});setTotal('$102.00');setSub('$102/month found. Not earned extra — found. The remaining 10 rows are yours to fill.');});
+  t+=SEQ[1];
+
+  // ── S4 TFSA Checklist
+  at(0,function(){showScene('s4');setSub('Section B: TFSA Setup Checklist. Seven tasks. Complete them in order before deploying any capital.');});
+  at(1800,function(){ciShow(1);setSub('Task 1 — Choose your brokerage. Wealthsimple Trade. Fractional shares are required for the $1/day system.');});
+  at(5500,function(){ciDone(1);ciShow(2);setSub('Task 2 — Open your TFSA, specifically Engine 1: the Rebate Portfolio. Everything inside grows 100% tax-free.');});
+  at(9500,function(){ciDone(2);ciShow(3);setSub('Task 3 — Confirm your contribution room via CRA My Account. Know your limit before deploying a single dollar.');});
+  at(13500,function(){ciDone(3);ciShow(4);setSub('Task 4 — Set up a recurring bi-weekly transfer. Even $25 works. The mechanism is consistency, not size.');});
+  at(17500,function(){ciDone(4);ciShow(5);setSub('Task 5 — Purchase your first income-generating position. Target 12%+ yield. One position starts the machine.');});
+  at(21500,function(){ciDone(5);ciShow(6);setSub('Task 6 — Activate DRIP on that first position. Every dividend automatically buys more shares. Compounding begins here.');});
+  at(25500,function(){ciDone(6);ciShow(7);setSub('Task 7 — Record your first dividend received. Log the date and amount. The machine has officially paid you.');});
+  at(29500,function(){ciDone(7);setSub('All seven tasks checked. Platform live. Account open. DRIP active. First dividend recorded. Machine is running.');});
+  t+=SEQ[2];
+
+  // ── S5 First Injection Record
+  at(0,function(){showScene('s5');setSub('Section C: The First Injection Record. The platform field is pre-filled as Wealthsimple Trade.');});
+  at(3000,function(){hlINJ(1);setSub('DATE OF FIRST INJECTION — The exact day your machine came online.');});
+  at(6000,function(){fillINJ(1,'May 14, 2026');hlINJ(2);setSub('AMOUNT DEPLOYED — Your opening capital. Even $31 from gold proceeds counts as a real injection.');});
+  at(10000,function(){fillINJ(2,'$31.51');setSub('PLATFORM — Pre-filled as Wealthsimple Trade.');});
+  at(5200,function(){hlINJ(3);});
+  at(14500,function(){fillINJ(3,'Wealthsimple Trade');hlINJ(4);setSub('TICKER PURCHASED — Which income-generating position did you buy? Be specific — ticker symbol, exchange.');});
+  at(18000,function(){fillINJ(4,'BANK.TO');hlINJ(5);setSub('UNITS ACQUIRED — The fractional quantity you now hold. Fractional is fine — the yield still compounds.');});
+  at(22000,function(){fillINJ(5,'1.7881 units');hlINJ(6);setSub('ESTIMATED ANNUAL DIVIDEND — What this position pays per year at current yield. This is your target bill-slaying rate.');});
+  at(26000,function(){fillINJ(6,'$3.83 CAD/yr');hlINJ(7);setSub('FIRST BILL THIS WILL EXECUTE — Name the recurring cost this position is assigned to eliminate. One bill. One soldier.');});
+  at(30000,function(){fillINJ(7,'Streaming Services');setSub('Every field here is a permanent record. The contract is signed. The machine is running. The bill is targeted.');});
+  at(33500,function(){document.getElementById('wsQuote').classList.add('show');setSub('"Every zero-cost dollar is a soldier that doesn\'t cost you a knee."');});
+  t+=SEQ[3];
+
+  // ── CTA
+  at(0,function(){showScene('s-cta');clrSub();pauseBtn.style.display='none';skipBtn.style.display='none';ctrlLabel.textContent='Worksheet 1 complete';CLK.running=false;});
+}
+
+function clkTick(now){
+  if(!CLK.running)return;
+  if(!CLK.speechPaused){CLK.elapsed+=now-CLK.lastTick;EVENTS.forEach(function(ev){if(!ev.fired&&CLK.elapsed>=ev.t){ev.fn();ev.fired=true;}});var pct=Math.min(CLK.elapsed/TOTAL_MS*100,100);progEl.style.width=pct+'%';progThumb.style.left=pct+'%';}
+  CLK.lastTick=now;CLK.raf=requestAnimationFrame(clkTick);
+}
+
+function startAnim(){
+  document.getElementById('s-play').classList.remove('active');
+  buildEvents();CLK.elapsed=0;CLK.running=true;CLK.lastTick=performance.now();CLK.raf=requestAnimationFrame(clkTick);
+}
+
+function togglePause(){
+  if(CLK.running){CLK.running=false;cancelAnimationFrame(CLK.raf);if(synth)synth.cancel();pauseBtn.textContent='▶ Resume';}
+  else{CLK.running=true;CLK.lastTick=performance.now();CLK.raf=requestAnimationFrame(clkTick);pauseBtn.textContent='⏸ Pause';}
+}
+
+function skipToEnd(){
+  CLK.running=false;cancelAnimationFrame(CLK.raf);if(synth)synth.cancel();
+  EVENTS.forEach(function(ev){if(!ev.fired){ev.fn();ev.fired=true;}});
+  progEl.style.width='100%';
+}
+
+function resetAnim(){
+  CLK.running=false;cancelAnimationFrame(CLK.raf);if(synth)synth.cancel();CLK.elapsed=0;
+  hardReset();
+  progEl.style.width='0';progThumb.style.left='0';
+  ctrlLabel.textContent='Click play to begin';
+  showScene('s-play');
+}
+// ─── Seekable progress bar ──────────────────────────────────────────────────
+var progBar = document.getElementById('prog-bar');
+var progThumb = document.getElementById('prog-thumb');
+var seeking = false;
+
+function seekTo(pct) {
+  var targetMs = pct * TOTAL_MS;
+  var wasRunning = CLK.running;
+  CLK.running = false;
+  cancelAnimationFrame(CLK.raf);
+  CLK.speechPaused=false;if(synth)synth.cancel();
+
+  // Full DOM reset first
+  hardReset();
+
+  // Fast-fire all events up to targetMs
+  CLK.elapsed = targetMs;
+  EVENTS.forEach(function(ev) {
+    if (ev.t <= targetMs) { ev.fn(); ev.fired = true; }
+  });
+
+  // Update progress fill
+  progEl.style.width = (pct * 100) + '%';
+  progThumb.style.left = (pct * 100) + '%';
+
+  // Resume if was playing (or auto-resume after seek)
+  if (wasRunning || targetMs > 0) {
+    CLK.running = true;
+    CLK.lastTick = performance.now();
+    CLK.raf = requestAnimationFrame(clkTick);
+    pauseBtn.textContent = '⏸ Pause';
+  }
+}
+
+function getSeekPct(e) {
+  var rect = progBar.getBoundingClientRect();
+  var x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+  return Math.max(0, Math.min(1, x / rect.width));
+}
+
+progBar.addEventListener('mousedown', function(e) {
+  if (!CLK.elapsed && !CLK.running) return; // not started yet
+  seeking = true;
+  seekTo(getSeekPct(e));
+});
+progBar.addEventListener('mousemove', function(e) {
+  // Update thumb position on hover even without seeking
+  var pct = getSeekPct(e);
+  progThumb.style.left = (pct * 100) + '%';
+  if (seeking) seekTo(pct);
+});
+progBar.addEventListener('mouseup', function() { seeking = false; });
+document.addEventListener('mouseup', function() { seeking = false; });
+
+// Touch support
+progBar.addEventListener('touchstart', function(e) {
+  if (!CLK.elapsed && !CLK.running) return;
+  e.preventDefault(); seeking = true; seekTo(getSeekPct(e));
+}, {passive:false});
+progBar.addEventListener('touchmove', function(e) {
+  e.preventDefault(); if (seeking) seekTo(getSeekPct(e));
+}, {passive:false});
+progBar.addEventListener('touchend', function() { seeking = false; });
+
+// ─── Fullscreen ──────────────────────────────────────────────────────────────
+function toggleFullscreen() {
+  var el = document.getElementById('player');
+  var fsBtn = document.getElementById('fs-btn');
+  if (!document.fullscreenElement) {
+    (el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen).call(el);
+    fsBtn.textContent = '✕ Exit Full';
+  } else {
+    (document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen).call(document);
+    fsBtn.textContent = '⛶ Fullscreen';
+  }
+}
+document.addEventListener('fullscreenchange', function() {
+  if (!document.fullscreenElement) document.getElementById('fs-btn').textContent = '⛶ Fullscreen';
+});
+
+function hardReset(){
+  CLK.running=false;cancelAnimationFrame(CLK.raf);CLK.speechPaused=false;if(synth)synth.cancel();
+  ['f1a','f1b','f1c','f1d','f1e','f2a','f2b','f2c','f2d','f2e','f3a','f3b','f3c','f3d','f3e'].forEach(function(id){var el=document.getElementById(id);if(el){el.textContent='·';el.className='empty-cell';}});
+  var ft=document.getElementById('fmTotal');if(ft)ft.textContent='$0.00';
+  [1,2,3,4,5,6,7].forEach(function(n){var r=document.getElementById('ci'+n);var b=document.getElementById('cib'+n);if(r){r.classList.remove('ci-show','ci-done');}if(b)b.textContent='☐ No';});
+  ['iv1','iv2','iv4','iv5','iv6','iv7'].forEach(function(id){var el=document.getElementById(id);if(el){el.textContent='';el.className='field-val';}});
+  var ir3=document.getElementById('ir3');if(ir3)ir3.classList.remove('active-row');
+  document.getElementById('wsQuote').classList.remove('show');
+}
+</script>
+<script src="ws-shared.js"></script>
+</body>
+</html>

@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Book Trailer — Financially Trapped | Verity Architecture</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;height:100%;overflow:hidden;background:#070710;font-family:Georgia,"Times New Roman",serif;}
+
+#bg{position:fixed;inset:0;background:radial-gradient(ellipse at 50% 55%,#111128 0%,#070710 80%);}
+#vignette{position:fixed;inset:0;background:radial-gradient(ellipse at 50% 50%,transparent 35%,rgba(0,0,0,0.75) 100%);pointer-events:none;z-index:1;}
+#scanlines{position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.035) 3px,rgba(0,0,0,0.035) 6px);pointer-events:none;z-index:2;}
+
+#stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:10;}
+
+.scene{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:2em 3em;
+  opacity:0;
+  transition:opacity 0.75s ease;
+  pointer-events:none;
+}
+.scene.vis{opacity:1;pointer-events:auto;}
+
+/* Play screen */
+#s-play{cursor:pointer;}
+.play-ring{
+  width:88px;height:88px;border-radius:50%;
+  border:2px solid rgba(201,168,76,0.6);
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(201,168,76,0.07);
+  margin:0 auto 1.8em;
+  transition:all .3s;
+  cursor:pointer;
+}
+#s-play:hover .play-ring{
+  background:rgba(201,168,76,0.18);
+  border-color:#C9A84C;
+  box-shadow:0 0 32px rgba(201,168,76,0.28);
+}
+.play-ring::after{
+  content:'';
+  border-style:solid;
+  border-width:13px 0 13px 24px;
+  border-color:transparent transparent transparent #C9A84C;
+  margin-left:6px;
+}
+.play-hed{
+  font-size:clamp(1.1em,2.5vw,1.6em);
+  color:#fff;
+  text-align:center;
+  letter-spacing:0.04em;
+}
+.play-sub{
+  font-family:Arial,sans-serif;
+  font-size:clamp(0.6em,1.1vw,0.72em);
+  letter-spacing:0.28em;
+  text-transform:uppercase;
+  color:#555;
+  margin-top:0.7em;
+  text-align:center;
+}
+
+/* Quote text */
+.t-q{
+  font-size:clamp(1.6em,3.8vw,3.2em);
+  color:#fff;
+  text-align:center;
+  line-height:1.38;
+  max-width:840px;
+  letter-spacing:0.02em;
+}
+.t-q .gold{color:#C9A84C;}
+.t-q .dim{color:#888;}
+.t-q em{font-style:italic;}
+.t-eyebrow{
+  font-family:Arial,sans-serif;
+  font-size:clamp(0.55em,1.1vw,0.7em);
+  letter-spacing:0.3em;
+  text-transform:uppercase;
+  color:#555;
+  margin-bottom:1.1em;
+}
+.t-foot{
+  font-family:Arial,sans-serif;
+  font-size:clamp(0.55em,1.1vw,0.7em);
+  letter-spacing:0.22em;
+  text-transform:uppercase;
+  color:#444;
+  margin-top:1.4em;
+}
+
+/* Stat scenes */
+.t-stat{
+  font-family:Arial,sans-serif;
+  font-size:clamp(1.5em,4.5vw,4em);
+  color:#C9A84C;
+  text-align:center;
+  font-weight:bold;
+  letter-spacing:0.04em;
+  line-height:1.15;
+}
+.t-stat-note{
+  font-size:clamp(0.75em,1.7vw,1.1em);
+  color:#777;
+  font-style:italic;
+  text-align:center;
+  margin-top:0.65em;
+  letter-spacing:0.02em;
+}
+
+/* Book cover */
+.book-frame{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:1em;
+}
+.book-img{
+  max-height:58vh;
+  max-width:38vw;
+  min-width:160px;
+  object-fit:contain;
+  border:2px solid rgba(201,168,76,0.35);
+  border-radius:3px;
+  box-shadow:0 0 70px rgba(201,168,76,0.2),0 24px 80px rgba(0,0,0,0.8);
+  transform:scale(0.94) translateY(14px);
+  transition:transform 1.1s ease, box-shadow 1.1s ease;
+}
+.scene.vis .book-img{
+  transform:scale(1) translateY(0);
+  box-shadow:0 0 100px rgba(201,168,76,0.38),0 24px 80px rgba(0,0,0,0.85);
+}
+
+/* Title slam */
+.title-main{
+  font-size:clamp(2.2em,7vw,5.5em);
+  color:#fff;
+  text-align:center;
+  text-transform:uppercase;
+  letter-spacing:0.14em;
+  line-height:1.05;
+  text-shadow:0 0 40px rgba(255,255,255,0.06);
+}
+.title-sub{
+  font-size:clamp(0.9em,2.3vw,1.75em);
+  color:#C9A84C;
+  text-align:center;
+  font-style:italic;
+  margin-top:0.4em;
+  letter-spacing:0.06em;
+}
+.title-by{
+  font-family:Arial,sans-serif;
+  font-size:clamp(0.55em,1.2vw,0.8em);
+  letter-spacing:0.28em;
+  text-transform:uppercase;
+  color:#555;
+  margin-top:1.3em;
+  text-align:center;
+}
+
+/* Proof stats */
+.proof-num{
+  font-family:Arial,sans-serif;
+  font-size:clamp(1.2em,3.5vw,2.8em);
+  color:#C9A84C;
+  font-weight:bold;
+  text-align:center;
+  letter-spacing:0.03em;
+}
+.proof-label{
+  font-family:Arial,sans-serif;
+  font-size:clamp(0.6em,1.3vw,0.88em);
+  letter-spacing:0.22em;
+  text-transform:uppercase;
+  color:#555;
+  text-align:center;
+  margin-top:0.4em;
+}
+.proof-note{
+  font-size:clamp(0.75em,1.5vw,1em);
+  color:#666;
+  font-style:italic;
+  text-align:center;
+  margin-top:0.7em;
+}
+.proof-divider{
+  width:40px;
+  height:1px;
+  background:rgba(201,168,76,0.4);
+  margin:1.1em auto;
+}
+
+/* CTA */
+.cta-badge{
+  font-family:Arial,sans-serif;
+  font-size:clamp(0.55em,1.1vw,0.7em);
+  letter-spacing:0.28em;
+  text-transform:uppercase;
+  color:#C9A84C;
+  border:1px solid rgba(201,168,76,0.4);
+  padding:0.35em 1.1em;
+  border-radius:20px;
+  margin-bottom:0.9em;
+}
+.cta-title{
+  font-size:clamp(2em,5.5vw,4.5em);
+  color:#fff;
+  text-align:center;
+  text-transform:uppercase;
+  letter-spacing:0.12em;
+  line-height:1.05;
+}
+.cta-sub{
+  font-size:clamp(0.85em,2vw,1.5em);
+  color:#C9A84C;
+  font-style:italic;
+  text-align:center;
+  margin-top:0.35em;
+  letter-spacing:0.04em;
+}
+.cta-btns{
+  display:flex;gap:0.9em;flex-wrap:wrap;justify-content:center;
+  margin-top:1.4em;
+}
+.cta-btn{
+  font-family:Arial,sans-serif;
+  font-size:clamp(0.62em,1.25vw,0.8em);
+  font-weight:bold;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  text-decoration:none;
+  padding:0.72em 1.6em;
+  border-radius:4px;
+  border:none;
+  cursor:pointer;
+  transition:all .2s;
+}
+.btn-gold{background:#C9A84C;color:#1A1A2E;}
+.btn-gold:hover{background:#A88830;}
+.btn-line{background:transparent;color:#C9A84C;border:1.5px solid #C9A84C;}
+.btn-line:hover{background:rgba(201,168,76,0.1);}
+
+/* Progress bar */
+#prog{
+  position:fixed;bottom:0;left:0;height:2px;
+  background:linear-gradient(90deg,#7A6020,#C9A84C);
+  width:0%;z-index:100;
+  pointer-events:none;
+}
+
+/* Chrome */
+#home-link{
+  position:fixed;top:1.2em;left:1.5em;
+  font-family:Arial,sans-serif;font-size:0.64em;
+  letter-spacing:0.15em;text-transform:uppercase;
+  color:#444;text-decoration:none;z-index:200;
+  transition:color .2s;
+}
+#home-link:hover{color:#C9A84C;}
+
+#replay-btn{
+  position:fixed;top:1.2em;right:1.5em;
+  font-family:Arial,sans-serif;font-size:0.64em;
+  letter-spacing:0.15em;text-transform:uppercase;
+  color:#444;cursor:pointer;z-index:200;
+  border:1px solid #2A2A3E;padding:0.35em 0.8em;border-radius:3px;
+  opacity:0;transition:opacity .5s, color .2s, border-color .2s;
+}
+#replay-btn.vis{opacity:1;}
+#replay-btn:hover{color:#C9A84C;border-color:#C9A84C;}
+
+#skip-btn{
+  position:fixed;bottom:1.4em;right:1.8em;
+  font-family:Arial,sans-serif;font-size:0.62em;
+  letter-spacing:0.15em;text-transform:uppercase;
+  color:#333;cursor:pointer;z-index:200;
+  opacity:0;transition:opacity .5s, color .2s;
+}
+#skip-btn.vis{opacity:1;}
+#skip-btn:hover{color:#777;}
+</style>
+</head>
+<body>
+<a href="/" id="vaHomeBtn" aria-label="Home" style="position:fixed;top:14px;left:14px;z-index:99999;display:inline-flex;align-items:center;gap:7px;padding:9px 15px;background:rgba(18,22,44,0.9);color:#d9b676;font-family:Georgia,'Times New Roman',serif;font-size:14px;font-weight:bold;letter-spacing:.5px;text-decoration:none;border:1px solid #d9b676;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.35);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);"><span style="font-size:16px;line-height:1;">&#8962;</span> Home</a>
+
+<div id="bg"></div>
+<div id="vignette"></div>
+<div id="scanlines"></div>
+
+<a href="financially-trapped-hub.html" id="home-link">&larr; Home</a>
+<div id="replay-btn" onclick="resetTrailer()">&#8635; Replay</div>
+<div id="skip-btn" onclick="skipToEnd()">Skip &rarr;</div>
+
+<div id="stage">
+
+  <!-- PLAY SCREEN -->
+  <div class="scene vis" id="s-play" onclick="startTrailer()">
+    <div class="play-ring"></div>
+    <div class="play-hed">Financially Trapped</div>
+    <div class="play-sub">Engineering of Persistence &mdash; Book Trailer</div>
+  </div>
+
+  <!-- S1: Opening question -->
+  <div class="scene" id="s1">
+    <div class="t-eyebrow">Verity Architecture</div>
+    <div class="t-q">What if <span class="gold">$1</span><br>could change everything?</div>
+  </div>
+
+  <!-- S2: The constraint -->
+  <div class="scene" id="s2">
+    <div class="t-q">Not a thousand dollars.<br>Not a hundred.<br><span class="gold">One.</span></div>
+  </div>
+
+  <!-- S3: The belief system -->
+  <div class="scene" id="s3">
+    <div class="t-q"><em>You were told that wealth<br>was something you inherited.</em></div>
+  </div>
+
+  <!-- S4: The pivot -->
+  <div class="scene" id="s4">
+    <div class="t-q">No one told you<br>it could <span class="gold">work for you</span><br>while you slept.</div>
+  </div>
+
+  <!-- S5: The mechanism -->
+  <div class="scene" id="s5">
+    <div class="t-stat">$1 &rarr; a share.</div>
+    <div class="t-stat-note">A share &rarr; a dividend.<br>A dividend &rarr; another share.</div>
+  </div>
+
+  <!-- S6: The pattern -->
+  <div class="scene" id="s6">
+    <div class="t-q">Do it <span class="gold">every day</span>.<br><span class="dim">Watch what compounds.</span></div>
+    <div class="t-foot">Wealthsimple &bull; $1 Fractional Shares</div>
+  </div>
+
+  <!-- S7: The engineering angle -->
+  <div class="scene" id="s7">
+    <div class="t-q">The system isn&rsquo;t a secret.<br>It&rsquo;s <span class="gold">engineering.</span></div>
+  </div>
+
+  <!-- S8: Book cover -->
+  <div class="scene" id="s-cover">
+    <div class="book-frame">
+      <img class="book-img" src="ft-cover-2026.jpg" alt="Financially Trapped: Engineering of Persistence by Corvus Verity">
+    </div>
+  </div>
+
+  <!-- S9: Title slam -->
+  <div class="scene" id="s-title">
+    <div class="title-main">Financially<br>Trapped</div>
+    <div class="title-sub">Engineering of Persistence</div>
+    <div class="title-by">by Corvus Verity</div>
+  </div>
+
+  <!-- S10: Proof -->
+  <div class="scene" id="s-proof">
+    <div class="proof-num">$31 CAD</div>
+    <div class="proof-label">One Real Account. Reset May 14, 2026.</div>
+    <div class="proof-divider"></div>
+    <div class="proof-note"><em>Every transaction shown is live on Wealthsimple.<br>This is not a simulation.</em></div>
+  </div>
+
+  <!-- S11: CTA -->
+  <div class="scene" id="s-cta">
+    <div class="cta-badge">Available Now</div>
+    <div class="cta-title">Financially<br>Trapped</div>
+    <div class="cta-sub">Engineering of Persistence</div>
+    <div class="cta-btns">
+      <a class="cta-btn btn-gold" href="financially-trapped-hub.html#worksheets">Get the Book</a>
+      <a class="cta-btn btn-line" href="financially-trapped.html">Live Proof &rarr;</a>
+      <a class="cta-btn btn-line" href="financially-trapped-hub.html">Home</a>
+    </div>
+  </div>
+
+</div><!-- /#stage -->
+
+<div id="prog"></div>
+
+<script>
+// [id, holdMs, fadeOutMs]
+var SEQ = [
+  ['s1',      2800, 650],
+  ['s2',      3000, 650],
+  ['s3',      2900, 650],
+  ['s4',      3200, 650],
+  ['s5',      3100, 650],
+  ['s6',      3000, 650],
+  ['s7',      2800, 650],
+  ['s-cover', 3400, 800],
+  ['s-title', 3800, 750],
+  ['s-proof', 3200, 700],
+  ['s-cta',   99999, 0 ]
+];
+
+// Total duration (all but last hold)
+var TOTAL_MS = 0;
+SEQ.slice(0, -1).forEach(function(s){ TOTAL_MS += s[1]; });
+
+var progEl   = document.getElementById('prog');
+var replayEl = document.getElementById('replay-btn');
+var skipEl   = document.getElementById('skip-btn');
+var timers   = [];
+var running  = false;
+var raf      = null;
+var startTs  = 0;
+
+function vis(id)  { var el=document.getElementById(id); if(el) el.classList.add('vis'); }
+function unvis(id){ var el=document.getElementById(id); if(el) el.classList.remove('vis'); }
+
+function startTrailer() {
+  if (running) return;
+  running = true;
+  unvis('s-play');
+  skipEl.classList.add('vis');
+
+  var t = 0;
+  SEQ.forEach(function(item, idx) {
+    (function(id, hold, fout, offset, isLast) {
+      timers.push(setTimeout(function(){ vis(id); }, offset));
+      if (!isLast) {
+        timers.push(setTimeout(function(){ unvis(id); }, offset + hold - fout));
+      }
+    })(item[0], item[1], item[2], t, idx === SEQ.length - 1);
+    t += item[1];
+  });
+
+  // Show replay + hide skip after last scene starts
+  timers.push(setTimeout(function(){
+    replayEl.classList.add('vis');
+    skipEl.classList.remove('vis');
+  }, TOTAL_MS + 200));
+
+  // Progress bar
+  startTs = performance.now();
+  function tick(now) {
+    var pct = Math.min((now - startTs) / TOTAL_MS * 100, 100);
+    progEl.style.width = pct + '%';
+    if (pct < 100) raf = requestAnimationFrame(tick);
+  }
+  raf = requestAnimationFrame(tick);
+}
+
+function skipToEnd() {
+  clearAll();
+  vis('s-cta');
+  replayEl.classList.add('vis');
+  skipEl.classList.remove('vis');
+  progEl.style.width = '100%';
+}
+
+function resetTrailer() {
+  clearAll();
+  vis('s-play');
+}
+
+function clearAll() {
+  timers.forEach(clearTimeout);
+  timers = [];
+  cancelAnimationFrame(raf);
+  running = false;
+  document.querySelectorAll('.scene').forEach(function(el){ el.classList.remove('vis'); });
+  replayEl.classList.remove('vis');
+  skipEl.classList.remove('vis');
+  progEl.style.width = '0%';
+}
+</script>
+</body>
+</html>

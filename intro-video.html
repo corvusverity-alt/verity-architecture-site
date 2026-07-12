@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Introduction — Financially Trapped | The Concept Explained</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;height:100%;overflow:hidden;background:#07090F;font-family:Georgia,"Times New Roman",serif;}
+canvas#bgc{position:fixed;inset:0;z-index:0;pointer-events:none;}
+#vignette{position:fixed;inset:0;background:radial-gradient(ellipse at 50% 50%,transparent 20%,rgba(0,0,0,0.78) 100%);pointer-events:none;z-index:1;}
+
+/* NAV */
+#home-link{position:fixed;top:1.1em;left:1.4em;font-family:Arial,sans-serif;font-size:0.63em;letter-spacing:0.15em;text-transform:uppercase;color:#1E1E32;text-decoration:none;z-index:200;transition:color .2s;}
+#home-link:hover{color:#C9A84C;}
+#replay-btn{position:fixed;top:1.05em;right:1.4em;font-family:Arial,sans-serif;font-size:0.63em;letter-spacing:0.15em;text-transform:uppercase;color:#1E1E32;cursor:pointer;border:1px solid #0E0E1E;padding:0.32em 0.75em;border-radius:3px;z-index:200;opacity:0;transition:opacity .5s,color .2s,border-color .2s;}
+#replay-btn.vis{opacity:1;}
+#replay-btn:hover{color:#C9A84C;border-color:#C9A84C;}
+#skip-btn{position:fixed;bottom:1.4em;right:1.8em;font-family:Arial,sans-serif;font-size:0.61em;letter-spacing:0.14em;text-transform:uppercase;color:#14142A;cursor:pointer;z-index:200;opacity:0;transition:opacity .5s,color .2s;}
+#skip-btn.vis{opacity:1;}
+#skip-btn:hover{color:#555;}
+#pause-btn{position:fixed;bottom:1.25em;left:50%;transform:translateX(-50%);font-family:Arial,sans-serif;font-size:0.65em;letter-spacing:0.18em;text-transform:uppercase;color:#555;cursor:pointer;border:1px solid #1A1A2E;padding:0.35em 1.1em;border-radius:20px;z-index:200;opacity:0;transition:opacity .4s,color .2s,border-color .2s,background .2s;}
+#pause-btn.vis{opacity:1;}
+#pause-btn:hover{color:#C9A84C;border-color:rgba(201,168,76,0.4);background:rgba(201,168,76,0.05);}
+#pause-btn.paused{color:#C9A84C;border-color:rgba(201,168,76,0.5);}
+#prog{position:fixed;bottom:0;left:0;height:3px;background:linear-gradient(90deg,#1A0E04,#C9A84C);width:0%;z-index:100;pointer-events:none;}
+
+/* STAGE */
+#stage{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;}
+.scene{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2em;opacity:0;transition:opacity 0.7s ease;pointer-events:none;}
+.scene.vis{opacity:1;pointer-events:auto;}
+
+/* PLAY */
+#s-play{cursor:pointer;}
+.play-ring{width:94px;height:94px;border-radius:50%;border:2px solid rgba(201,168,76,0.45);display:flex;align-items:center;justify-content:center;background:rgba(201,168,76,0.06);margin:0 auto 1.6em;transition:all .3s;}
+#s-play:hover .play-ring{background:rgba(201,168,76,0.16);border-color:#C9A84C;box-shadow:0 0 40px rgba(201,168,76,0.28);}
+.play-ring::after{content:'';border-style:solid;border-width:14px 0 14px 26px;border-color:transparent transparent transparent #C9A84C;margin-left:7px;}
+.play-hed{font-size:clamp(1.1em,2.5vw,1.7em);color:#fff;text-align:center;letter-spacing:0.04em;}
+.play-sub{font-family:Arial,sans-serif;font-size:clamp(0.56em,1.1vw,0.7em);letter-spacing:0.28em;text-transform:uppercase;color:#252542;margin-top:0.7em;text-align:center;}
+
+/* SHARED TYPOGRAPHY */
+.t-eye{font-family:Arial,sans-serif;font-size:clamp(0.5em,1vw,0.66em);letter-spacing:0.3em;text-transform:uppercase;color:#252542;margin-bottom:0.9em;text-align:center;}
+.t-hero{font-size:clamp(1.3em,3.6vw,3em);color:#fff;text-align:center;line-height:1.34;max-width:800px;}
+.t-hero .gold{color:#C9A84C;}
+.t-hero .dim{color:#3A3A56;}
+.t-hero .red{color:#C84C4C;}
+.t-foot{font-family:Arial,sans-serif;font-size:clamp(0.5em,0.95vw,0.65em);letter-spacing:0.2em;text-transform:uppercase;color:#1E1E36;margin-top:1.3em;text-align:center;}
+
+/* S1 — THE TRAP */
+.trap-wrap{display:flex;flex-direction:column;align-items:center;gap:1.4em;width:100%;max-width:760px;}
+.trap-cycle{position:relative;width:clamp(320px,55vw,520px);height:clamp(320px,55vw,520px);}
+.trap-node{position:absolute;display:flex;flex-direction:column;align-items:center;gap:0.4em;opacity:0;transition:opacity 0.5s ease;}
+.trap-node.show{opacity:1;}
+.trap-node .tn-icon{font-size:clamp(3em,8vw,5.5em);line-height:1;filter:drop-shadow(0 0 8px rgba(201,168,76,0.2));}
+.trap-node .tn-lbl{font-family:Arial,sans-serif;font-size:clamp(0.6em,1.2vw,0.82em);letter-spacing:0.18em;text-transform:uppercase;color:#555;font-weight:bold;}
+/* positions: top, right, bottom, left */
+.tn-top{top:0;left:50%;transform:translateX(-50%);}
+.tn-right{top:50%;right:0;transform:translateY(-50%);}
+.tn-bottom{bottom:0;left:50%;transform:translateX(-50%);}
+.tn-left{top:50%;left:0;transform:translateY(-50%);}
+/* SVG arrows between nodes */
+.trap-arrows{position:absolute;inset:0;pointer-events:none;}
+.trap-arrow-path{stroke:rgba(201,168,76,0);stroke-width:4;fill:none;stroke-dasharray:12 6;transition:stroke 0.5s ease;}
+.trap-arrow-path.show{stroke:rgba(201,168,76,0.7);animation:dashflow 1.8s linear infinite;}
+@keyframes dashflow{to{stroke-dashoffset:-54;}}
+.trap-headline{font-size:clamp(1em,2.2vw,1.5em);color:#777;font-style:italic;text-align:center;line-height:1.5;}
+.trap-headline .lit{color:#C84C4C;}
+
+/* S2 — THE INVERSION */
+.inv-wrap{display:flex;gap:clamp(1.5em,5vw,5em);align-items:center;justify-content:center;flex-wrap:wrap;max-width:760px;}
+.inv-side{display:flex;flex-direction:column;align-items:center;gap:0.7em;width:clamp(160px,28vw,240px);opacity:0;transform:translateY(16px);transition:opacity 0.6s ease,transform 0.6s ease;}
+.inv-side.show{opacity:1;transform:translateY(0);}
+.inv-icon{font-size:clamp(2.5em,6vw,5em);line-height:1;}
+.inv-label{font-family:Arial,sans-serif;font-size:clamp(0.58em,1.2vw,0.8em);letter-spacing:0.12em;text-transform:uppercase;text-align:center;line-height:1.5;}
+.inv-label.bad{color:#C84C4C;}
+.inv-label.good{color:#8FD14F;}
+.inv-arrow{font-size:clamp(0.7em,1.5vw,1.1em);color:#2A2A42;text-align:center;font-family:Arial,sans-serif;}
+.inv-divider{width:1px;height:clamp(80px,15vw,130px);background:linear-gradient(to bottom,transparent,rgba(201,168,76,0.3),transparent);flex-shrink:0;opacity:0;transition:opacity 0.6s ease 0.4s;}
+.inv-divider.show{opacity:1;}
+.inv-foot{font-family:Arial,sans-serif;font-size:clamp(0.7em,1.4vw,0.95em);color:#555;font-style:italic;text-align:center;max-width:560px;line-height:1.6;margin-top:0.4em;}
+
+/* S3 — THE MACHINE */
+.mach-wrap{display:flex;flex-direction:column;align-items:center;gap:1em;max-width:720px;width:100%;}
+.mach-title{font-family:Arial,sans-serif;font-size:clamp(0.5em,0.95vw,0.64em);letter-spacing:0.3em;text-transform:uppercase;color:rgba(201,168,76,0.5);}
+.mach-cycle{display:grid;grid-template-columns:1fr auto 1fr;grid-template-rows:1fr auto 1fr;gap:clamp(0.3em,1.2vw,0.8em);align-items:center;justify-items:center;width:100%;max-width:560px;}
+.mach-node{display:flex;flex-direction:column;align-items:center;gap:0.4em;background:rgba(255,255,255,0.025);border:1px solid rgba(201,168,76,0.1);border-radius:8px;padding:clamp(0.5em,1.5vw,1em) clamp(0.8em,2vw,1.4em);opacity:0;transform:scale(0.85);transition:opacity 0.4s ease,transform 0.4s ease,border-color 0.4s,box-shadow 0.4s;}
+.mach-node.show{opacity:1;transform:scale(1);}
+.mach-node.pulse{border-color:rgba(201,168,76,0.4);box-shadow:0 0 18px rgba(201,168,76,0.12);}
+.mn-icon{font-size:clamp(1.4em,3.5vw,2.4em);line-height:1;}
+.mn-label{font-family:Arial,sans-serif;font-size:clamp(0.44em,0.88vw,0.6em);letter-spacing:0.1em;text-transform:uppercase;color:#555;text-align:center;line-height:1.4;}
+.mn-label strong{color:#C9A84C;display:block;font-size:1.1em;}
+.mach-arr{font-size:clamp(0.9em,2vw,1.5em);color:rgba(201,168,76,0.3);opacity:0;transition:opacity 0.4s ease;}
+.mach-arr.show{opacity:1;color:#C9A84C;}
+/* center cell with rotating gear */
+.mach-center{grid-column:2;grid-row:2;position:relative;width:clamp(44px,8vw,64px);height:clamp(44px,8vw,64px);}
+.gear{animation:gearSpin 3s linear infinite;transform-origin:center;opacity:0;transition:opacity 0.5s;}
+.gear.show{opacity:0.7;}
+@keyframes gearSpin{to{transform:rotate(360deg);}}
+.mach-sub{font-family:Arial,sans-serif;font-size:clamp(0.52em,1vw,0.68em);color:#333;font-style:italic;text-align:center;letter-spacing:0.06em;}
+
+/* S4 — FIFTY DOLLARS */
+.fifty-wrap{display:flex;flex-direction:column;align-items:center;gap:0.5em;text-align:center;max-width:580px;}
+.fifty-label{font-family:Arial,sans-serif;font-size:clamp(0.5em,0.95vw,0.64em);letter-spacing:0.32em;text-transform:uppercase;color:#252542;margin-bottom:0.3em;}
+.fifty-coin{font-size:clamp(3.5em,10vw,8em);line-height:1;filter:drop-shadow(0 0 24px rgba(201,168,76,0.5));animation:coinFloat 3s ease-in-out infinite;}
+@keyframes coinFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+.fifty-num{font-family:Georgia,serif;font-size:clamp(2.5em,8vw,6.5em);color:#C9A84C;font-weight:normal;letter-spacing:0.04em;line-height:1;}
+.fifty-unit{font-family:Arial,sans-serif;font-size:clamp(0.6em,1.3vw,0.88em);color:#444;letter-spacing:0.25em;text-transform:uppercase;}
+.fifty-desc{font-size:clamp(0.88em,1.9vw,1.35em);color:#555;font-style:italic;line-height:1.6;margin-top:0.3em;}
+.fifty-desc .gold{color:#C9A84C;}
+
+/* S5 — THE MATH */
+.math-wrap{display:flex;flex-direction:column;align-items:center;gap:clamp(0.5em,1.2vw,0.9em);max-width:640px;width:100%;}
+.math-eq{display:flex;align-items:center;gap:clamp(0.5em,1.5vw,1.2em);background:rgba(255,255,255,0.025);border:1px solid rgba(201,168,76,0.1);border-radius:7px;padding:clamp(0.55em,1.3vw,0.9em) clamp(0.9em,2vw,1.5em);width:100%;opacity:0;transform:translateX(-20px);transition:opacity 0.45s ease,transform 0.45s ease,border-color 0.45s;}
+.math-eq.show{opacity:1;transform:translateX(0);}
+.math-eq.show.highlight{border-color:rgba(201,168,76,0.35);background:rgba(201,168,76,0.05);}
+.me-invest{font-family:Georgia,serif;font-size:clamp(0.95em,2.2vw,1.65em);color:#C9A84C;font-weight:normal;min-width:90px;}
+.me-at{font-family:Arial,sans-serif;font-size:clamp(0.5em,1vw,0.68em);color:#2E2E4E;letter-spacing:0.2em;text-transform:uppercase;flex:1;text-align:center;}
+.me-result{font-family:Georgia,serif;font-size:clamp(0.95em,2.2vw,1.65em);color:#8FD14F;font-weight:normal;text-align:right;min-width:110px;}
+.math-note{font-family:Arial,sans-serif;font-size:clamp(0.5em,0.95vw,0.64em);color:#252542;letter-spacing:0.18em;text-transform:uppercase;margin-top:0.3em;text-align:center;}
+
+/* S6 — THE TIMELINE */
+.tl-wrap{display:flex;flex-direction:column;align-items:center;gap:1.2em;width:100%;max-width:920px;}
+.tl-hed{font-family:Arial,sans-serif;font-size:clamp(0.68em,1.3vw,0.9em);letter-spacing:0.22em;text-transform:uppercase;color:rgba(201,168,76,0.75);}
+.tl-track{position:relative;width:100%;height:3px;background:rgba(255,255,255,0.05);border-radius:2px;margin:1.4em 0 2.2em;}
+.tl-fill{height:100%;background:linear-gradient(90deg,#C9A84C,#8FD14F);border-radius:2px;width:0%;transition:width 0.6s ease;}
+.tl-dots{position:absolute;top:0;left:0;right:0;bottom:0;}
+.tl-dot{position:absolute;top:50%;width:10px;height:10px;border-radius:50%;border:2px solid rgba(201,168,76,0.3);background:#07090F;transform:translate(-50%,-50%);transition:border-color 0.4s,background 0.4s,box-shadow 0.4s;}
+.tl-dot.lit{border-color:#C9A84C;background:#C9A84C;box-shadow:0 0 10px rgba(201,168,76,0.6);}
+.tl-dot.done{border-color:#8FD14F;background:#8FD14F;box-shadow:0 0 10px rgba(143,209,79,0.5);}
+.tl-labels{display:flex;justify-content:space-between;width:100%;flex-wrap:wrap;gap:0.8em;}
+.tl-item{display:flex;flex-direction:column;align-items:center;gap:0.4em;opacity:0;transform:translateY(10px);transition:opacity 0.4s ease,transform 0.4s ease;text-align:center;flex:1;min-width:95px;}
+.tl-item.show{opacity:1;transform:translateY(0);}
+.tl-period{font-family:Arial,sans-serif;font-size:clamp(0.62em,1.1vw,0.78em);color:#555;letter-spacing:0.12em;text-transform:uppercase;}
+.tl-bill{font-size:clamp(2.2em,5.5vw,4em);line-height:1;filter:drop-shadow(0 0 8px rgba(201,168,76,0.18));}
+.tl-what{font-family:Arial,sans-serif;font-size:clamp(0.65em,1.2vw,0.85em);color:#C9A84C;letter-spacing:0.06em;font-weight:bold;}
+.tl-val{font-family:"Courier New",monospace;font-size:clamp(0.6em,1.05vw,0.74em);color:#666;}
+.tl-finale{font-size:clamp(1.4em,3.2vw,2.7em);color:#fff;text-align:center;font-style:italic;opacity:0;transition:opacity 0.8s ease;line-height:1.4;}
+.tl-finale.show{opacity:1;}
+.tl-finale .gold{color:#C9A84C;}
+.tl-finale .green{color:#8FD14F;}
+
+/* INLINE BOOK REVEAL (inside s6 timeline) */
+.tl-book-reveal{display:flex;align-items:center;gap:clamp(1em,3vw,2.5em);opacity:0;transform:translateY(16px);transition:opacity 0.8s ease,transform 0.8s ease;margin-top:0.6em;flex-wrap:wrap;justify-content:center;}
+.tl-book-reveal.show{opacity:1;transform:translateY(0);}
+.tlb-cover-img{height:clamp(110px,18vh,175px);width:auto;object-fit:contain;border-radius:2px;box-shadow:0 0 50px rgba(201,168,76,0.25),0 16px 60px rgba(0,0,0,0.85);transform:perspective(700px) rotateY(-14deg) scale(0.92);transition:transform 1s ease 0.15s,box-shadow 1s ease 0.15s;}
+.tl-book-reveal.show .tlb-cover-img{transform:perspective(700px) rotateY(-6deg) scale(1);box-shadow:0 0 80px rgba(201,168,76,0.4),0 20px 70px rgba(0,0,0,0.9);}
+.tlb-text{display:flex;flex-direction:column;gap:0.35em;}
+.tlb-eyebrow{font-family:Arial,sans-serif;font-size:clamp(0.5em,0.95vw,0.64em);letter-spacing:0.25em;text-transform:uppercase;color:rgba(201,168,76,0.55);}
+.tlb-title{font-size:clamp(1.3em,3.2vw,2.4em);color:#fff;letter-spacing:0.04em;line-height:1.2;}
+.tlb-sub{font-size:clamp(0.68em,1.35vw,0.95em);color:#C9A84C;font-style:italic;letter-spacing:0.06em;}
+.tlb-desc{font-family:Arial,sans-serif;font-size:clamp(0.56em,1.05vw,0.73em);color:#444;line-height:1.75;max-width:340px;}
+
+/* CTA */
+.cta-badge{font-family:Arial,sans-serif;font-size:clamp(0.52em,1.05vw,0.67em);letter-spacing:0.28em;text-transform:uppercase;color:#C9A84C;border:1px solid rgba(201,168,76,0.32);padding:0.3em 1em;border-radius:20px;margin-bottom:0.85em;}
+.cta-title{font-size:clamp(1.8em,5.5vw,4.3em);color:#fff;text-align:center;text-transform:uppercase;letter-spacing:0.12em;line-height:1.06;}
+.cta-sub{font-size:clamp(0.8em,1.8vw,1.4em);color:#C9A84C;font-style:italic;text-align:center;margin-top:0.3em;letter-spacing:0.04em;}
+.cta-btns{display:flex;gap:0.8em;flex-wrap:wrap;justify-content:center;margin-top:1.3em;}
+.cta-btn{font-family:Arial,sans-serif;font-size:clamp(0.6em,1.2vw,0.78em);font-weight:bold;letter-spacing:0.12em;text-transform:uppercase;text-decoration:none;padding:0.7em 1.5em;border-radius:4px;cursor:pointer;transition:all .2s;}
+.btn-gold{background:#C9A84C;color:#0C1020;border:none;}
+.btn-gold:hover{background:#B89038;}
+.btn-line{background:transparent;color:#C9A84C;border:1.5px solid #C9A84C;}
+.btn-line:hover{background:rgba(201,168,76,0.1);}
+</style>
+</head>
+<body>
+<a href="/" id="vaHomeBtn" aria-label="Home" style="position:fixed;top:14px;left:14px;z-index:99999;display:inline-flex;align-items:center;gap:7px;padding:9px 15px;background:rgba(18,22,44,0.9);color:#d9b676;font-family:Georgia,'Times New Roman',serif;font-size:14px;font-weight:bold;letter-spacing:.5px;text-decoration:none;border:1px solid #d9b676;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.35);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);"><span style="font-size:16px;line-height:1;">&#8962;</span> Home</a>
+<canvas id="bgc"></canvas>
+<div id="vignette"></div>
+<a href="financially-trapped-hub.html" id="home-link">&larr; Home</a>
+<div id="replay-btn" onclick="resetAnim()">&#8635; Replay</div>
+<div id="skip-btn" onclick="skipToEnd()">Skip &rarr;</div>
+<div id="pause-btn" onclick="togglePause()">&#9646;&#9646; Pause</div>
+
+<div id="stage">
+
+<!-- PLAY -->
+<div class="scene vis" id="s-play" onclick="startAnim()">
+  <div class="play-ring"></div>
+  <div class="play-hed">Financially Trapped</div>
+  <div class="play-sub">Introduction to the Concept</div>
+</div>
+
+<!-- S1: THE TRAP -->
+<div class="scene" id="s1">
+  <div class="trap-wrap">
+    <div class="trap-cycle" id="trapCycle">
+      <svg class="trap-arrows" viewBox="0 0 380 380" xmlns="http://www.w3.org/2000/svg">
+        <defs><marker id="ah" markerWidth="10" markerHeight="10" refX="7" refY="5" orient="auto"><polygon points="0 0,10 5,0 10" fill="rgba(201,168,76,0.85)"/></marker></defs>
+        <!-- top→right -->
+        <path id="arr1" class="trap-arrow-path" d="M 220 60 Q 310 60 310 150" marker-end="url(#ah)"/>
+        <!-- right→bottom -->
+        <path id="arr2" class="trap-arrow-path" d="M 310 230 Q 310 320 220 320" marker-end="url(#ah)"/>
+        <!-- bottom→left -->
+        <path id="arr3" class="trap-arrow-path" d="M 160 320 Q 70 320 70 230" marker-end="url(#ah)"/>
+        <!-- left→top -->
+        <path id="arr4" class="trap-arrow-path" d="M 70 150 Q 70 60 160 60" marker-end="url(#ah)"/>
+      </svg>
+      <div class="trap-node tn-top" id="tn0"><div class="tn-icon">&#127749;</div><div class="tn-lbl">Wake Up</div></div>
+      <div class="trap-node tn-right" id="tn1"><div class="tn-icon">&#128188;</div><div class="tn-lbl">Work</div></div>
+      <div class="trap-node tn-bottom" id="tn2"><div class="tn-icon">&#128176;</div><div class="tn-lbl">Pay Bills</div></div>
+      <div class="trap-node tn-left" id="tn3"><div class="tn-icon">&#128564;</div><div class="tn-lbl">Sleep</div></div>
+    </div>
+    <div class="trap-headline" id="trapHed">Most people repeat this cycle<br>for <span class="lit">40 years</span> &mdash; and never escape it.</div>
+  </div>
+</div>
+
+<!-- S2: THE INVERSION -->
+<div class="scene" id="s2">
+  <div class="t-eye">There is another way</div>
+  <div class="inv-wrap">
+    <div class="inv-side" id="inv-bad">
+      <div class="inv-icon">&#128100;</div>
+      <div class="inv-label bad">You work<br>for money</div>
+      <div class="inv-arrow">&#8595; Time &amp; energy out<br>&#8595; Paycheque in<br>&#8595; Bills paid<br>&#8595; Nothing left</div>
+    </div>
+    <div class="inv-divider" id="inv-div"></div>
+    <div class="inv-side" id="inv-good">
+      <div class="inv-icon">&#128176;</div>
+      <div class="inv-label good">Money works<br>for you</div>
+      <div class="inv-arrow" style="color:#8FD14F;">&#8593; Dividends in — every month<br>&#8593; Reinvested automatically<br>&#8593; Portfolio grows<br>&#8593; Income grows</div>
+    </div>
+  </div>
+  <div class="inv-foot">The difference between the two is not income.<br>It&rsquo;s <em>what you do with it.</em></div>
+</div>
+
+<!-- S3: THE MACHINE -->
+<div class="scene" id="s3">
+  <div class="mach-wrap">
+    <div class="mach-title">The Income Machine</div>
+    <div class="mach-cycle">
+      <!-- Row 1 -->
+      <div class="mach-node" id="mn0"><div class="mn-icon">&#128176;</div><div class="mn-label"><strong>You Invest</strong>$50/month into<br>high-yield ETFs</div></div>
+      <div class="mach-arr" id="marr0">&#8594;</div>
+      <div class="mach-node" id="mn1"><div class="mn-icon">&#9881;&#65039;</div><div class="mn-label"><strong>12% Yield</strong>Dividends paid<br>monthly</div></div>
+      <!-- Row 2 (center) -->
+      <div class="mach-arr" id="marr3" style="transform:rotate(-90deg);">&#8594;</div>
+      <div class="mach-center">
+        <svg class="gear" viewBox="0 0 64 64" width="100%" height="100%">
+          <path fill="rgba(201,168,76,0.4)" d="M32 20a12 12 0 1 0 0 24 12 12 0 0 0 0-24zm0 18a6 6 0 1 1 0-12 6 6 0 0 1 0 12z"/>
+          <path fill="rgba(201,168,76,0.25)" d="M28 6h8v6l3.5 2 4.5-4 5.7 5.7-4 4.5 2 3.5h6v8h-6l-2 3.5 4 4.5-5.7 5.7-4.5-4-3.5 2v6h-8v-6l-3.5-2-4.5 4L14.3 44l4-4.5-2-3.5H10v-8h6l2-3.5-4-4.5L19.7 14l4.5 4 3.5-2V6z"/>
+        </svg>
+      </div>
+      <div class="mach-arr" id="marr1" style="transform:rotate(90deg);">&#8594;</div>
+      <!-- Row 3 -->
+      <div class="mach-node" id="mn3"><div class="mn-icon">&#128200;</div><div class="mn-label"><strong>Compound</strong>Portfolio grows<br>automatically</div></div>
+      <div class="mach-arr" id="marr2">&#8592;</div>
+      <div class="mach-node" id="mn2"><div class="mn-icon">&#128257;</div><div class="mn-label"><strong>DRIP</strong>Dividends buy<br>more shares</div></div>
+    </div>
+    <div class="mach-sub">Every dividend buys more shares. More shares pay more dividends. Repeat.</div>
+  </div>
+</div>
+
+<!-- S4: FIFTY DOLLARS -->
+<div class="scene" id="s4">
+  <div class="fifty-wrap">
+    <div class="fifty-label">Your starting point</div>
+    <div class="fifty-coin">&#129689;</div>
+    <div class="fifty-num">$50</div>
+    <div class="fifty-unit">per month &mdash; that&rsquo;s it</div>
+    <div class="fifty-desc">Not $500. Not $5,000. Just <span class="gold">fifty dollars</span> a month &mdash; the cost of a streaming subscription &mdash; consistently invested, quietly compounding.</div>
+  </div>
+</div>
+
+<!-- S5: THE MATH -->
+<div class="scene" id="s5">
+  <div class="math-wrap">
+    <div class="t-eye" style="margin-bottom:0.4em;">The arithmetic is simple</div>
+    <div class="math-eq" id="meq1">
+      <div class="me-invest">$1,000</div>
+      <div class="me-at">invested at 12% annual yield</div>
+      <div class="me-result">$10/month</div>
+    </div>
+    <div class="math-eq" id="meq2">
+      <div class="me-invest">$10,000</div>
+      <div class="me-at">invested at 12% annual yield</div>
+      <div class="me-result">$100/month</div>
+    </div>
+    <div class="math-eq" id="meq3">
+      <div class="me-invest">$50,000</div>
+      <div class="me-at">invested at 12% annual yield</div>
+      <div class="me-result">$500/month</div>
+    </div>
+    <div class="math-eq" id="meq4">
+      <div class="me-invest">$174,784</div>
+      <div class="me-at">invested at 12% annual yield</div>
+      <div class="me-result">$1,748/month</div>
+    </div>
+    <div class="math-note">The machine doesn&rsquo;t care how you started. It only cares how long you run it.</div>
+  </div>
+</div>
+
+<!-- S6: THE TIMELINE -->
+<div class="scene" id="s6">
+  <div class="tl-wrap">
+    <div class="tl-hed">$50/month &mdash; what it buys you over time</div>
+    <div class="tl-track">
+      <div class="tl-fill" id="tlFill"></div>
+      <div class="tl-dots" id="tlDots">
+        <div class="tl-dot" style="left:0%"></div>
+        <div class="tl-dot" style="left:16%"></div>
+        <div class="tl-dot" style="left:33%"></div>
+        <div class="tl-dot" style="left:50%"></div>
+        <div class="tl-dot" style="left:67%"></div>
+        <div class="tl-dot" style="left:83%"></div>
+        <div class="tl-dot" style="left:100%"></div>
+      </div>
+    </div>
+    <div class="tl-labels" id="tlLabels">
+      <div class="tl-item" id="tl0"><div class="tl-period">Start</div><div class="tl-bill">&#129689;</div><div class="tl-what">$1 Loonie</div><div class="tl-val">Day One</div></div>
+      <div class="tl-item" id="tl1"><div class="tl-period">Month 6</div><div class="tl-bill">&#9749;</div><div class="tl-what">Coffee</div><div class="tl-val">$3/mo income</div></div>
+      <div class="tl-item" id="tl2"><div class="tl-period">Year 5</div><div class="tl-bill">&#128250;</div><div class="tl-what">Streaming</div><div class="tl-val">$40/mo income</div></div>
+      <div class="tl-item" id="tl3"><div class="tl-period">Year 10</div><div class="tl-bill">&#9889;</div><div class="tl-what">Utilities</div><div class="tl-val">$115/mo income</div></div>
+      <div class="tl-item" id="tl4"><div class="tl-period">Year 20</div><div class="tl-bill">&#128722;</div><div class="tl-what">Groceries</div><div class="tl-val">$494/mo income</div></div>
+      <div class="tl-item" id="tl5"><div class="tl-period">Year 25</div><div class="tl-bill">&#128663;</div><div class="tl-what">Car + extras</div><div class="tl-val">$939/mo income</div></div>
+      <div class="tl-item" id="tl6"><div class="tl-period">Year 30</div><div class="tl-bill">&#127968;</div><div class="tl-what">Rent/Mortgage</div><div class="tl-val">$1,748/mo income</div></div>
+    </div>
+    <div class="tl-finale" id="tlFinale"><span class="gold">$18,001 in.</span> &nbsp; <span class="green">$174,784 back.</span><br><span style="color:#555;font-size:0.72em;font-style:italic;">That&rsquo;s not an investment strategy. That&rsquo;s an <em style="color:#C9A84C;">engineering problem.</em></span></div>
+    <div class="tl-book-reveal" id="tlBook">
+      <img class="tlb-cover-img" id="bookCover" src="ft-cover-2026.jpg" alt="Financially Trapped: Engineering of Persistence">
+      <div class="tlb-text">
+        <div class="tlb-eyebrow">The complete system &mdash; documented</div>
+        <div class="tlb-title">Financially Trapped</div>
+        <div class="tlb-sub">Engineering of Persistence</div>
+        <div class="tlb-desc">Every position. Every dividend. Every reinvestment &mdash; written by someone building this live, in real accounts, with real money.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="scene" id="s-cta">
+  <div class="cta-badge">Available Now</div>
+  <div class="cta-title">Financially<br>Trapped</div>
+  <div class="cta-sub">Engineering of Persistence</div>
+  <div class="cta-btns">
+    <a class="cta-btn btn-gold" href="financially-trapped-hub.html#worksheets">Get the Book</a>
+    <a class="cta-btn btn-line" href="proof-of-concept.html">See the Proof &rarr;</a>
+    <a class="cta-btn btn-line" href="financially-trapped-hub.html">Home</a>
+  </div>
+</div>
+
+</div><!-- /#stage -->
+<div id="prog"></div>
+
+<script>
+/* ── BACKGROUND: slow-moving gradient orbs ── */
+var C=document.getElementById('bgc'),ctx=C.getContext('2d'),W,H;
+var orbs=[
+  {x:0.25,y:0.3,r:0.28,hue:220,a:0.06},
+  {x:0.75,y:0.7,r:0.32,hue:35,a:0.045},
+  {x:0.5, y:0.5,r:0.18,hue:180,a:0.03}
+];
+var orbT=0;
+function resize(){W=C.width=window.innerWidth;H=C.height=window.innerHeight;}
+resize();window.addEventListener('resize',resize);
+function drawBg(){
+  ctx.clearRect(0,0,W,H);
+  orbs.forEach(function(o,i){
+    var ox=o.x*W+Math.sin(orbT*0.0004+i*2.1)*W*0.06;
+    var oy=o.y*H+Math.cos(orbT*0.0003+i*1.7)*H*0.05;
+    var r=o.r*Math.min(W,H);
+    var g=ctx.createRadialGradient(ox,oy,0,ox,oy,r);
+    g.addColorStop(0,'hsla('+o.hue+',40%,25%,'+o.a+')');
+    g.addColorStop(1,'hsla('+o.hue+',20%,5%,0)');
+    ctx.beginPath();ctx.arc(ox,oy,r,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+  });
+  orbT++;
+  requestAnimationFrame(drawBg);
+}
+drawBg();
+
+/* ── SCENE ENTER FUNCTIONS ── */
+
+/* S1 trap */
+function enterTrap(){
+  var nodes=['tn0','tn1','tn2','tn3'];
+  var arrs=['arr1','arr2','arr3','arr4'];
+  nodes.forEach(function(id,i){
+    (function(elId,delay){setTimeout(function(){var el=document.getElementById(elId);if(el)el.classList.add('show');},delay);})(id,i*380);
+  });
+  arrs.forEach(function(id,i){
+    (function(elId,delay){setTimeout(function(){var el=document.getElementById(elId);if(el)el.classList.add('show');},delay);})(id,i*380+500);
+  });
+  setTimeout(function(){var h=document.getElementById('trapHed');if(h)h.style.color='#888';},1600);
+}
+
+/* S2 inversion */
+function enterInversion(){
+  setTimeout(function(){var el=document.getElementById('inv-bad');if(el)el.classList.add('show');},100);
+  setTimeout(function(){var el=document.getElementById('inv-div');if(el)el.classList.add('show');},400);
+  setTimeout(function(){var el=document.getElementById('inv-good');if(el)el.classList.add('show');},700);
+}
+
+/* S3 machine */
+function enterMachine(){
+  var nodes=['mn0','mn1','mn2','mn3'];
+  var arrs=['marr0','marr1','marr2','marr3'];
+  nodes.forEach(function(id,i){
+    (function(elId,delay){setTimeout(function(){
+      var el=document.getElementById(elId);if(el)el.classList.add('show');
+      setTimeout(function(){if(el)el.classList.add('pulse');},600);
+    },delay);})(id,i*350+200);
+  });
+  arrs.forEach(function(id,i){
+    (function(elId,delay){setTimeout(function(){var el=document.getElementById(elId);if(el)el.classList.add('show');},delay);})(id,i*350+550);
+  });
+  setTimeout(function(){var g=document.querySelector('.gear');if(g)g.classList.add('show');},300);
+  /* pulse cycle */
+  var pulseTimer=null;
+  function pulseCycle(){
+    var idx=0;
+    pulseTimer=setInterval(function(){
+      nodes.forEach(function(id){var el=document.getElementById(id);if(el)el.classList.remove('pulse');});
+      var el=document.getElementById(nodes[idx%4]);if(el)el.classList.add('pulse');
+      idx++;
+    },700);
+  }
+  setTimeout(pulseCycle,1800);
+}
+
+/* S5 math */
+function enterMath(){
+  ['meq1','meq2','meq3','meq4'].forEach(function(id,i){
+    (function(elId,delay){setTimeout(function(){
+      var el=document.getElementById(elId);if(el){el.classList.add('show');if(i===3)el.classList.add('highlight');}
+    },delay);})(id,i*500+100);
+  });
+}
+
+/* S6 timeline — pauseable */
+var tlInterval=null,tlStep=0,tlActive=false;
+function startTlInterval(){
+  var items=document.querySelectorAll('.tl-item');
+  var dots=document.querySelectorAll('.tl-dot');
+  var fill=document.getElementById('tlFill');
+  var pcts=[0,16,33,50,67,83,100];
+  tlInterval=setInterval(function(){
+    if(tlStep>=items.length){clearInterval(tlInterval);tlInterval=null;tlActive=false;
+      setTimeout(function(){var f=document.getElementById('tlFinale');if(f)f.classList.add('show');},700);
+      setTimeout(function(){enterBook();},2200);return;}
+    items[tlStep].classList.add('show');
+    if(dots[tlStep]){dots[tlStep].classList.add(tlStep<items.length-1?'lit':'done');}
+    if(tlStep>0&&dots[tlStep-1]){dots[tlStep-1].classList.remove('lit');dots[tlStep-1].classList.add('done');}
+    if(fill)fill.style.width=pcts[tlStep]+'%';
+    tlStep++;
+  },1500);
+}
+function enterTimeline(){tlStep=0;tlActive=true;startTlInterval();}
+function clearTimeline(){
+  if(tlInterval)clearInterval(tlInterval);tlInterval=null;tlStep=0;tlActive=false;
+  document.querySelectorAll('.tl-item').forEach(function(el){el.classList.remove('show');});
+  document.querySelectorAll('.tl-dot').forEach(function(el){el.classList.remove('lit','done');});
+  var fill=document.getElementById('tlFill');if(fill)fill.style.width='0%';
+  var fin=document.getElementById('tlFinale');if(fin)fin.classList.remove('show');
+  var tlb=document.getElementById('tlBook');if(tlb)tlb.classList.remove('show');
+}
+
+/* Book reveal (inline in s6) */
+function enterBook(){
+  var tl=document.getElementById('tlBook');if(tl)tl.classList.add('show');
+}
+
+/* ── SEQUENCE (slowed ~40%) ── */
+var SEQ=[
+  ['s1',      7500, 800, enterTrap],
+  ['s2',      7500, 800, enterInversion],
+  ['s3',      8000, 800, enterMachine],
+  ['s4',      6500, 800, null],
+  ['s5',      7500, 800, enterMath],
+  ['s6',     18000, 900, enterTimeline],
+  ['s-cta',  99999,   0, null]
+];
+var TOTAL_MS=0;
+SEQ.slice(0,-1).forEach(function(s){TOTAL_MS+=s[1];});
+
+var progEl=document.getElementById('prog');
+var replayEl=document.getElementById('replay-btn');
+var skipEl=document.getElementById('skip-btn');
+var pauseEl=document.getElementById('pause-btn');
+
+function vis(id){var el=document.getElementById(id);if(el)el.classList.add('vis');}
+function unvis(id){var el=document.getElementById(id);if(el)el.classList.remove('vis');}
+
+/* ── CLOCK-BASED RUNNER (supports pause/resume) ── */
+var CLK={elapsed:0,lastTick:0,running:false,raf:null};
+var EVENTS=[];
+
+function buildEvents(){
+  EVENTS=[];
+  var t=0;
+  SEQ.forEach(function(item,idx){
+    var id=item[0],hold=item[1],fout=item[2],enter=item[3];
+    var isLast=idx===SEQ.length-1;
+    (function(id,enter,offset,hold,fout,isLast){
+      EVENTS.push({t:offset,fired:false,fn:function(){vis(id);if(enter)enter();}});
+      if(!isLast)EVENTS.push({t:offset+hold-fout,fired:false,fn:function(){unvis(id);}});
+    })(id,enter,t,hold,fout,isLast);
+    if(!isLast)t+=hold;
+  });
+  EVENTS.push({t:TOTAL_MS+300,fired:false,fn:function(){
+    replayEl.classList.add('vis');skipEl.classList.remove('vis');pauseEl.classList.remove('vis');
+    CLK.running=false;
+  }});
+}
+
+function clkTick(now){
+  if(!CLK.running)return;
+  CLK.elapsed+=now-CLK.lastTick;
+  CLK.lastTick=now;
+  EVENTS.forEach(function(ev){if(!ev.fired&&CLK.elapsed>=ev.t){ev.fn();ev.fired=true;}});
+  progEl.style.width=Math.min(CLK.elapsed/TOTAL_MS*100,100)+'%';
+  CLK.raf=requestAnimationFrame(clkTick);
+}
+
+function startAnim(){
+  if(CLK.running)return;
+  buildEvents();
+  unvis('s-play');
+  skipEl.classList.add('vis');
+  pauseEl.classList.add('vis');
+  CLK.elapsed=0;CLK.lastTick=performance.now();CLK.running=true;
+  CLK.raf=requestAnimationFrame(clkTick);
+}
+
+function togglePause(){
+  if(CLK.running){
+    /* PAUSE */
+    CLK.running=false;
+    if(CLK.raf)cancelAnimationFrame(CLK.raf);
+    if(tlActive&&tlInterval){clearInterval(tlInterval);tlInterval=null;}
+    pauseEl.innerHTML='&#9646;&#9646; Pause &#9646;&#9646;'.replace('&#9646;&#9646; Pause &#9646;&#9646;','&#9646;&#9646; Pause');
+    pauseEl.classList.add('paused');
+  } else {
+    /* RESUME */
+    CLK.running=true;
+    CLK.lastTick=performance.now();
+    if(tlActive&&!tlInterval)startTlInterval();
+    CLK.raf=requestAnimationFrame(clkTick);
+    pauseEl.innerHTML='&#9646;&#9646; Pause';
+    pauseEl.classList.remove('paused');
+  }
+}
+
+function skipToEnd(){
+  stopAll();vis('s-cta');
+  replayEl.classList.add('vis');skipEl.classList.remove('vis');pauseEl.classList.remove('vis');
+  progEl.style.width='100%';
+}
+
+function resetAnim(){
+  stopAll();
+  /* reset trap */
+  ['tn0','tn1','tn2','tn3'].forEach(function(id){var el=document.getElementById(id);if(el)el.classList.remove('show');});
+  ['arr1','arr2','arr3','arr4'].forEach(function(id){var el=document.getElementById(id);if(el)el.classList.remove('show');});
+  var th=document.getElementById('trapHed');if(th)th.style.color='';
+  /* reset inversion */
+  ['inv-bad','inv-div','inv-good'].forEach(function(id){var el=document.getElementById(id);if(el)el.classList.remove('show');});
+  /* reset machine */
+  ['mn0','mn1','mn2','mn3'].forEach(function(id){var el=document.getElementById(id);if(el)el.classList.remove('show','pulse');});
+  ['marr0','marr1','marr2','marr3'].forEach(function(id){var el=document.getElementById(id);if(el)el.classList.remove('show');});
+  var g=document.querySelector('.gear');if(g)g.classList.remove('show');
+  /* reset math */
+  ['meq1','meq2','meq3','meq4'].forEach(function(id){var el=document.getElementById(id);if(el)el.classList.remove('show','highlight');});
+  /* reset timeline + book */
+  clearTimeline();
+  pauseEl.innerHTML='&#9646;&#9646; Pause';pauseEl.classList.remove('paused');
+  vis('s-play');
+}
+
+function stopAll(){
+  CLK.running=false;
+  if(CLK.raf)cancelAnimationFrame(CLK.raf);
+  clearTimeline();
+  document.querySelectorAll('.scene').forEach(function(el){el.classList.remove('vis');});
+  replayEl.classList.remove('vis');skipEl.classList.remove('vis');pauseEl.classList.remove('vis');
+  progEl.style.width='0%';
+}
+</script>
+</body>
+</html>

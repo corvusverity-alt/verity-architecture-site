@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>WS16: The Eternal Architect | Financially Trapped</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:20px;}
+body{background:#0e0e1c;color:#e8e0cc;font-family:Georgia,serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;}
+#player{position:relative;width:100vw;height:100vh;background:#13132a;border:none;display:flex;flex-direction:column;overflow:hidden;}
+#prog-bar{height:16px;background:rgba(201,168,76,.12);flex-shrink:0;cursor:pointer;position:relative;user-select:none;border-top:1px solid rgba(201,168,76,.2);}
+#prog-bar:hover{background:rgba(201,168,76,.22);}
+#prog-fill{height:100%;width:0;background:#C9A84C;pointer-events:none;}
+#prog-thumb{position:absolute;top:50%;right:auto;width:20px;height:20px;border-radius:50%;background:#C9A84C;border:2px solid #fff;transform:translate(-50%,-50%);left:0;pointer-events:none;box-shadow:0 0 10px rgba(201,168,76,.7);opacity:0;transition:opacity .15s;}
+#prog-bar:hover #prog-thumb{opacity:1;}
+#fs-btn{font-family:Arial,sans-serif;font-size:0.8em;font-weight:bold;letter-spacing:.08em;color:#888;border:1px solid rgba(255,255,255,.18);background:none;padding:.38em .95em;border-radius:4px;cursor:pointer;white-space:nowrap;}
+#fs-btn:hover{color:#C9A84C;border-color:rgba(201,168,76,.5);}
+#voice-btn{font-family:Arial,sans-serif;font-size:0.8em;letter-spacing:.06em;color:#aaa;border:1px solid rgba(255,255,255,.18);background:none;padding:.38em .95em;border-radius:4px;cursor:pointer;}
+#voice-btn:hover{color:#C9A84C;border-color:rgba(201,168,76,.5);}
+#stage{flex:1;position:relative;overflow:hidden;}
+.scene{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .5s;}
+.scene.active{opacity:1;pointer-events:auto;}
+#s-play{cursor:pointer;background:radial-gradient(ellipse at center,#1e1e3a 0%,#0e0e1c 75%);}
+.ch-tag{font-family:Arial,sans-serif;font-size:0.85em;font-weight:bold;letter-spacing:.2em;text-transform:uppercase;color:#C9A84C;margin-bottom:.6em;}
+.ch-num{font-size:clamp(2.6em,7vw,4.5em);font-weight:bold;color:#C9A84C;line-height:1;text-shadow:0 0 40px rgba(201,168,76,.45);}
+.ch-title{font-size:clamp(1.1em,2.8vw,1.7em);color:#e8e0cc;margin-top:.35em;letter-spacing:.03em;}
+.ch-sub{font-size:0.9em;color:#bbb;font-style:italic;margin-top:.5em;}
+.play-ring{width:90px;height:90px;border-radius:50%;border:3px solid #C9A84C;display:flex;align-items:center;justify-content:center;margin-top:1.5em;transition:box-shadow .2s,transform .15s;}
+#s-play:hover .play-ring{box-shadow:0 0 32px rgba(201,168,76,.5);transform:scale(1.06);}
+.play-tri{width:0;height:0;border-top:18px solid transparent;border-bottom:18px solid transparent;border-left:28px solid #C9A84C;margin-left:7px;}
+#top-bar{background:#0a0a18;border-bottom:1px solid rgba(201,168,76,.2);padding:.6em 1.2em .5em;flex-shrink:0;}
+#ch-badge{font-family:Arial,sans-serif;font-size:0.72em;font-weight:bold;letter-spacing:.14em;text-transform:uppercase;color:#C9A84C;opacity:0;transition:opacity .5s;margin-bottom:.25em;}
+#ch-badge.vis{opacity:1;}
+#subtitle{font-size:1.08em;color:#fff;line-height:1.6;min-height:2.4em;}
+#subtitle span{background:none;padding:0;letter-spacing:.01em;color:#f0e8d0;}
+#controls{height:64px;display:flex;align-items:center;gap:.9em;padding:0 1.2em;background:#0a0a18;border-top:1px solid rgba(201,168,76,.2);flex-shrink:0;}
+#pause-btn{font-family:Arial,sans-serif;font-size:0.88em;font-weight:bold;letter-spacing:.1em;text-transform:uppercase;color:#C9A84C;border:2px solid rgba(201,168,76,.55);background:none;padding:.4em 1.1em;border-radius:4px;cursor:pointer;transition:background .15s;}
+#pause-btn:hover{background:rgba(201,168,76,.15);}
+#skip-btn{font-family:Arial,sans-serif;font-size:0.8em;letter-spacing:.08em;text-transform:uppercase;color:#999;border:1px solid rgba(255,255,255,.18);background:none;padding:.38em .95em;border-radius:4px;cursor:pointer;}
+#skip-btn:hover{color:#eee;}
+.ctrl-label{font-family:Arial,sans-serif;font-size:0.75em;color:#666;margin-left:auto;}
+.sc-wrap{width:92%;max-width:1400px;max-height:calc(100% - 130px);overflow-y:auto;padding:.4em 0;}
+.sc-wrap::-webkit-scrollbar{width:6px;}
+.sc-wrap::-webkit-scrollbar-thumb{background:rgba(201,168,76,.35);border-radius:3px;}
+.ws-shell{background:#0c0c20;border:1.5px solid rgba(201,168,76,.35);border-radius:6px;overflow:hidden;font-family:Arial,sans-serif;}
+.ws-hdr{padding:.65em 1.1em;border-bottom:1px solid rgba(201,168,76,.18);}
+.ws-hdr-title{font-size:0.72em;font-weight:bold;letter-spacing:.12em;text-transform:uppercase;color:#C9A84C;}
+.ws-hdr-sheet{font-size:0.95em;font-weight:bold;color:#e8e0cc;margin-top:.25em;}
+.ws-hdr-sub{font-size:0.76em;color:#999;font-style:italic;margin-top:.15em;}
+.ws-sec-band{background:rgba(201,168,76,.12);padding:.5em 1.1em;font-size:0.82em;font-weight:bold;letter-spacing:.07em;color:#C9A84C;border-top:1px solid rgba(201,168,76,.25);border-bottom:1px solid rgba(201,168,76,.18);}
+.ws-tbl{width:100%;border-collapse:collapse;}
+.ws-tbl th{background:rgba(201,168,76,.08);color:#C9A84C;font-size:0.8em;font-weight:bold;letter-spacing:.09em;padding:.55em .9em;border-bottom:1px solid rgba(201,168,76,.25);text-align:left;white-space:nowrap;}
+.ws-tbl td{font-size:0.88em;padding:.55em .9em;border-bottom:1px solid rgba(255,255,255,.05);color:#333;vertical-align:middle;}
+.ws-tbl td.filled{color:#d8cfb8;}
+.ws-tbl td.gold-val{color:#C9A84C;font-weight:bold;}
+.ws-tbl tr.active-row>td{background:rgba(201,168,76,.07);}
+.ws-tbl td.hl{background:rgba(201,168,76,.22)!important;color:#fff!important;border:2px solid rgba(201,168,76,.8)!important;border-radius:3px;}
+.ws-tbl tr.total-row>td{border-top:1.5px solid rgba(201,168,76,.4);color:#C9A84C;font-weight:bold;font-size:0.88em;padding:.55em .9em;}
+.ws-tbl td.empty-cell{color:#1e1e30;}
+.ws-calc-tbl{width:100%;border-collapse:collapse;}
+.ws-calc-tbl th{background:rgba(201,168,76,.08);color:#C9A84C;font-size:0.8em;font-weight:bold;letter-spacing:.09em;padding:.55em .9em;border-bottom:1px solid rgba(201,168,76,.25);text-align:left;}
+.ws-calc-tbl td{font-size:0.88em;padding:.65em .9em;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:middle;}
+.ws-calc-tbl td.calc-label{color:#bbb;white-space:nowrap;width:55%;}
+.ws-calc-tbl td.calc-val{color:#222238;width:45%;}
+.ws-calc-tbl td.calc-val.filled{color:#d8cfb8;}
+.ws-calc-tbl td.calc-val.gold-fill{color:#C9A84C;font-weight:bold;}
+.ws-calc-tbl td.hl{background:rgba(201,168,76,.22)!important;color:#fff!important;border:2px solid rgba(201,168,76,.8)!important;border-radius:3px;}
+.ws-quote-row{padding:.85em 1.1em;font-size:0.82em;color:#1e1e30;font-style:italic;border-top:1px solid rgba(255,255,255,.05);transition:color .6s;}
+.ws-quote-row.show{color:#C9A84C;}
+#s1 .ws-eyebrow{font-family:Arial,sans-serif;font-size:0.85em;font-weight:bold;letter-spacing:.2em;text-transform:uppercase;color:#C9A84C;margin-bottom:.6em;text-align:center;}
+#s1 .ws-title{font-size:clamp(1.6em,4vw,2.6em);font-weight:bold;color:#C9A84C;text-align:center;text-shadow:0 0 28px rgba(201,168,76,.35);}
+#s1 .ws-sub2{font-size:0.88em;color:#bbb;text-align:center;margin-top:.45em;font-style:italic;}
+#s1 .ws-desc{font-size:0.92em;color:#c8bfa8;text-align:center;margin-top:1.1em;line-height:1.75;max-width:600px;margin-left:auto;margin-right:auto;}
+#s-cta{text-align:center;}
+#s-cta .cta-done{font-size:0.9em;color:#aaa;margin-bottom:.8em;}
+#s-cta .cta-title{font-size:clamp(1.3em,3.2vw,2em);color:#C9A84C;margin-bottom:.4em;}
+.cta-btns{display:flex;gap:.9em;flex-wrap:wrap;justify-content:center;margin-top:1.2em;}
+.cta-btn{font-family:Arial,sans-serif;font-size:0.85em;font-weight:bold;letter-spacing:.1em;text-transform:uppercase;padding:.7em 1.5em;border-radius:4px;text-decoration:none;border:2px solid #C9A84C;color:#C9A84C;transition:background .15s;}
+.cta-btn.gold{background:#C9A84C;color:#0e0e1c;}
+.cta-btn:hover{background:rgba(201,168,76,.18);}
+.cta-btn.gold:hover{background:#b8953e;}
+</style>
+<link rel="stylesheet" href="ws-shared.css">
+</head>
+<body>
+<a href="/" id="vaHomeBtn" aria-label="Home" style="position:fixed;top:14px;left:14px;z-index:99999;display:inline-flex;align-items:center;gap:7px;padding:9px 15px;background:rgba(18,22,44,0.9);color:#d9b676;font-family:Georgia,'Times New Roman',serif;font-size:14px;font-weight:bold;letter-spacing:.5px;text-decoration:none;border:1px solid #d9b676;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.35);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);"><span style="font-size:16px;line-height:1;">&#8962;</span> Home</a>
+<div id="player">
+<div id="top-bar">
+<div id="ch-badge">Chapter 16 · The Eternal Architect</div>
+<div id="subtitle"><span id="sub-text"></span></div>
+</div>
+<div id="stage">
+<div class="scene active" id="s-play" onclick="startAnim()">
+<div class="ch-tag">Financially Trapped &middot; Worksheet Tutorial</div>
+<div class="ch-num">WS 16</div>
+<div class="ch-title">The Eternal Architect</div>
+<div class="ch-sub">Black Box · Beneficiary Audit · Co-Pilot Curriculum</div>
+<div class="play-ring"><div class="play-tri"></div></div>
+</div>
+<div class="scene" id="s1">
+<div class="sc-wrap" style="text-align:center;">
+<div class="ws-eyebrow">Worksheet 16 of 16</div>
+<div class="ws-title">The Eternal Architect</div>
+<div class="ws-sub2" id="ws-sub2"></div>
+<div class="ws-desc" id="s1desc"></div>
+</div>
+</div>
+
+    <div class="scene" id="s3">
+      <div class="sc-wrap">
+        <div class="ws-shell">
+          <div class="ws-hdr">
+            <div class="ws-hdr-title">Financially Trapped &middot; The Architect's Working Documents</div>
+            <div class="ws-hdr-sheet">Worksheet 16: The Eternal Architect — Succession &amp; the Hand-Off</div>
+            <div class="ws-hdr-sub">Black Box Checklist &middot; Beneficiary Audit &middot; Co-Pilot Curriculum</div>
+          </div>
+          <div class="ws-sec-band">[A] Black Box Creation Checklist &mdash; Every critical document, located and updated</div>
+          <table class="ws-tbl">
+            <thead><tr><th>DOCUMENT</th><th>STATUS</th><th>LOCATION</th><th>LAST UPDATED</th></tr></thead>
+          <tbody>
+            <tr id="bb1"><td id="b1a" class="empty-cell">&middot;</td><td id="b1b" class="empty-cell">&middot;</td><td id="b1c" class="empty-cell">&middot;</td><td id="b1d" class="empty-cell">&middot;</td></tr>
+            <tr id="bb2"><td id="b2a" class="empty-cell">&middot;</td><td id="b2b" class="empty-cell">&middot;</td><td id="b2c" class="empty-cell">&middot;</td><td id="b2d" class="empty-cell">&middot;</td></tr>
+            <tr id="bb3"><td id="b3a" class="empty-cell">&middot;</td><td id="b3b" class="empty-cell">&middot;</td><td id="b3c" class="empty-cell">&middot;</td><td id="b3d" class="empty-cell">&middot;</td></tr>
+            <tr id="bb4"><td id="b4a" class="empty-cell">&middot;</td><td id="b4b" class="empty-cell">&middot;</td><td id="b4c" class="empty-cell">&middot;</td><td id="b4d" class="empty-cell">&middot;</td></tr>
+            <tr id="bb5"><td id="b5a" class="empty-cell">&middot;</td><td id="b5b" class="empty-cell">&middot;</td><td id="b5c" class="empty-cell">&middot;</td><td id="b5d" class="empty-cell">&middot;</td></tr>
+          </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="scene" id="s4">
+      <div class="sc-wrap">
+        <div class="ws-shell">
+          <div class="ws-hdr">
+            <div class="ws-hdr-title">Financially Trapped &middot; The Architect's Working Documents</div>
+            <div class="ws-hdr-sheet">Worksheet 16: The Eternal Architect</div>
+          </div>
+          <div class="ws-sec-band">[B] Beneficiary Audit &mdash; Confirm every asset has a named beneficiary</div>
+          <table class="ws-tbl">
+            <thead><tr><th>ASSET / ACCOUNT</th><th>BENEFICIARY NAMED?</th><th>WHO?</th><th>DATE VERIFIED</th><th>NOTES</th></tr></thead>
+          <tbody>
+            <tr id="bn1"><td id="n1a" class="empty-cell">&middot;</td><td id="n1b" class="empty-cell">&middot;</td><td id="n1c" class="empty-cell">&middot;</td><td id="n1d" class="empty-cell">&middot;</td><td id="n1e" class="empty-cell">&middot;</td></tr>
+            <tr id="bn2"><td id="n2a" class="empty-cell">&middot;</td><td id="n2b" class="empty-cell">&middot;</td><td id="n2c" class="empty-cell">&middot;</td><td id="n2d" class="empty-cell">&middot;</td><td id="n2e" class="empty-cell">&middot;</td></tr>
+            <tr id="bn3"><td id="n3a" class="empty-cell">&middot;</td><td id="n3b" class="empty-cell">&middot;</td><td id="n3c" class="empty-cell">&middot;</td><td id="n3d" class="empty-cell">&middot;</td><td id="n3e" class="empty-cell">&middot;</td></tr>
+          </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="scene" id="s5">
+      <div class="sc-wrap">
+        <div class="ws-shell">
+          <div class="ws-hdr">
+            <div class="ws-hdr-title">Financially Trapped &middot; The Architect's Working Documents</div>
+            <div class="ws-hdr-sheet">Worksheet 16: The Eternal Architect</div>
+          </div>
+          <div class="ws-sec-band">[C] Co-Pilot Curriculum &mdash; Train the person who will continue the mission</div>
+          <table class="ws-tbl">
+            <thead><tr><th>TRAINING EVENT</th><th>WHO RECEIVES IT</th><th>DATE COMPLETED</th><th>NOTES</th></tr></thead>
+          <tbody>
+            <tr id="cp1"><td id="c1a" class="empty-cell">&middot;</td><td id="c1b" class="empty-cell">&middot;</td><td id="c1c" class="empty-cell">&middot;</td><td id="c1d" class="empty-cell">&middot;</td></tr>
+            <tr id="cp2"><td id="c2a" class="empty-cell">&middot;</td><td id="c2b" class="empty-cell">&middot;</td><td id="c2c" class="empty-cell">&middot;</td><td id="c2d" class="empty-cell">&middot;</td></tr>
+            <tr id="cp3"><td id="c3a" class="empty-cell">&middot;</td><td id="c3b" class="empty-cell">&middot;</td><td id="c3c" class="empty-cell">&middot;</td><td id="c3d" class="empty-cell">&middot;</td></tr>
+            <tr id="cp4"><td id="c4a" class="empty-cell">&middot;</td><td id="c4b" class="empty-cell">&middot;</td><td id="c4c" class="empty-cell">&middot;</td><td id="c4d" class="empty-cell">&middot;</td></tr>
+          </tbody>
+          </table>
+          <div class="ws-quote-row" id="wsQuote16">"Wealth is what you earn. A Legacy is what you build."</div>
+        </div>
+      </div>
+    </div>
+<div class="scene" id="s-cta">
+<div class="cta-done">All 16 Worksheets Complete</div>
+<div class="cta-title">The Eternal Architect</div>
+<div style="font-size:.78em;color:#aaa;font-style:italic;">The machine is built. The hand-off is planned. The legacy has begun. You are the Eternal Architect.</div>
+<div class="cta-btns">
+<a class="cta-btn gold" href="financially-trapped-hub.html#tutorials">Back to All Tutorials</a>
+<a class="cta-btn" href="#" onclick="resetAnim();return false;">Watch Again</a>
+</div>
+</div>
+</div>
+<div id="controls">
+<button id="pause-btn" onclick="togglePause()" style="display:none;">&#9208; Pause</button>
+<button id="skip-btn" onclick="skipToEnd()" style="display:none;">Skip &#8594;</button>
+<button id="voice-btn" onclick="toggleVoice()">&#128266; Voice</button>
+<div class="ctrl-label" id="ctrl-label">Click play to begin</div>
+<button id="fs-btn" onclick="toggleFullscreen()">&#9974; Fullscreen</button>
+</div>
+<div id="prog-bar" title="Click to seek">
+<div id="prog-fill"></div>
+<div id="prog-thumb"></div>
+</div>
+</div>
+<script>
+var SEQ=[8000,40000,35000,40000];
+
+var CLK={elapsed:0,lastTick:0,running:false,raf:null,speechPaused:false};
+var EVENTS=[];var TOTAL_MS=0;
+var progEl=document.getElementById('prog-fill');var progThumb=document.getElementById('prog-thumb');
+var subEl=document.getElementById('sub-text');var pauseBtn=document.getElementById('pause-btn');
+var skipBtn=document.getElementById('skip-btn');var ctrlLabel=document.getElementById('ctrl-label');
+var VOICE_ON=true;var synth=window.speechSynthesis||null;var VOX=[];
+function loadV(){if(synth)VOX=synth.getVoices();}
+if(synth){loadV();if(synth.onvoiceschanged!==undefined)synth.onvoiceschanged=loadV;}
+function speak(txt){if(!VOICE_ON||!synth||!txt)return;synth.cancel();var u=new SpeechSynthesisUtterance(txt.replace(/[""''"']/g,"'"));u.rate=0.88;u.pitch=1.0;u.volume=1.0;var voices=VOX.length?VOX:synth.getVoices();var v=voices.find(function(x){return/samantha|karen|moira|victoria|allison|ava|alice|tessa|zoe/i.test(x.name);})||voices.find(function(x){return x.lang.startsWith('en')&&x.localService;})||voices.find(function(x){return x.lang.startsWith('en');});if(v)u.voice=v;CLK.speechPaused=true;u.onend=function(){CLK.speechPaused=false;if(CLK.running)CLK.lastTick=performance.now();};u.onerror=function(){CLK.speechPaused=false;if(CLK.running)CLK.lastTick=performance.now();};synth.speak(u);}
+function toggleVoice(){VOICE_ON=!VOICE_ON;if(!VOICE_ON&&synth)synth.cancel();document.getElementById('voice-btn').textContent=VOICE_ON?'🔊 Voice':'🔇 Muted';}
+function showScene(id){document.querySelectorAll('.scene').forEach(function(s){s.classList.remove('active');});var el=document.getElementById(id);if(el)el.classList.add('active');}
+function setSub(t){subEl.textContent=t;speak(t);}function clrSub(){subEl.textContent='';if(synth)synth.cancel();}
+function hl(id){document.querySelectorAll('.hl').forEach(function(c){c.classList.remove('hl');});var el=document.getElementById(id);if(el)el.classList.add('hl');}
+function fill(id,val,cls){var el=document.getElementById(id);if(!el)return;el.textContent=val;el.classList.remove('empty-cell','hl');el.classList.add(cls||'filled');}
+function hlOff(){document.querySelectorAll('.hl').forEach(function(c){c.classList.remove('hl');});}
+function clkTick(now){if(!CLK.running)return;if(!CLK.speechPaused){CLK.elapsed+=now-CLK.lastTick;EVENTS.forEach(function(ev){if(!ev.fired&&CLK.elapsed>=ev.t){ev.fn();ev.fired=true;}});var pct=Math.min(CLK.elapsed/TOTAL_MS*100,100);progEl.style.width=pct+'%';progThumb.style.left=pct+'%';}CLK.lastTick=now;CLK.raf=requestAnimationFrame(clkTick);}
+function startAnim(){document.getElementById('s-play').classList.remove('active');buildEvents();CLK.elapsed=0;CLK.running=true;CLK.lastTick=performance.now();CLK.raf=requestAnimationFrame(clkTick);}
+function togglePause(){if(CLK.running){CLK.running=false;cancelAnimationFrame(CLK.raf);if(synth)synth.cancel();pauseBtn.textContent='▶ Resume';}else{CLK.running=true;CLK.lastTick=performance.now();CLK.raf=requestAnimationFrame(clkTick);pauseBtn.textContent='⏸ Pause';}}
+function skipToEnd(){CLK.running=false;cancelAnimationFrame(CLK.raf);if(synth)synth.cancel();EVENTS.forEach(function(ev){if(!ev.fired){ev.fn();ev.fired=true;}});progEl.style.width='100%';}
+function resetAnim(){CLK.running=false;cancelAnimationFrame(CLK.raf);if(synth)synth.cancel();CLK.elapsed=0;hardReset();progEl.style.width='0';progThumb.style.left='0';ctrlLabel.textContent='Click play to begin';showScene('s-play');}
+var progBar=document.getElementById('prog-bar');var seeking=false;
+function seekTo(pct){var targetMs=pct*TOTAL_MS;CLK.running=false;cancelAnimationFrame(CLK.raf);CLK.speechPaused=false;if(synth)synth.cancel();hardReset();CLK.elapsed=targetMs;EVENTS.forEach(function(ev){if(ev.t<=targetMs){ev.fn();ev.fired=true;}});progEl.style.width=(pct*100)+'%';progThumb.style.left=(pct*100)+'%';if(targetMs>0){CLK.running=true;CLK.lastTick=performance.now();CLK.raf=requestAnimationFrame(clkTick);pauseBtn.textContent='⏸ Pause';}}
+function getSeekPct(e){var r=progBar.getBoundingClientRect();var x=(e.touches?e.touches[0].clientX:e.clientX)-r.left;return Math.max(0,Math.min(1,x/r.width));}
+progBar.addEventListener('mousedown',function(e){if(!CLK.elapsed&&!CLK.running)return;seeking=true;seekTo(getSeekPct(e));});
+progBar.addEventListener('mousemove',function(e){var p=getSeekPct(e);progThumb.style.left=(p*100)+'%';if(seeking)seekTo(p);});
+progBar.addEventListener('mouseup',function(){seeking=false;});document.addEventListener('mouseup',function(){seeking=false;});
+progBar.addEventListener('touchstart',function(e){if(!CLK.elapsed&&!CLK.running)return;e.preventDefault();seeking=true;seekTo(getSeekPct(e));},{passive:false});
+progBar.addEventListener('touchmove',function(e){e.preventDefault();if(seeking)seekTo(getSeekPct(e));},{passive:false});
+progBar.addEventListener('touchend',function(){seeking=false;});
+function toggleFullscreen(){var el=document.getElementById('player');var btn=document.getElementById('fs-btn');if(!document.fullscreenElement){(el.requestFullscreen||el.webkitRequestFullscreen||el.mozRequestFullScreen).call(el);btn.textContent='✕ Exit Full';}else{(document.exitFullscreen||document.webkitExitFullscreen||document.mozCancelFullScreen).call(document);btn.textContent='⛶ Fullscreen';}}
+document.addEventListener('fullscreenchange',function(){if(!document.fullscreenElement)document.getElementById('fs-btn').textContent='⛶ Fullscreen';});
+
+
+function buildEvents(){
+  EVENTS=[];var t=0;TOTAL_MS=SEQ[0]+SEQ[1]+SEQ[2]+SEQ[3];
+  function at(off,fn){EVENTS.push({t:t+off,fired:false,fn:fn});}
+  at(0,function(){
+    showScene('s1');document.getElementById('ch-badge').classList.add('vis');
+    pauseBtn.style.display='inline-block';skipBtn.style.display='inline-block';
+    ctrlLabel.textContent='WS 16 of 16';
+    document.getElementById('ws-sub2').textContent='Black Box Checklist · Beneficiary Audit · Co-Pilot Curriculum';
+    setSub('Worksheet 16: The Eternal Architect. This is the final worksheet. It is not about you. It is about what happens after you.');
+  });
+  at(4500,function(){document.getElementById('s1desc').textContent='Every engine you have built, every bill you have eliminated, every valve you have opened — all of it can be inherited, continued, and amplified. But only if you plan for it. This worksheet creates the hand-off plan.';});
+  at(8500,function(){setSub('The Black Box is the document your family can open if you are ever unable to operate the machine. It contains everything they need to continue the mission without you.');});
+  t+=SEQ[0];
+
+  at(0,function(){showScene('s3');setSub('Section A: The Black Box. Five critical documents. If your family cannot find these, the machine stops. Locate every one and record where it lives.');});
+  at(4500,function(){hl('b1a');setSub('DOCUMENT 1: Your Will. Without a will, your estate goes through probate. Your assets may not reach who you intended. If you do not have a will, this is the most urgent task on this worksheet.');});
+  at(9500,function(){fill('b1a','Last Will and Testament');fill('b1b','EXISTS');fill('b1c','Lawyer safe + home fireproof safe');fill('b1d','Jan 2025');hlOff();setSub('Will located. Notarized copy at the lawyer. Personal copy in a fireproof safe at home. This is correct.');});
+  at(16000,function(){fill('b2a','Power of Attorney - Financial');fill('b2b','EXISTS');fill('b2c','Lawyer file');fill('b2d','Jan 2025');hlOff();setSub('Power of Attorney. Who can make financial decisions on your behalf if you are incapacitated? This person needs to know where the engines are and how they operate.');});
+  at(22000,function(){fill('b3a','Brokerage Account List + Login Guide');fill('b3b','EXISTS');fill('b3c','Encrypted password manager + printed guide');fill('b3d','Jun 2026');hlOff();setSub('The Account List. Every brokerage account, every platform, every engine — listed with enough information that someone else can access them. This is the engine manifest.');});
+  at(29000,function(){fill('b4a','Insurance Policies');fill('b4b','EXISTS');fill('b4c','Insurance binder in home safe');fill('b4d','Mar 2025');hlOff();});
+  at(33000,function(){fill('b5a','Portfolio Philosophy Summary (this book)');fill('b5b','EXISTS');fill('b5c','Printed + digital copy for co-pilot');fill('b5d','Jun 2026');hlOff();setSub('Five documents located and recorded. The Black Box is built. Your family can open this worksheet and find everything they need to continue.');});
+  t+=SEQ[1];
+
+  at(0,function(){showScene('s4');setSub('Section B: Beneficiary Audit. Every investment account must have a named beneficiary. An unnamed account goes through probate. Probate is slow, public, and expensive.');});
+  at(5000,function(){hl('n1a');setSub('ACCOUNT 1: Your TFSA. The most important account to name correctly. A named successor holder inherits the TFSA with full contribution room intact. Incorrect naming causes taxable events.');});
+  at(10000,function(){fill('n1a','TFSA - Wealthsimple Trade');fill('n1b','YES');fill('n1c','Spouse - Maria E.');fill('n1d','Jun 2026');fill('n1e','Successor holder - TFSA room transfers');hlOff();setSub('TFSA: beneficiary named as successor holder. Perfect. The account transfers with all tax-free status and contribution room intact. No probate. No tax event.');});
+  at(17000,function(){fill('n2a','RRSP - Wealthsimple Trade');fill('n2b','YES');fill('n2c','Spouse - Maria E.');fill('n2d','Jun 2026');fill('n2e','Spousal rollover - tax deferred');hlOff();setSub('RRSP: spouse as beneficiary enables a tax-deferred spousal rollover. The RRSP transfers without triggering income tax in the year of death.');});
+  at(25000,function(){fill('n3a','Non-Registered Margin Account');fill('n3b','NO - not possible');fill('n3c','Handled through Will');fill('n3d','Jun 2026');fill('n3e','Goes through estate - ensure Will is current');hlOff();setSub('Non-Registered accounts do not allow direct beneficiary naming on most platforms. They pass through your estate via the Will. Ensure the Will is current and specific about these accounts.');});
+  t+=SEQ[2];
+
+  at(0,function(){showScene('s5');setSub('Section C: The Co-Pilot Curriculum. Identify one person who will learn to operate the machine alongside you. Not after you. Alongside you. Starting now.');});
+  at(4500,function(){hl('c1a');setSub('TRAINING EVENT 1: Introduce the co-pilot to the system. Sit with them, show them the worksheets, show them the brokerage accounts, explain DRIP. One session. Two hours. Done.');});
+  at(9500,function(){fill('c1a','System introduction - accounts + DRIP');fill('c1b','Maria E.');fill('c1c','Jul 2026');fill('c1d','Walked through all 16 worksheets');hlOff();setSub('System introduction logged. Maria now knows the platforms, the positions, and the injection schedule. She can operate the machine if needed.');});
+  at(16000,function(){fill('c2a','Monthly review - co-pilot present');fill('c2b','Maria E.');fill('c2c','Ongoing - 1st of month');fill('c2d','Reviews DRIP, dividends, Days of Freedom number');hlOff();setSub('Monthly review: co-pilot participates in every monthly check. They see the injection happen. They see the dividend land. They understand the machine is real and working.');});
+  at(23000,function(){fill('c3a','Black Box document walkthrough');fill('c3b','Maria E.');fill('c3c','Jun 2026');fill('c3d','Located all 5 documents independently');hlOff();setSub('Black Box walkthrough: the co-pilot can independently locate every document in the Black Box. They have done this drill. They know where everything is.');});
+  at(30000,function(){fill('c4a','Independent injection practice');fill('c4b','Maria E.');fill('c4c','Sep 2026 planned');fill('c4d','Will execute injection independently with me present');hlOff();setSub('Independent injection: the co-pilot makes a real investment decision and executes it. With you present. This proves they can operate the machine without you if they need to.');});
+  at(37000,function(){document.getElementById('wsQuote16').classList.add('show');setSub('Wealth is what you earn. A Legacy is what you build.');});
+  t+=SEQ[3];
+  at(0,function(){showScene('s-cta');clrSub();pauseBtn.style.display='none';skipBtn.style.display='none';ctrlLabel.textContent='All 16 Worksheets Complete';CLK.running=false;});
+}
+
+
+function hardReset(){
+  CLK.running=false;cancelAnimationFrame(CLK.raf);if(synth)synth.cancel();
+  ['b1a','b1b','b1c','b1d','b2a','b2b','b2c','b2d','b3a','b3b','b3c','b3d','b4a','b4b','b4c','b4d','b5a','b5b','b5c','b5d'].forEach(function(id){var el=document.getElementById(id);if(el){el.textContent='·';el.className='empty-cell';}});
+  ['n1a','n1b','n1c','n1d','n1e','n2a','n2b','n2c','n2d','n2e','n3a','n3b','n3c','n3d','n3e'].forEach(function(id){var el=document.getElementById(id);if(el){el.textContent='·';el.className='empty-cell';}});
+  ['c1a','c1b','c1c','c1d','c2a','c2b','c2c','c2d','c3a','c3b','c3c','c3d','c4a','c4b','c4c','c4d'].forEach(function(id){var el=document.getElementById(id);if(el){el.textContent='·';el.className='empty-cell';}});
+  document.getElementById('wsQuote16').classList.remove('show');
+}
+</script>
+<script src="ws-shared.js"></script>
+</body>
+</html>lementById('ws-sub2').textContent='';
+  document.getElementById('ch-badge').classList.remove('vis');
+  pauseBtn.style.display='none';skipBtn.style.display='none';pauseBtn.textContent='⏸ Pause';setSub('');buildEvents();
+}
+
+</script>
+</body>
+</html>

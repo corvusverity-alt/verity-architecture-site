@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="2000" height="2000" viewBox="0 0 2000 2000" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Background -->
+  <rect width="2000" height="2000" fill="#F5E6C8"/>
+
+  <!-- Gold outer border frame -->
+  <rect x="40" y="40" width="1920" height="1920" rx="12"
+        fill="none" stroke="#C9A84C" stroke-width="8"/>
+  <!-- Inner thin border -->
+  <rect x="70" y="70" width="1860" height="1860" rx="8"
+        fill="none" stroke="#C9A84C" stroke-width="2"/>
+
+  <!-- Badge circle (centered, upper area) -->
+  <circle cx="1000" cy="640" r="220" fill="#1A1A2E" stroke="#C9A84C" stroke-width="8"/>
+
+  <!-- Three ascending pillars (bottom-aligned at y=820) -->
+  <rect x="878" y="714" width="56" height="106" fill="#C9A84C"/>
+  <rect x="950" y="644" width="56" height="176" fill="#C9A84C"/>
+  <rect x="1022" y="568" width="56" height="252" fill="#C9A84C"/>
+
+  <!-- Cap line -->
+  <line x1="878" y1="568" x2="1078" y2="568" stroke="#C9A84C" stroke-width="10"/>
+
+  <!-- Foundation bar -->
+  <rect x="878" y="820" width="200" height="14" fill="#C9A84C"/>
+
+  <!-- Gold rule above VERITY -->
+  <line x1="300" y1="950" x2="1700" y2="950" stroke="#C9A84C" stroke-width="3"/>
+
+  <!-- VERITY -->
+  <text x="1000" y="1090"
+        font-family="Georgia,'Times New Roman',serif"
+        font-size="220" font-weight="700"
+        fill="#1A1A2E" text-anchor="middle">VERITY</text>
+
+  <!-- Thin gold rule -->
+  <line x1="300" y1="1120" x2="1700" y2="1120" stroke="#C9A84C" stroke-width="3"/>
+
+  <!-- ARCHITECTURE tracked -->
+  <text x="1000" y="1215"
+        font-family="Arial,Helvetica,sans-serif"
+        font-size="72" font-weight="400"
+        fill="#1A1A2E" text-anchor="middle" letter-spacing="22">ARCHITECTURE</text>
+
+  <!-- Second gold rule -->
+  <line x1="300" y1="1250" x2="1700" y2="1250" stroke="#C9A84C" stroke-width="1.5"/>
+
+  <!-- Byline -->
+  <text x="1000" y="1360"
+        font-family="Georgia,'Times New Roman',serif"
+        font-size="58" font-style="italic"
+        fill="#8A6B28" text-anchor="middle">Corvus Verity</text>
+
+  <!-- Bottom tagline -->
+  <text x="1000" y="1820"
+        font-family="Arial,Helvetica,sans-serif"
+        font-size="44" font-weight="400"
+        fill="#8A6B28" text-anchor="middle" letter-spacing="8">THE ENGINEERING OF PERSISTENCE</text>
+
+  <!-- Small gold diamonds as decorators -->
+  <polygon points="1000,1700 1012,1720 1000,1740 988,1720" fill="#C9A84C"/>
+  <polygon points="940,1700 952,1720 940,1740 928,1720"  fill="#C9A84C" opacity="0.5"/>
+  <polygon points="1060,1700 1072,1720 1060,1740 1048,1720" fill="#C9A84C" opacity="0.5"/>
+
+</svg>

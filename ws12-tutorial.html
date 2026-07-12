@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>WS12: The Bulkhead Strategy | Financially Trapped</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:20px;}
+body{background:#0e0e1c;color:#e8e0cc;font-family:Georgia,serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;}
+#player{position:relative;width:100vw;height:100vh;background:#13132a;border:none;display:flex;flex-direction:column;overflow:hidden;}
+#prog-bar{height:16px;background:rgba(201,168,76,.12);flex-shrink:0;cursor:pointer;position:relative;user-select:none;border-top:1px solid rgba(201,168,76,.2);}
+#prog-bar:hover{background:rgba(201,168,76,.22);}
+#prog-fill{height:100%;width:0;background:#C9A84C;pointer-events:none;}
+#prog-thumb{position:absolute;top:50%;right:auto;width:20px;height:20px;border-radius:50%;background:#C9A84C;border:2px solid #fff;transform:translate(-50%,-50%);left:0;pointer-events:none;box-shadow:0 0 10px rgba(201,168,76,.7);opacity:0;transition:opacity .15s;}
+#prog-bar:hover #prog-thumb{opacity:1;}
+#fs-btn{font-family:Arial,sans-serif;font-size:0.8em;font-weight:bold;letter-spacing:.08em;color:#888;border:1px solid rgba(255,255,255,.18);background:none;padding:.38em .95em;border-radius:4px;cursor:pointer;white-space:nowrap;}
+#fs-btn:hover{color:#C9A84C;border-color:rgba(201,168,76,.5);}
+#voice-btn{font-family:Arial,sans-serif;font-size:0.8em;letter-spacing:.06em;color:#aaa;border:1px solid rgba(255,255,255,.18);background:none;padding:.38em .95em;border-radius:4px;cursor:pointer;}
+#voice-btn:hover{color:#C9A84C;border-color:rgba(201,168,76,.5);}
+#stage{flex:1;position:relative;overflow:hidden;}
+.scene{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .5s;}
+.scene.active{opacity:1;pointer-events:auto;}
+#s-play{cursor:pointer;background:radial-gradient(ellipse at center,#1e1e3a 0%,#0e0e1c 75%);}
+.ch-tag{font-family:Arial,sans-serif;font-size:0.85em;font-weight:bold;letter-spacing:.2em;text-transform:uppercase;color:#C9A84C;margin-bottom:.6em;}
+.ch-num{font-size:clamp(2.6em,7vw,4.5em);font-weight:bold;color:#C9A84C;line-height:1;text-shadow:0 0 40px rgba(201,168,76,.45);}
+.ch-title{font-size:clamp(1.1em,2.8vw,1.7em);color:#e8e0cc;margin-top:.35em;letter-spacing:.03em;}
+.ch-sub{font-size:0.9em;color:#bbb;font-style:italic;margin-top:.5em;}
+.play-ring{width:90px;height:90px;border-radius:50%;border:3px solid #C9A84C;display:flex;align-items:center;justify-content:center;margin-top:1.5em;transition:box-shadow .2s,transform .15s;}
+#s-play:hover .play-ring{box-shadow:0 0 32px rgba(201,168,76,.5);transform:scale(1.06);}
+.play-tri{width:0;height:0;border-top:18px solid transparent;border-bottom:18px solid transparent;border-left:28px solid #C9A84C;margin-left:7px;}
+#top-bar{background:#0a0a18;border-bottom:1px solid rgba(201,168,76,.2);padding:.6em 1.2em .5em;flex-shrink:0;}
+#ch-badge{font-family:Arial,sans-serif;font-size:0.72em;font-weight:bold;letter-spacing:.14em;text-transform:uppercase;color:#C9A84C;opacity:0;transition:opacity .5s;margin-bottom:.25em;}
+#ch-badge.vis{opacity:1;}
+#subtitle{font-size:1.08em;color:#fff;line-height:1.6;min-height:2.4em;}
+#subtitle span{background:none;padding:0;letter-spacing:.01em;color:#f0e8d0;}
+#controls{height:64px;display:flex;align-items:center;gap:.9em;padding:0 1.2em;background:#0a0a18;border-top:1px solid rgba(201,168,76,.2);flex-shrink:0;}
+#pause-btn{font-family:Arial,sans-serif;font-size:0.88em;font-weight:bold;letter-spacing:.1em;text-transform:uppercase;color:#C9A84C;border:2px solid rgba(201,168,76,.55);background:none;padding:.4em 1.1em;border-radius:4px;cursor:pointer;transition:background .15s;}
+#pause-btn:hover{background:rgba(201,168,76,.15);}
+#skip-btn{font-family:Arial,sans-serif;font-size:0.8em;letter-spacing:.08em;text-transform:uppercase;color:#999;border:1px solid rgba(255,255,255,.18);background:none;padding:.38em .95em;border-radius:4px;cursor:pointer;}
+#skip-btn:hover{color:#eee;}
+.ctrl-label{font-family:Arial,sans-serif;font-size:0.75em;color:#666;margin-left:auto;}
+.sc-wrap{width:92%;max-width:1400px;max-height:calc(100% - 130px);overflow-y:auto;padding:.4em 0;}
+.sc-wrap::-webkit-scrollbar{width:6px;}
+.sc-wrap::-webkit-scrollbar-thumb{background:rgba(201,168,76,.35);border-radius:3px;}
+.ws-shell{background:#0c0c20;border:1.5px solid rgba(201,168,76,.35);border-radius:6px;overflow:hidden;font-family:Arial,sans-serif;}
+.ws-hdr{padding:.65em 1.1em;border-bottom:1px solid rgba(201,168,76,.18);}
+.ws-hdr-title{font-size:0.72em;font-weight:bold;letter-spacing:.12em;text-transform:uppercase;color:#C9A84C;}
+.ws-hdr-sheet{font-size:0.95em;font-weight:bold;color:#e8e0cc;margin-top:.25em;}
+.ws-hdr-sub{font-size:0.76em;color:#999;font-style:italic;margin-top:.15em;}
+.ws-sec-band{background:rgba(201,168,76,.12);padding:.5em 1.1em;font-size:0.82em;font-weight:bold;letter-spacing:.07em;color:#C9A84C;border-top:1px solid rgba(201,168,76,.25);border-bottom:1px solid rgba(201,168,76,.18);}
+.ws-tbl{width:100%;border-collapse:collapse;}
+.ws-tbl th{background:rgba(201,168,76,.08);color:#C9A84C;font-size:0.8em;font-weight:bold;letter-spacing:.09em;padding:.55em .9em;border-bottom:1px solid rgba(201,168,76,.25);text-align:left;white-space:nowrap;}
+.ws-tbl td{font-size:0.88em;padding:.55em .9em;border-bottom:1px solid rgba(255,255,255,.05);color:#333;vertical-align:middle;}
+.ws-tbl td.filled{color:#d8cfb8;}
+.ws-tbl td.gold-val{color:#C9A84C;font-weight:bold;}
+.ws-tbl tr.active-row>td{background:rgba(201,168,76,.07);}
+.ws-tbl td.hl{background:rgba(201,168,76,.22)!important;color:#fff!important;border:2px solid rgba(201,168,76,.8)!important;border-radius:3px;}
+.ws-tbl tr.total-row>td{border-top:1.5px solid rgba(201,168,76,.4);color:#C9A84C;font-weight:bold;font-size:0.88em;padding:.55em .9em;}
+.ws-tbl td.empty-cell{color:#1e1e30;}
+.ws-calc-tbl{width:100%;border-collapse:collapse;}
+.ws-calc-tbl th{background:rgba(201,168,76,.08);color:#C9A84C;font-size:0.8em;font-weight:bold;letter-spacing:.09em;padding:.55em .9em;border-bottom:1px solid rgba(201,168,76,.25);text-align:left;}
+.ws-calc-tbl td{font-size:0.88em;padding:.65em .9em;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:middle;}
+.ws-calc-tbl td.calc-label{color:#bbb;white-space:nowrap;width:55%;}
+.ws-calc-tbl td.calc-val{color:#222238;width:45%;}
+.ws-calc-tbl td.calc-val.filled{color:#d8cfb8;}
+.ws-calc-tbl td.calc-val.gold-fill{color:#C9A84C;font-weight:bold;}
+.ws-calc-tbl td.hl{background:rgba(201,168,76,.22)!important;color:#fff!important;border:2px solid rgba(201,168,76,.8)!important;border-radius:3px;}
+.ws-quote-row{padding:.85em 1.1em;font-size:0.82em;color:#1e1e30;font-style:italic;border-top:1px solid rgba(255,255,255,.05);transition:color .6s;}
+.ws-quote-row.show{color:#C9A84C;}
+#s1 .ws-eyebrow{font-family:Arial,sans-serif;font-size:0.85em;font-weight:bold;letter-spacing:.2em;text-transform:uppercase;color:#C9A84C;margin-bottom:.6em;text-align:center;}
+#s1 .ws-title{font-size:clamp(1.6em,4vw,2.6em);font-weight:bold;color:#C9A84C;text-align:center;text-shadow:0 0 28px rgba(201,168,76,.35);}
+#s1 .ws-sub2{font-size:0.88em;color:#bbb;text-align:center;margin-top:.45em;font-style:italic;}
+#s1 .ws-desc{font-size:0.92em;color:#c8bfa8;text-align:center;margin-top:1.1em;line-height:1.75;max-width:600px;margin-left:auto;margin-right:auto;}
+#s-cta{text-align:center;}
+#s-cta .cta-done{font-size:0.9em;color:#aaa;margin-bottom:.8em;}
+#s-cta .cta-title{font-size:clamp(1.3em,3.2vw,2em);color:#C9A84C;margin-bottom:.4em;}
+.cta-btns{display:flex;gap:.9em;flex-wrap:wrap;justify-content:center;margin-top:1.2em;}
+.cta-btn{font-family:Arial,sans-serif;font-size:0.85em;font-weight:bold;letter-spacing:.1em;text-transform:uppercase;padding:.7em 1.5em;border-radius:4px;text-decoration:none;border:2px solid #C9A84C;color:#C9A84C;transition:background .15s;}
+.cta-btn.gold{background:#C9A84C;color:#0e0e1c;}
+.cta-btn:hover{background:rgba(201,168,76,.18);}
+.cta-btn.gold:hover{background:#b8953e;}
+</style>
+<link rel="stylesheet" href="ws-shared.css">
+</head>
+<body>
+<a href="/" id="vaHomeBtn" aria-label="Home" style="position:fixed;top:14px;left:14px;z-index:99999;display:inline-flex;align-items:center;gap:7px;padding:9px 15px;background:rgba(18,22,44,0.9);color:#d9b676;font-family:Georgia,'Times New Roman',serif;font-size:14px;font-weight:bold;letter-spacing:.5px;text-decoration:none;border:1px solid #d9b676;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.35);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);"><span style="font-size:16px;line-height:1;">&#8962;</span> Home</a>
+<div id="player">
+<div id="top-bar">
+<div id="ch-badge">Chapter 12 · The Bulkhead Strategy</div>
+<div id="subtitle"><span id="sub-text"></span></div>
+</div>
+<div id="stage">
+<div class="scene active" id="s-play" onclick="startAnim()">
+<div class="ch-tag">Financially Trapped &middot; Worksheet Tutorial</div>
+<div class="ch-num">WS 12</div>
+<div class="ch-title">The Bulkhead Strategy</div>
+<div class="ch-sub">Fleet Bulkhead Tracker · 15% Max Per Sector</div>
+<div class="play-ring"><div class="play-tri"></div></div>
+</div>
+<div class="scene" id="s1">
+<div class="sc-wrap" style="text-align:center;">
+<div class="ws-eyebrow">Worksheet 12 of 16</div>
+<div class="ws-title">The Bulkhead Strategy</div>
+<div class="ws-sub2" id="ws-sub2"></div>
+<div class="ws-desc" id="s1desc"></div>
+</div>
+</div>
+
+    <div class="scene" id="s3">
+      <div class="sc-wrap">
+        <div class="ws-shell">
+          <div class="ws-hdr">
+            <div class="ws-hdr-title">Financially Trapped &middot; The Architect's Working Documents</div>
+            <div class="ws-hdr-sheet">Worksheet 12: The Bulkhead Strategy</div>
+            <div class="ws-hdr-sub">Fleet Bulkhead Tracker &mdash; Maximum 15% per sector</div>
+          </div>
+          <div class="ws-sec-band">[A] Fleet Bulkhead Tracker &mdash; No single sector exceeds 15% of total portfolio</div>
+          <table class="ws-tbl">
+            <thead><tr><th>SECTOR</th><th>TARGET % (MAX 15)</th><th>CURRENT VALUE ($)</th><th>CURRENT %</th><th>STATUS</th><th>NEXT INJECTION?</th></tr></thead>
+          <tbody>
+            <tr id="bk1"><td id="k1a" class="empty-cell">&middot;</td><td id="k1b" class="empty-cell">&middot;</td><td id="k1c" class="empty-cell">&middot;</td><td id="k1d" class="empty-cell">&middot;</td><td id="k1e" class="empty-cell">&middot;</td><td id="k1f" class="empty-cell">&middot;</td></tr>
+            <tr id="bk2"><td id="k2a" class="empty-cell">&middot;</td><td id="k2b" class="empty-cell">&middot;</td><td id="k2c" class="empty-cell">&middot;</td><td id="k2d" class="empty-cell">&middot;</td><td id="k2e" class="empty-cell">&middot;</td><td id="k2f" class="empty-cell">&middot;</td></tr>
+            <tr id="bk3"><td id="k3a" class="empty-cell">&middot;</td><td id="k3b" class="empty-cell">&middot;</td><td id="k3c" class="empty-cell">&middot;</td><td id="k3d" class="empty-cell">&middot;</td><td id="k3e" class="empty-cell">&middot;</td><td id="k3f" class="empty-cell">&middot;</td></tr>
+            <tr id="bk4"><td id="k4a" class="empty-cell">&middot;</td><td id="k4b" class="empty-cell">&middot;</td><td id="k4c" class="empty-cell">&middot;</td><td id="k4d" class="empty-cell">&middot;</td><td id="k4e" class="empty-cell">&middot;</td><td id="k4f" class="empty-cell">&middot;</td></tr>
+            <tr id="bk5"><td id="k5a" class="empty-cell">&middot;</td><td id="k5b" class="empty-cell">&middot;</td><td id="k5c" class="empty-cell">&middot;</td><td id="k5d" class="empty-cell">&middot;</td><td id="k5e" class="empty-cell">&middot;</td><td id="k5f" class="empty-cell">&middot;</td></tr>
+            <tr id="bk6"><td id="k6a" class="empty-cell">&middot;</td><td id="k6b" class="empty-cell">&middot;</td><td id="k6c" class="empty-cell">&middot;</td><td id="k6d" class="empty-cell">&middot;</td><td id="k6e" class="empty-cell">&middot;</td><td id="k6f" class="empty-cell">&middot;</td></tr>
+            <tr><td class="empty-cell">&middot;</td><td class="empty-cell">&middot;</td><td class="empty-cell">&middot;</td><td class="empty-cell">&middot;</td><td class="empty-cell">&middot;</td><td class="empty-cell">&middot;</td></tr>
+            <tr><td class="empty-cell">&middot;</td><td class="empty-cell">&middot;</td><td class="empty-cell">&middot;</td><td class="empty-cell">&middot;</td><td class="empty-cell">&middot;</td><td class="empty-cell">&middot;</td></tr>
+            <tr class="total-row"><td colspan="2">TOTAL PORTFOLIO VALUE</td><td id="k-total" class="gold-val">$___</td><td id="k-pct" class="gold-val">100%</td><td colspan="2"></td></tr>
+          </tbody>
+          </table>
+          <div class="ws-quote-row" id="wsQuote12">"A crash in one sector is contained. A crash in all sectors destroys a fleet built without bulkheads."</div>
+        </div>
+      </div>
+    </div>
+<div class="scene" id="s-cta">
+<div class="cta-done">Worksheet 12 complete</div>
+<div class="cta-title">The Bulkhead Strategy</div>
+<div style="font-size:.78em;color:#aaa;font-style:italic;">Bulkheads set. Sector caps enforced. No crash can sink this fleet.</div>
+<div class="cta-btns">
+<a class="cta-btn gold" href="financially-trapped-hub.html#tutorials">Back to All Tutorials</a>
+<a class="cta-btn" href="#" onclick="resetAnim();return false;">Watch Again</a>
+</div>
+</div>
+</div>
+<div id="controls">
+<button id="pause-btn" onclick="togglePause()" style="display:none;">&#9208; Pause</button>
+<button id="skip-btn" onclick="skipToEnd()" style="display:none;">Skip &#8594;</button>
+<button id="voice-btn" onclick="toggleVoice()">&#128266; Voice</button>
+<div class="ctrl-label" id="ctrl-label">Click play to begin</div>
+<button id="fs-btn" onclick="toggleFullscreen()">&#9974; Fullscreen</button>
+</div>
+<div id="prog-bar" title="Click to seek">
+<div id="prog-fill"></div>
+<div id="prog-thumb"></div>
+</div>
+</div>
+<script>
+var SEQ=[8000,65000];
+
+var CLK={elapsed:0,lastTick:0,running:false,raf:null,speechPaused:false};
+var EVENTS=[];var TOTAL_MS=0;
+var progEl=document.getElementById('prog-fill');var progThumb=document.getElementById('prog-thumb');
+var subEl=document.getElementById('sub-text');var pauseBtn=document.getElementById('pause-btn');
+var skipBtn=document.getElementById('skip-btn');var ctrlLabel=document.getElementById('ctrl-label');
+var VOICE_ON=true;var synth=window.speechSynthesis||null;var VOX=[];
+function loadV(){if(synth)VOX=synth.getVoices();}
+if(synth){loadV();if(synth.onvoiceschanged!==undefined)synth.onvoiceschanged=loadV;}
+function speak(txt){if(!VOICE_ON||!synth||!txt)return;synth.cancel();var u=new SpeechSynthesisUtterance(txt.replace(/[""''"']/g,"'"));u.rate=0.88;u.pitch=1.0;u.volume=1.0;var voices=VOX.length?VOX:synth.getVoices();var v=voices.find(function(x){return/samantha|karen|moira|victoria|allison|ava|alice|tessa|zoe/i.test(x.name);})||voices.find(function(x){return x.lang.startsWith('en')&&x.localService;})||voices.find(function(x){return x.lang.startsWith('en');});if(v)u.voice=v;CLK.speechPaused=true;u.onend=function(){CLK.speechPaused=false;if(CLK.running)CLK.lastTick=performance.now();};u.onerror=function(){CLK.speechPaused=false;if(CLK.running)CLK.lastTick=performance.now();};synth.speak(u);}
+function toggleVoice(){VOICE_ON=!VOICE_ON;if(!VOICE_ON&&synth)synth.cancel();document.getElementById('voice-btn').textContent=VOICE_ON?'🔊 Voice':'🔇 Muted';}
+function showScene(id){document.querySelectorAll('.scene').forEach(function(s){s.classList.remove('active');});var el=document.getElementById(id);if(el)el.classList.add('active');}
+function setSub(t){subEl.textContent=t;speak(t);}function clrSub(){subEl.textContent='';if(synth)synth.cancel();}
+function hl(id){document.querySelectorAll('.hl').forEach(function(c){c.classList.remove('hl');});var el=document.getElementById(id);if(el)el.classList.add('hl');}
+function fill(id,val,cls){var el=document.getElementById(id);if(!el)return;el.textContent=val;el.classList.remove('empty-cell','hl');el.classList.add(cls||'filled');}
+function hlOff(){document.querySelectorAll('.hl').forEach(function(c){c.classList.remove('hl');});}
+function clkTick(now){if(!CLK.running)return;if(!CLK.speechPaused){CLK.elapsed+=now-CLK.lastTick;EVENTS.forEach(function(ev){if(!ev.fired&&CLK.elapsed>=ev.t){ev.fn();ev.fired=true;}});var pct=Math.min(CLK.elapsed/TOTAL_MS*100,100);progEl.style.width=pct+'%';progThumb.style.left=pct+'%';}CLK.lastTick=now;CLK.raf=requestAnimationFrame(clkTick);}
+function startAnim(){document.getElementById('s-play').classList.remove('active');buildEvents();CLK.elapsed=0;CLK.running=true;CLK.lastTick=performance.now();CLK.raf=requestAnimationFrame(clkTick);}
+function togglePause(){if(CLK.running){CLK.running=false;cancelAnimationFrame(CLK.raf);if(synth)synth.cancel();pauseBtn.textContent='▶ Resume';}else{CLK.running=true;CLK.lastTick=performance.now();CLK.raf=requestAnimationFrame(clkTick);pauseBtn.textContent='⏸ Pause';}}
+function skipToEnd(){CLK.running=false;cancelAnimationFrame(CLK.raf);if(synth)synth.cancel();EVENTS.forEach(function(ev){if(!ev.fired){ev.fn();ev.fired=true;}});progEl.style.width='100%';}
+function resetAnim(){CLK.running=false;cancelAnimationFrame(CLK.raf);if(synth)synth.cancel();CLK.elapsed=0;hardReset();progEl.style.width='0';progThumb.style.left='0';ctrlLabel.textContent='Click play to begin';showScene('s-play');}
+var progBar=document.getElementById('prog-bar');var seeking=false;
+function seekTo(pct){var targetMs=pct*TOTAL_MS;CLK.running=false;cancelAnimationFrame(CLK.raf);CLK.speechPaused=false;if(synth)synth.cancel();hardReset();CLK.elapsed=targetMs;EVENTS.forEach(function(ev){if(ev.t<=targetMs){ev.fn();ev.fired=true;}});progEl.style.width=(pct*100)+'%';progThumb.style.left=(pct*100)+'%';if(targetMs>0){CLK.running=true;CLK.lastTick=performance.now();CLK.raf=requestAnimationFrame(clkTick);pauseBtn.textContent='⏸ Pause';}}
+function getSeekPct(e){var r=progBar.getBoundingClientRect();var x=(e.touches?e.touches[0].clientX:e.clientX)-r.left;return Math.max(0,Math.min(1,x/r.width));}
+progBar.addEventListener('mousedown',function(e){if(!CLK.elapsed&&!CLK.running)return;seeking=true;seekTo(getSeekPct(e));});
+progBar.addEventListener('mousemove',function(e){var p=getSeekPct(e);progThumb.style.left=(p*100)+'%';if(seeking)seekTo(p);});
+progBar.addEventListener('mouseup',function(){seeking=false;});document.addEventListener('mouseup',function(){seeking=false;});
+progBar.addEventListener('touchstart',function(e){if(!CLK.elapsed&&!CLK.running)return;e.preventDefault();seeking=true;seekTo(getSeekPct(e));},{passive:false});
+progBar.addEventListener('touchmove',function(e){e.preventDefault();if(seeking)seekTo(getSeekPct(e));},{passive:false});
+progBar.addEventListener('touchend',function(){seeking=false;});
+function toggleFullscreen(){var el=document.getElementById('player');var btn=document.getElementById('fs-btn');if(!document.fullscreenElement){(el.requestFullscreen||el.webkitRequestFullscreen||el.mozRequestFullScreen).call(el);btn.textContent='✕ Exit Full';}else{(document.exitFullscreen||document.webkitExitFullscreen||document.mozCancelFullScreen).call(document);btn.textContent='⛶ Fullscreen';}}
+document.addEventListener('fullscreenchange',function(){if(!document.fullscreenElement)document.getElementById('fs-btn').textContent='⛶ Fullscreen';});
+
+
+function buildEvents(){
+  EVENTS=[];var t=0;TOTAL_MS=SEQ[0]+SEQ[1];
+  function at(off,fn){EVENTS.push({t:t+off,fired:false,fn:fn});}
+  at(0,function(){
+    showScene('s1');document.getElementById('ch-badge').classList.add('vis');
+    pauseBtn.style.display='inline-block';skipBtn.style.display='inline-block';
+    ctrlLabel.textContent='WS 12 of 16';
+    document.getElementById('ws-sub2').textContent='Fleet Bulkhead Tracker · 15% Maximum Per Sector';
+    setSub('Worksheet 12: The Bulkhead Strategy. On a ship, bulkheads are walls that contain flooding to one compartment. In your portfolio, sector limits are bulkheads that contain a crash to one area.');
+  });
+  at(4500,function(){document.getElementById('s1desc').textContent='The rule is absolute: no single sector may represent more than 15 percent of your total portfolio. This worksheet tracks your allocation and flags any bulkhead breach before it becomes a problem.';});
+  at(8500,function(){setSub('A fleet concentrated in one sector is not a fleet. It is a bet. The bulkhead turns a fleet into a resilient income machine that weathers sector collapses.');});
+  t+=SEQ[0];
+
+  at(0,function(){showScene('s3');setSub('The Fleet Bulkhead Tracker. Six common sectors shown. Add your own. No sector above 15 percent. That is the only rule that matters here.');});
+  at(4000,function(){hl('k1a');setSub('SECTOR 1: Financial. Canadian banks, insurance companies, and financial services. Historically the most reliable dividend payers in Canada.');});
+  at(8000,function(){fill('k1a','Financial');fill('k1b','15%');hl('k1c');setSub('CURRENT VALUE: Total dollar value of all financial sector holdings in your portfolio right now.');});
+  at(12000,function(){fill('k1c','$1,850');hl('k1d');setSub('CURRENT PERCENT: Divide this sector value by total portfolio value. $1,850 of $12,000 total equals 15.4 percent. Slightly above the limit.');});
+  at(17000,function(){fill('k1d','15.4%');hl('k1e');setSub('STATUS: At the limit or above the limit. This sector is full. No further injections here until other sectors grow.');});
+  at(21000,function(){fill('k1e','AT LIMIT');hl('k1f');setSub('NEXT INJECTION: Do not add to this sector. The next injection goes to an underweighted sector instead.');});
+  at(25000,function(){fill('k1f','No - redirect injection');hlOff();setSub('Financial sector at limit. The bulkhead is sealed. Now map the remaining sectors.');});
+  at(30000,function(){fill('k2a','REIT');fill('k2b','15%');fill('k2c','$1,200');fill('k2d','10.0%');fill('k2e','OPEN');fill('k2f','Yes - add here next');hlOff();setSub('REITs: 10 percent. Underweighted. This sector gets the next injection until it approaches the 15 percent limit.');});
+  at(37000,function(){fill('k3a','Energy');fill('k3b','15%');fill('k3c','$980');fill('k3d','8.2%');fill('k3e','OPEN');fill('k3f','Yes - growing');hlOff();});
+  at(42000,function(){fill('k4a','Technology');fill('k4b','15%');fill('k4c','$750');fill('k4d','6.3%');fill('k4e','OPEN');fill('k4f','Yes - underweight');hlOff();});
+  at(47000,function(){fill('k5a','Utility');fill('k5b','15%');fill('k5c','$620');fill('k5d','5.2%');fill('k5e','OPEN');fill('k5f','Yes');hlOff();});
+  at(52000,function(){fill('k6a','Healthcare');fill('k6b','15%');fill('k6c','$480');fill('k6d','4.0%');fill('k6e','OPEN');fill('k6f','Yes - low priority');hlOff();document.getElementById('k-total').textContent='$12,000';setSub('Six sectors tracked. One at the limit. Five open for injections. The bulkheads define where capital flows next. Not emotion. Architecture.');});
+  at(58000,function(){document.getElementById('wsQuote12').classList.add('show');setSub('A crash in one sector is contained. A crash in all sectors destroys a fleet built without bulkheads.');});
+  t+=SEQ[1];
+  at(0,function(){showScene('s-cta');clrSub();pauseBtn.style.display='none';skipBtn.style.display='none';ctrlLabel.textContent='Worksheet 12 complete';CLK.running=false;});
+}
+
+
+function hardReset(){
+  CLK.running=false;cancelAnimationFrame(CLK.raf);if(synth)synth.cancel();
+  ['k1a','k1b','k1c','k1d','k1e','k1f','k2a','k2b','k2c','k2d','k2e','k2f','k3a','k3b','k3c','k3d','k3e','k3f','k4a','k4b','k4c','k4d','k4e','k4f','k5a','k5b','k5c','k5d','k5e','k5f','k6a','k6b','k6c','k6d','k6e','k6f'].forEach(function(id){var el=document.getElementById(id);if(el){el.textContent='·';el.className='empty-cell';}});
+  var kt=document.getElementById('k-total');if(kt)kt.textContent='$___';
+  document.getElementById('wsQuote12').classList.remove('show');
+}
+</script>
+<script src="ws-shared.js"></script>
+</body>
+</html>lementById('ws-sub2').textContent='';
+  document.getElementById('ch-badge').classList.remove('vis');
+  pauseBtn.style.display='none';skipBtn.style.display='none';pauseBtn.textContent='⏸ Pause';setSub('');buildEvents();
+}
+
+</script>
+</body>
+</html>

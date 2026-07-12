@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verity Architecture — Books by Corvus Verity</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:16px;scroll-behavior:smooth;}
+
+body{
+  background:#2C2A3E;
+  color:#E8E0CC;
+  font-family:Georgia,'Times New Roman',serif;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ─── Background texture ─────────────────────────────────────────────────── */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 90% 55% at 50% -5%, rgba(201,168,76,.1) 0%, transparent 65%),
+    radial-gradient(ellipse 70% 50% at 10% 100%, rgba(201,168,76,.05) 0%, transparent 60%);
+  pointer-events:none;z-index:0;
+}
+
+/* ─── Nav bar ────────────────────────────────────────────────────────────── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  background:rgba(28,26,45,.96);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(201,168,76,.22);
+  padding:.7em 2.5em;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.nav-logo{height:38px;}
+.nav-links{display:flex;gap:2em;align-items:center;}
+.nav-links a{
+  font-family:Arial,sans-serif;font-size:.8em;letter-spacing:.1em;
+  text-transform:uppercase;color:#aaa;text-decoration:none;
+  transition:color .2s;
+}
+.nav-links a:hover{color:#C9A84C;}
+.nav-contact{
+  font-family:Arial,sans-serif;font-size:.78em;
+  color:#C9A84C;letter-spacing:.04em;
+}
+.nav-contact a{color:#C9A84C;text-decoration:none;}
+.nav-contact a:hover{text-decoration:underline;}
+
+/* ─── Hero ───────────────────────────────────────────────────────────────── */
+.hero{
+  position:relative;z-index:1;
+  min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;
+  padding:6em 2em 4em;
+  background:radial-gradient(ellipse 80% 70% at 50% 40%, rgba(44,42,62,.0) 0%, rgba(30,28,48,.4) 100%);
+}
+.hero-logo{
+  width:min(520px, 88vw);
+  margin-bottom:2em;
+  filter:drop-shadow(0 0 40px rgba(201,168,76,.2));
+}
+.hero-tagline{
+  font-size:clamp(.95em,2vw,1.25em);
+  color:#bbb;font-style:italic;
+  letter-spacing:.03em;
+  margin-bottom:.6em;
+  max-width:600px;
+}
+.hero-rule{
+  width:80px;height:1px;
+  background:linear-gradient(90deg,transparent,#C9A84C,transparent);
+  margin:.9em auto 1.8em;
+}
+.hero-author{
+  font-family:Arial,sans-serif;
+  font-size:.78em;letter-spacing:.2em;text-transform:uppercase;
+  color:#C9A84C;margin-bottom:2.5em;
+}
+.hero-cta{
+  display:inline-block;
+  font-family:Arial,sans-serif;font-size:.82em;font-weight:bold;
+  letter-spacing:.12em;text-transform:uppercase;
+  color:#0E0E1C;background:#C9A84C;
+  padding:.75em 2.2em;border-radius:3px;
+  text-decoration:none;
+  transition:background .2s,box-shadow .2s;
+  box-shadow:0 4px 24px rgba(201,168,76,.35);
+}
+.hero-cta:hover{background:#e0be6a;box-shadow:0 6px 32px rgba(201,168,76,.5);}
+
+/* ─── Section divider ────────────────────────────────────────────────────── */
+.section{position:relative;z-index:1;padding:5em 2em;}
+.section-label{
+  text-align:center;
+  font-family:Arial,sans-serif;font-size:.72em;
+  letter-spacing:.22em;text-transform:uppercase;color:#C9A84C;
+  margin-bottom:.6em;
+}
+.section-title{
+  text-align:center;
+  font-size:clamp(1.5em,3.5vw,2.4em);
+  color:#E8E0CC;font-weight:bold;margin-bottom:.4em;
+}
+.section-sub{
+  text-align:center;font-style:italic;color:#aaa;
+  font-size:.95em;max-width:540px;margin:0 auto 3.5em;
+}
+
+/* ─── Book shelf ─────────────────────────────────────────────────────────── */
+.book-shelf{
+  display:flex;flex-wrap:wrap;gap:4em;
+  justify-content:center;align-items:flex-end;
+  max-width:1100px;margin:0 auto;
+}
+
+/* ─── 3-D Open Book ─────────────────────────────────────────────────────── */
+.book-card{ display:flex;flex-direction:column;align-items:center;gap:1.3em;width:250px; }
+.book-3d-wrap{ width:250px;height:300px;perspective:1600px;display:flex;align-items:center;justify-content:center;cursor:pointer; }
+.book-3d{ position:relative;width:188px;height:272px;transform-style:preserve-3d;
+  transform:rotateX(4deg) rotateY(-17deg);transition:transform .6s cubic-bezier(.2,.7,.2,1); }
+.book-3d-wrap:hover .book-3d{ transform:rotateX(2deg) rotateY(-6deg); }
+.book-3d-wrap:hover .bk-cover{ transform:translateZ(2px) rotateY(-42deg); }
+/* page block — thickness via stacked page-edge shadows */
+.bk-block{ position:absolute;inset:0;border-radius:2px 5px 5px 2px;background:#f6f0df;box-shadow:var(--stack); }
+.bk-page{ position:absolute;inset:0;padding:30px 18px 16px 26px;overflow:hidden;border-radius:2px 5px 5px 2px; }
+.bk-gutter{ position:absolute;top:0;bottom:0;left:0;width:12px;background:linear-gradient(90deg,rgba(0,0,0,.4),rgba(0,0,0,0)); }
+.bk-ch{ font-family:Arial,sans-serif;font-size:.5em;letter-spacing:.24em;text-transform:uppercase;color:#9a7b2e; }
+.bk-ti{ font-family:Georgia,serif;font-size:.92em;font-weight:bold;color:#2c2417;line-height:1.22;
+  margin:.3em 0 .7em;border-bottom:1px solid rgba(154,123,46,.45);padding-bottom:.5em;min-height:1.2em; }
+.bk-lines{ height:150px;background:repeating-linear-gradient(180deg,transparent 0 5px,rgba(54,44,24,.38) 5px 6px,transparent 6px 13px);
+  -webkit-mask:linear-gradient(90deg,#000 80%,transparent);mask:linear-gradient(90deg,#000 80%,transparent); }
+/* front cover — hinged at the spine, swung open to chapter 1 */
+.bk-cover{ position:absolute;inset:0;border-radius:2px 6px 6px 2px;background-size:cover;background-position:center;
+  transform-origin:left center;transform:translateZ(2px) rotateY(0deg);transition:transform .6s cubic-bezier(.2,.7,.2,1);backface-visibility:hidden;
+  box-shadow:5px 7px 22px rgba(0,0,0,.5); }
+.bk-cover::after{ content:"";position:absolute;inset:0;border-radius:2px 6px 6px 2px;
+  background:linear-gradient(100deg,rgba(255,255,255,.24),transparent 46%); }
+.bk-spine-edge{ position:absolute;top:0;bottom:0;left:0;width:7px;background:linear-gradient(90deg,rgba(0,0,0,.55),transparent);border-radius:2px 0 0 2px; }
+
+/* Book info below */
+.book-info{text-align:center;}
+.book-num{ font-family:Arial,sans-serif;font-size:.68em;letter-spacing:.18em;text-transform:uppercase;color:#C9A84C;margin-bottom:.3em; }
+.book-title{ font-size:1.05em;font-weight:bold;color:#E8E0CC;line-height:1.3;margin-bottom:.35em; }
+.book-sub{font-style:italic;font-size:.82em;color:#aaa;margin-bottom:1em;}
+.book-pages{ font-family:Arial,sans-serif;font-size:.62em;letter-spacing:.12em;text-transform:uppercase;color:#7d7560;margin:-.5em 0 1em; }
+.book-link{ display:inline-block;font-family:Arial,sans-serif;font-size:.72em;font-weight:bold;letter-spacing:.1em;text-transform:uppercase;
+  color:#C9A84C;border:1.5px solid rgba(201,168,76,.55);padding:.42em 1.2em;border-radius:3px;text-decoration:none;
+  transition:background .18s,color .18s,border-color .18s; }
+.book-link:hover{background:#C9A84C;color:#0E0E1C;border-color:#C9A84C;}
+.book-link.soon{color:#666;border-color:rgba(255,255,255,.12);cursor:default;}
+.book-link.soon:hover{background:none;color:#666;border-color:rgba(255,255,255,.12);}
+
+/* ─── About strip ────────────────────────────────────────────────────────── */
+.about{
+  position:relative;z-index:1;
+  background:rgba(20,18,34,.5);
+  border-top:1px solid rgba(201,168,76,.18);
+  border-bottom:1px solid rgba(201,168,76,.18);
+  padding:4em 2em;
+  text-align:center;
+}
+.about-inner{max-width:640px;margin:0 auto;}
+.about-pillars{
+  display:flex;justify-content:center;align-items:flex-end;gap:4px;
+  margin-bottom:1.5em;
+}
+.ab-pillar{background:#C9A84C;border-radius:2px 2px 0 0;}
+.about h2{font-size:1.6em;color:#E8E0CC;margin-bottom:.8em;}
+.about p{
+  color:#aaa;font-size:.92em;line-height:1.75;
+  font-style:italic;
+}
+
+/* ─── Footer ─────────────────────────────────────────────────────────────── */
+footer{
+  position:relative;z-index:1;
+  background:#1A1828;
+  border-top:1px solid rgba(201,168,76,.2);
+  padding:2.5em 2em;
+  text-align:center;
+}
+.footer-logo{height:32px;margin-bottom:1.2em;opacity:.7;}
+.footer-links{
+  display:flex;flex-wrap:wrap;gap:1.5em;justify-content:center;
+  margin-bottom:1.2em;
+}
+.footer-links a{
+  font-family:Arial,sans-serif;font-size:.74em;
+  letter-spacing:.1em;text-transform:uppercase;
+  color:#666;text-decoration:none;transition:color .2s;
+}
+.footer-links a:hover{color:#C9A84C;}
+.footer-contact{
+  font-family:Arial,sans-serif;font-size:.8em;
+  color:#aaa;margin-bottom:.8em;
+}
+.footer-contact a{color:#C9A84C;text-decoration:none;}
+.footer-contact a:hover{text-decoration:underline;}
+.footer-copy{
+  font-family:Arial,sans-serif;font-size:.72em;
+  color:#444;letter-spacing:.04em;
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────────────── */
+@media(max-width:680px){
+  nav{padding:.6em 1.2em;}
+  .nav-links{display:none;}
+  .book-shelf{gap:2.5em;}
+  .book-card{width:180px;}
+  .book-3d-wrap,.book-3d{width:160px;height:232px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ─── Nav ───────────────────────────────────────────────────────────────── -->
+<nav>
+  <img class="nav-logo"
+       src="Verity Architecture Company logos/VerityArchitecture_Logo.svg"
+       alt="Verity Architecture">
+  <div class="nav-links">
+    <a href="#books">Books</a>
+    <a href="#about">About</a>
+    <a href="financially-trapped-hub.html">Financially Trapped</a>
+    <a href="portfolio-architect.html">Portfolio Architecture</a>
+  </div>
+  <div class="nav-contact">
+    <a href="mailto:Support@VerityArchitect.com">Support@VerityArchitect.com</a>
+  </div>
+</nav>
+
+<!-- ─── Hero ──────────────────────────────────────────────────────────────── -->
+<section class="hero">
+  <img class="hero-logo"
+       src="Verity Architecture Company logos/VerityArchitecture_Logo.svg"
+       alt="Verity Architecture">
+  <p class="hero-tagline">A series of financial architecture books for Canadians who are done being passengers in their own economy.</p>
+  <div class="hero-rule"></div>
+  <div class="hero-author">By Corvus Verity</div>
+  <a href="#books" class="hero-cta">Explore the Library</a>
+</section>
+
+<!-- ─── Books ─────────────────────────────────────────────────────────────── -->
+<section class="section" id="books">
+  <div class="section-label">The Library</div>
+  <h2 class="section-title">The Verity Architecture Series</h2>
+  <p class="section-sub">Each book is a blueprint. Each blueprint is a system. The systems work together.</p>
+
+  <div class="book-shelf">
+
+    <div class="book-card">
+      <a href="financially-trapped-hub.html" style="text-decoration:none;">
+      <div class="book-3d-wrap">
+        <div class="book-3d" style="--stack:1px 1px 0 0 #e7ddc5,2px 2px 0 0 #d4c7a8,3px 3px 0 0 #e7ddc5,4px 4px 0 0 #d4c7a8,5px 5px 0 0 #e7ddc5,6px 6px 0 0 #d4c7a8,7px 7px 0 0 #e7ddc5,8px 8px 0 0 #d4c7a8,11px 11px 0 0 #241f12;--sa:#2a2410;--sb:#1a1a0a;">
+          <div class="bk-block">
+            <div class="bk-gutter"></div>
+            <div class="bk-page">
+              <div class="bk-ch">Chapter One</div>
+              <div class="bk-ti">The Shopping Cart Protocol</div>
+              <div class="bk-lines"></div>
+            </div>
+          </div>
+          <div class="bk-cover" style="background-image:url('ft-cover-2026.jpg');"><div class="bk-spine-edge"></div></div>
+        </div>
+      </div>
+      </a>
+      <div class="book-info">
+        <div class="book-num">Book 1</div>
+        <div class="book-title">Financially Trapped</div>
+        <div class="book-sub">Engineering of Persistence</div>
+        <div class="book-pages">444 pages</div>
+        <a href="financially-trapped-hub.html" class="book-link">Enter the Hub →</a>
+      </div>
+    </div>
+
+    <div class="book-card">
+      <a href="portfolio-architect.html" style="text-decoration:none;">
+      <div class="book-3d-wrap">
+        <div class="book-3d" style="--stack:1px 1px 0 0 #e7ddc5,2px 2px 0 0 #d4c7a8,3px 3px 0 0 #e7ddc5,4px 4px 0 0 #d4c7a8,5px 5px 0 0 #e7ddc5,6px 6px 0 0 #d4c7a8,7px 7px 0 0 #e7ddc5,8px 8px 0 0 #d4c7a8,9px 9px 0 0 #e7ddc5,10px 10px 0 0 #d4c7a8,11px 11px 0 0 #e7ddc5,14px 14px 0 0 #0b1622;--sa:#0d1b2a;--sb:#0a1520;">
+          <div class="bk-block">
+            <div class="bk-gutter"></div>
+            <div class="bk-page">
+              <div class="bk-ch">Chapter One</div>
+              <div class="bk-ti">Dollar Cost Averaging</div>
+              <div class="bk-lines"></div>
+            </div>
+          </div>
+          <div class="bk-cover" style="background-image:url('pa-cover-2026.jpg');"><div class="bk-spine-edge"></div></div>
+        </div>
+      </div>
+      </a>
+      <div class="book-info">
+        <div class="book-num">Book 2</div>
+        <div class="book-title">Portfolio Architecture</div>
+        <div class="book-sub">Build Your Own Passive Income Legacy</div>
+        <div class="book-pages">618 pages</div>
+        <a href="portfolio-architect.html" class="book-link">Coming Soon &rarr;</a>
+      </div>
+    </div>
+
+    <div class="book-card">
+      <a href="book-three.html" style="text-decoration:none;">
+      <div class="book-3d-wrap">
+        <div class="book-3d" style="--stack:1px 1px 0 0 #e7ddc5,2px 2px 0 0 #d4c7a8,5px 5px 0 0 #0a0a16;--sa:#0c0c1a;--sb:#080810;">
+          <div class="bk-block">
+            <div class="bk-gutter"></div>
+            <div class="bk-page">
+              <div class="bk-ch">Chapter One</div>
+              <div class="bk-ti"></div>
+              <div class="bk-lines"></div>
+            </div>
+          </div>
+          <div class="bk-cover" style="background-image:url('escape-cover.png');"><div class="bk-spine-edge"></div></div>
+        </div>
+      </div>
+      </a>
+      <div class="book-info">
+        <div class="book-num">Book 3</div>
+        <div class="book-title">The Architect's Business Escape Strategies</div>
+        <div class="book-sub">Financial Independence by Architecture</div>
+        <div class="book-pages">147 pages · In progress</div>
+        <a href="book-three.html" class="book-link">Coming Soon →</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ─── About ─────────────────────────────────────────────────────────────── -->
+<section class="about" id="about">
+  <div class="about-inner">
+    <!-- Three ascending pillars (inline SVG, matching the logo) -->
+    <div class="about-pillars">
+      <div class="ab-pillar" style="width:12px;height:22px;"></div>
+      <div class="ab-pillar" style="width:12px;height:36px;"></div>
+      <div class="ab-pillar" style="width:12px;height:52px;"></div>
+    </div>
+    <h2>About Corvus Verity</h2>
+    <p>
+      Corvus Verity writes financial architecture — not financial advice. The Verity Architecture series
+      exists to give everyday Canadians the same systematic thinking that institutional investors use,
+      stripped of jargon and rebuilt as executable blueprints. Each book is a system. Each system is a step.
+      The steps connect. The architecture compounds.
+    </p>
+  </div>
+</section>
+
+<!-- ─── Footer ────────────────────────────────────────────────────────────── -->
+<footer>
+  <img class="footer-logo"
+       src="Verity Architecture Company logos/VerityArchitecture_Logo.svg"
+       alt="Verity Architecture">
+  <div class="footer-links">
+    <a href="financially-trapped-hub.html">Financially Trapped Hub</a>
+    <a href="#books">Books</a>
+    <a href="#about">About</a>
+    <a href="mailto:Support@VerityArchitect.com">Contact</a>
+  </div>
+  <div class="footer-contact">
+    General inquiries &amp; support:
+    <a href="mailto:Support@VerityArchitect.com">Support@VerityArchitect.com</a>
+  </div>
+  <div class="footer-copy">
+    &copy; <span id="yr"></span> Verity Architecture. All rights reserved.
+    &nbsp;·&nbsp; Author: Corvus Verity
+    &nbsp;·&nbsp; VerityArchitect.com
+  </div>
+</footer>
+
+<script>
+document.getElementById('yr').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>

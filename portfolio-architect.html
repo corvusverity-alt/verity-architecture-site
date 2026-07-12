@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Portfolio Architecture — How to Build Your Own Passive Income Legacy | Verity Architecture</title>
+<script src="chart.umd.min.js"></script>
+<style>
+:root{
+  --paper:#ECE4D0;--paper2:#F4EEDF;--card:#FBF7EC;
+  --deep:#062536;--deep2:#0C3147;
+  --ink:#22303a;--muted:#6b6151;
+  --brass:#A8884A;--brass-dim:#7E6230;--brass-light:#D9C48C;
+  --green:#2E5E3A;--crimson:#9B2516;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Georgia,"Times New Roman",serif;color:var(--ink);line-height:1.55;
+  background:var(--paper);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% 0%,rgba(168,136,74,0.10),transparent 60%),
+    radial-gradient(ellipse 60% 40% at 100% 100%,rgba(46,94,58,0.06),transparent 60%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='80' height='80' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");}
+.label{font-family:Georgia,serif;font-weight:bold;text-transform:uppercase;letter-spacing:0.2em;}
+.serifcaps{font-family:Georgia,serif;text-transform:uppercase;letter-spacing:0.16em;}
+
+/* Header */
+header{background:var(--deep);background-image:linear-gradient(160deg,#0a3046 0%,#041d2c 100%);
+  padding:2.1em 1.5em 1.7em;text-align:center;border-bottom:4px double var(--brass);position:relative;}
+header::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:4px;
+  background:repeating-linear-gradient(90deg,var(--brass) 0 14px,transparent 14px 28px);opacity:0.4;}
+header .brand{color:var(--brass-light);font-size:0.72em;letter-spacing:0.32em;}
+header h1{color:#F4EEDF;font-size:2.05em;margin:0.25em 0 0.12em;font-weight:bold;letter-spacing:0.02em;
+  text-shadow:0 2px 8px rgba(0,0,0,0.4);}
+header .subtitle{color:var(--brass-light);font-style:italic;font-size:1em;}
+header .ornament{color:var(--brass);font-size:0.9em;letter-spacing:0.5em;margin-top:0.5em;opacity:0.8;}
+
+/* Nav */
+nav{background:var(--deep);display:flex;justify-content:center;flex-wrap:wrap;position:sticky;top:0;z-index:50;
+  border-bottom:1px solid rgba(168,136,74,0.4);}
+nav a{color:#CDBFA6;text-decoration:none;font-family:Georgia,serif;font-size:0.74em;font-weight:bold;
+  letter-spacing:0.16em;text-transform:uppercase;padding:0.85em 1.05em;transition:background .15s,color .15s;}
+nav a:hover{background:rgba(168,136,74,0.16);color:var(--brass-light);}
+
+.wrap{max-width:1040px;margin:0 auto;padding:0 1.5em 3em;}
+section{padding-top:2.6em;}
+
+/* Section header — ribbon medallion */
+.sec-header{display:flex;align-items:center;gap:0.75em;margin-bottom:0.4em;}
+.sec-badge{width:34px;height:34px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#d4b566,var(--brass) 60%,var(--brass-dim));
+  color:var(--deep);font-weight:bold;display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;
+  flex-shrink:0;border:1px solid var(--brass-dim);box-shadow:0 2px 6px rgba(0,0,0,0.25),inset 0 1px 2px rgba(255,255,255,0.4);}
+.sec-title{font-weight:bold;font-size:1.4em;color:var(--deep);letter-spacing:0.01em;}
+.sec-rule{border:none;height:3px;margin:0.5em 0 1.1em;
+  background:linear-gradient(90deg,var(--brass) 0%,var(--brass) 30%,transparent 100%);
+  border-bottom:1px solid rgba(126,98,48,0.4);}
+.note{font-style:italic;color:#5a5346;font-size:0.92em;border-left:4px solid var(--brass);
+  background:linear-gradient(90deg,rgba(217,196,140,0.35),rgba(217,196,140,0.12));
+  padding:0.55em 0.85em;border-radius:0 4px 4px 0;margin-bottom:1.2em;}
+
+/* Combined total banner */
+.total-banner{background:linear-gradient(160deg,#0c3147 0%,#041d2c 75%);border:1px solid var(--brass);
+  border-radius:8px;padding:1.4em 1.5em;text-align:center;margin-bottom:1.3em;position:relative;
+  box-shadow:0 5px 22px rgba(6,37,54,0.35);}
+.total-banner::before,.total-banner::after{content:"";position:absolute;width:18px;height:18px;border:2px solid var(--brass);opacity:0.7;}
+.total-banner::before{top:7px;left:7px;border-right:none;border-bottom:none;}
+.total-banner::after{bottom:7px;right:7px;border-left:none;border-top:none;}
+.total-banner .tb-label{color:var(--brass-light);font-family:Georgia,serif;font-size:0.66em;font-weight:bold;
+  letter-spacing:0.24em;text-transform:uppercase;}
+.total-banner .tb-value{font-size:2.7em;font-weight:bold;color:var(--brass);margin-top:0.1em;
+  text-shadow:0 2px 12px rgba(168,136,74,0.5);line-height:1.1;}
+.total-banner .tb-sub{color:#9aa7ad;font-size:0.78em;font-style:italic;margin-top:0.25em;}
+
+.balances{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1em;}
+.balances .group-header{grid-column:1/-1;font-family:Georgia,serif;font-size:0.66em;font-weight:bold;
+  letter-spacing:0.22em;text-transform:uppercase;color:var(--brass-dim);padding:0.6em 0 0.2em;
+  border-bottom:1px solid rgba(126,98,48,0.35);margin-bottom:0.1em;}
+.plaque{background:linear-gradient(160deg,#0c3147 0%,#062536 60%);border:1px solid var(--brass);
+  border-radius:6px;padding:1.1em 1.2em;text-align:center;box-shadow:0 3px 12px rgba(6,37,54,0.3);
+  text-decoration:none;display:block;transition:box-shadow .18s,border-color .18s,transform .15s;}
+.plaque[href]:hover{box-shadow:0 6px 22px rgba(168,136,74,0.4);transform:translateY(-2px);cursor:pointer;}
+.plaque .p-label{color:var(--brass-light);font-size:0.62em;letter-spacing:0.12em;}
+.plaque .p-value{font-size:1.9em;font-weight:bold;color:var(--brass);margin-top:0.15em;text-shadow:0 1px 6px rgba(168,136,74,0.4);}
+.plaque.negative .p-value{color:#e08a7a;text-shadow:0 1px 6px rgba(220,80,80,0.3);}
+.plaque .p-sub{color:#8e9aa0;font-size:0.74em;font-style:italic;margin-top:0.1em;}
+
+/* Feature showcase (Appendix D diagrams) */
+.showcase{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:1.1em;}
+.show-card{background:var(--card);border:1px solid #d8cdb0;border-top:3px solid var(--brass);border-radius:5px;
+  overflow:hidden;box-shadow:0 2px 10px rgba(6,37,54,0.1);cursor:pointer;transition:box-shadow .18s,transform .15s;display:flex;flex-direction:column;}
+.show-card:hover{box-shadow:0 8px 24px rgba(6,37,54,0.2);transform:translateY(-3px);}
+.show-card img{width:100%;height:150px;object-fit:cover;object-position:top;display:block;border-bottom:1px solid #e3d9bf;background:#EFEEE5;}
+.show-card .sc-cap{padding:0.6em 0.8em;font-family:Georgia,serif;font-size:0.82em;color:var(--deep);font-weight:bold;}
+.show-card .sc-cap span{display:block;font-weight:normal;font-style:italic;color:var(--muted);font-size:0.85em;margin-top:0.1em;}
+
+/* Tabs */
+.tabs{display:flex;gap:0;border-bottom:2px solid var(--brass);margin-bottom:1.2em;flex-wrap:wrap;}
+.tab{padding:0.55em 1.05em;cursor:pointer;font-family:Georgia,serif;font-size:0.74em;font-weight:bold;
+  letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);border:1px solid transparent;border-bottom:none;
+  margin-bottom:-2px;background:transparent;transition:all .15s;}
+.tab:hover{color:var(--brass-dim);}
+.tab.active{background:var(--card);border-color:#d8cdb0 #d8cdb0 var(--card);color:var(--deep);}
+.tab-panel{display:none;}.tab-panel.active{display:block;}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:0.8em;margin-bottom:1.2em;}
+.stat{background:var(--card);border:1px solid #d8cdb0;border-left:4px solid var(--brass);border-radius:0 4px 4px 0;padding:0.7em 0.9em;}
+.stat .s-label{font-family:Georgia,serif;font-size:0.62em;font-weight:bold;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);}
+.stat .s-value{font-size:1.3em;font-weight:bold;color:var(--green);margin-top:0.1em;}
+.stat .s-sub{font-size:0.78em;color:var(--muted);font-style:italic;}
+.chart-card{background:var(--card);border:1px solid #d8cdb0;border-top:3px solid var(--brass);border-radius:4px;
+  padding:1.2em 1.2em 0.9em;margin-bottom:1.4em;box-shadow:0 2px 8px rgba(6,37,54,0.08);}
+.chart-card h3{font-size:1.05em;margin-bottom:0.2em;color:var(--deep);}
+.chart-card .ch-sub{font-style:italic;color:var(--muted);font-size:0.85em;margin-bottom:0.7em;}
+.chart-wrap{position:relative;height:280px;}
+.tab-open{display:inline-block;font-family:Georgia,serif;font-size:0.72em;font-weight:bold;letter-spacing:0.1em;
+  text-transform:uppercase;text-decoration:none;color:var(--brass-dim);border:1.5px solid var(--brass);
+  padding:0.45em 1em;border-radius:3px;margin-bottom:1.2em;transition:background .15s;}
+.tab-open:hover{background:rgba(217,196,140,0.4);}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:1.1em;}
+.card{background:var(--card);border:1px solid #d8cdb0;border-radius:4px;padding:1.1em 1.2em;display:flex;
+  flex-direction:column;box-shadow:0 2px 8px rgba(6,37,54,0.08);}
+.card h3{font-size:1.08em;color:var(--deep);}
+.card .c-sub{font-style:italic;color:var(--muted);font-size:0.88em;margin:0.25em 0 0.8em;}
+.btn{display:inline-block;font-family:Georgia,serif;font-size:0.74em;font-weight:bold;letter-spacing:0.1em;
+  text-transform:uppercase;text-decoration:none;text-align:center;padding:0.65em 1em;border-radius:3px;
+  margin:0.2em 0.25em 0.2em 0;cursor:pointer;border:none;}
+.btn-gold{background:var(--brass);color:var(--deep);}
+.btn-gold:hover{background:var(--brass-dim);}
+.btn-line{background:transparent;color:var(--deep);border:1.5px solid var(--brass);}
+.btn-line:hover{background:rgba(217,196,140,0.4);}
+.btn[data-pending]{opacity:0.45;pointer-events:none;}
+.spacer{flex:1;}
+.coll-card{border-left:4px solid var(--brass);}
+.coll-card .tag{font-family:Georgia,serif;font-size:0.62em;font-weight:bold;letter-spacing:0.15em;text-transform:uppercase;color:var(--brass-dim);}
+
+/* Floating combined total */
+#totalFloat{position:fixed;bottom:24px;right:22px;z-index:200;background:linear-gradient(160deg,#0c3147,#041d2c);
+  border:1.5px solid var(--brass);border-radius:8px;padding:0.75em 1.2em;text-align:center;
+  box-shadow:0 4px 18px rgba(6,37,54,0.5);text-decoration:none;cursor:pointer;display:flex;flex-direction:column;
+  align-items:center;gap:0.12em;transition:box-shadow .18s,transform .15s;min-width:140px;}
+#totalFloat:hover{box-shadow:0 8px 28px rgba(168,136,74,0.35);transform:translateY(-2px);}
+#totalFloat .pf-label{font-family:Georgia,serif;font-size:0.54em;font-weight:bold;letter-spacing:0.18em;text-transform:uppercase;color:var(--brass-light);}
+#totalFloat .pf-value{font-size:1.18em;font-weight:bold;color:var(--brass);text-shadow:0 1px 5px rgba(168,136,74,0.35);line-height:1.1;}
+#totalFloat .pf-sub{font-family:Georgia,serif;font-size:0.5em;color:#9aa7ad;letter-spacing:0.06em;font-style:italic;}
+
+/* Book Hero */
+.book-hero{background:var(--deep);background-image:linear-gradient(135deg,#0a3046 0%,#041d2c 55%,#08293b 100%);
+  padding:2.9em 2em 2.7em;display:grid;grid-template-columns:auto 1fr;gap:2.5em;align-items:center;position:relative;overflow:hidden;}
+.book-hero::before{content:"";position:absolute;inset:0;
+  background:url("PA%20Diagrams/thumbs/pa-fig-01.jpg") right center/auto 150% no-repeat;opacity:0.06;}
+.book-cover{width:170px;flex-shrink:0;border:3px solid var(--brass);border-radius:3px;
+  box-shadow:6px 10px 34px rgba(0,0,0,0.65);display:block;object-fit:cover;position:relative;z-index:1;}
+.book-meta{color:#DDD4C2;position:relative;z-index:1;}
+.book-meta .bm-badge{font-family:Georgia,serif;font-size:0.62em;font-weight:bold;letter-spacing:0.24em;text-transform:uppercase;color:var(--brass-light);margin-bottom:0.4em;}
+.book-meta h2{color:#F4EEDF;font-size:1.95em;line-height:1.2;margin-bottom:0.1em;}
+.book-meta .bm-tagline{color:var(--brass-light);font-style:italic;font-size:1.02em;margin-bottom:1em;}
+.book-meta .bm-desc{font-size:0.9em;color:#C3BBA8;line-height:1.7;margin-bottom:1.4em;max-width:540px;}
+.bm-buy{display:flex;flex-wrap:wrap;gap:0.5em;margin-bottom:0.7em;}
+.btn-hero{font-family:Georgia,serif;font-size:0.72em;font-weight:bold;letter-spacing:0.1em;text-transform:uppercase;
+  text-decoration:none;padding:0.7em 1.3em;border-radius:3px;cursor:pointer;border:none;display:inline-block;transition:background .15s;}
+.btn-hero-gold{background:var(--brass);color:var(--deep);}
+.btn-hero-gold:hover{background:var(--brass-dim);}
+.btn-hero-dim{background:transparent;color:#7d8a8f;border:1.5px solid #2c4453;pointer-events:none;}
+.bm-retailers{font-family:Georgia,serif;font-size:0.66em;color:#7d8a8f;letter-spacing:0.06em;}
+
+/* Diagram Library gallery */
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:0.6em;}
+.gallery a{display:block;border:1px solid #d8cdb0;border-radius:3px;overflow:hidden;background:#EFEEE5;
+  box-shadow:0 1px 4px rgba(6,37,54,0.12);cursor:pointer;transition:box-shadow .15s,transform .12s;}
+.gallery a:hover{box-shadow:0 5px 16px rgba(6,37,54,0.25);transform:translateY(-2px);}
+.gallery img{width:100%;height:108px;object-fit:cover;object-position:top;display:block;}
+.gallery-more{display:block;text-align:center;margin:1.2em auto 0;font-family:Georgia,serif;font-size:0.78em;
+  font-weight:bold;letter-spacing:0.12em;text-transform:uppercase;color:var(--brass-dim);
+  border:1.5px solid var(--brass);padding:0.6em 1.4em;border-radius:3px;background:transparent;cursor:pointer;}
+.gallery-more:hover{background:rgba(217,196,140,0.4);}
+
+/* Lightbox */
+#lb{position:fixed;inset:0;background:rgba(6,18,28,0.92);z-index:500;display:none;align-items:center;justify-content:center;padding:2em;cursor:zoom-out;}
+#lb.open{display:flex;}
+#lb img{max-width:95%;max-height:92%;border:3px solid var(--brass);border-radius:3px;box-shadow:0 10px 50px rgba(0,0,0,0.7);background:#EFEEE5;}
+#lb .lb-close{position:absolute;top:16px;right:24px;color:var(--brass-light);font-size:2em;font-family:Georgia,serif;cursor:pointer;line-height:1;}
+
+/* Bundles */
+.bundle-card{background:linear-gradient(160deg,#0c3147 0%,#062536 100%);border:1px solid var(--brass);border-radius:8px;
+  padding:1.5em 1.6em;margin-bottom:1.1em;position:relative;}
+.bundle-card .bc-head{color:var(--brass-light);font-size:1.12em;font-weight:bold;margin-bottom:0.25em;}
+.bundle-card .bc-price{color:#C3BBA8;font-size:1.28em;font-weight:bold;margin:0.4em 0 0.9em;}
+.bundle-includes{display:grid;grid-template-columns:1fr 1fr;gap:0.4em 1.2em;margin-bottom:1.1em;}
+.bundle-includes .bi{font-size:0.84em;color:#C3BBA8;display:flex;align-items:baseline;gap:0.4em;}
+.bundle-includes .bi::before{content:"\2713";color:var(--brass);font-weight:bold;flex-shrink:0;font-size:0.85em;}
+.coming-badge{position:absolute;top:0.9em;right:1em;font-family:Georgia,serif;font-size:0.62em;letter-spacing:0.2em;
+  text-transform:uppercase;color:var(--brass-light);border:1px solid rgba(168,136,74,0.5);padding:0.2em 0.7em;border-radius:20px;}
+
+/* Video row */
+.video-row{background:var(--deep);background-image:linear-gradient(135deg,#0a3046,#041d2c);
+  border-bottom:1px solid rgba(168,136,74,0.25);padding:1.6em 2em;}
+.video-row .vr-title{font-family:Georgia,serif;font-size:0.66em;font-weight:bold;letter-spacing:0.22em;
+  text-transform:uppercase;color:var(--brass-dim);text-align:center;margin-bottom:1.1em;}
+.video-slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1em;max-width:1000px;margin:0 auto;}
+.video-slot{background:linear-gradient(135deg,#08293b 0%,#0c3147 100%);border:1px solid rgba(168,136,74,0.22);
+  border-radius:6px;aspect-ratio:16/9;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:0.5em;position:relative;overflow:hidden;}
+.video-slot .vs-icon{width:44px;height:44px;border-radius:50%;background:rgba(168,136,74,0.12);
+  border:1.5px solid rgba(168,136,74,0.4);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--brass);z-index:1;}
+.video-slot .vs-label{font-family:Georgia,serif;font-size:0.62em;color:var(--brass-light);letter-spacing:0.08em;text-transform:uppercase;z-index:1;padding:0 0.5em;text-align:center;}
+.video-slot .vs-sublabel{font-family:Georgia,serif;font-size:0.56em;color:#7d8a8f;letter-spacing:0.04em;z-index:1;text-align:center;margin-top:-0.2em;font-style:italic;}
+.video-slot .coming-pill{position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.45);border:1px solid rgba(168,136,74,0.4);
+  border-radius:20px;padding:2px 8px;font-family:Georgia,serif;font-size:0.55em;color:#b9ac90;z-index:2;letter-spacing:0.1em;}
+
+footer{background:var(--deep);background-image:linear-gradient(135deg,#0a3046,#041d2c);color:#9aa7ad;text-align:center;
+  font-size:0.8em;padding:1.7em 1em;margin-top:3em;border-top:4px double var(--brass);}
+footer .f-brand{color:var(--brass-light);}
+@media(max-width:640px){
+  header h1{font-size:1.55em;}.chart-wrap{height:220px;}
+  .book-hero{grid-template-columns:1fr;text-align:center;gap:1.4em;padding:2em 1.2em;}
+  .book-cover{width:135px;margin:0 auto;}.bm-buy{justify-content:center;}
+  .bundle-includes{grid-template-columns:1fr;}
+  #totalFloat{bottom:14px;right:12px;min-width:120px;}
+}
+
+/* ============================================================
+   LIGHT PARCHMENT THEME (Book Two - brighter, escape-the-trap tone)
+   Appended override: leaves original layout rules intact.
+   ============================================================ */
+header{background:#EBDCBB !important;background-image:linear-gradient(160deg,#F7F0DC 0%,#E8D7B3 100%) !important;border-bottom:4px double var(--brass);}
+header .brand,header .subtitle{color:#7E6230 !important;}
+header h1{color:#5A4A22 !important;text-shadow:0 1px 2px rgba(255,255,255,0.5) !important;}
+header .ornament{color:var(--brass) !important;opacity:0.85 !important;}
+nav{background:#E8D7B3 !important;background-image:none !important;border-bottom:1px solid rgba(168,136,74,0.55);}
+nav a{color:#5A4A22 !important;}
+nav a:hover{background:rgba(168,136,74,0.28) !important;color:#3A2F10 !important;}
+.book-hero{background:#F1E9D6 !important;background-image:linear-gradient(135deg,#F7F0DC 0%,#EFE3C6 55%,#E8D7B3 100%) !important;}
+.book-meta{color:#3A3222 !important;}
+.book-meta h2{color:#5A4A22 !important;}
+.book-meta .bm-badge,.book-meta .bm-tagline{color:#7E6230 !important;}
+.book-meta .bm-desc{color:#4A4130 !important;}
+.total-banner,.plaque,#totalFloat,.bundle-card{background:#FBF7EC !important;background-image:none !important;border:1px solid var(--brass) !important;box-shadow:0 2px 12px rgba(120,98,48,0.15) !important;}
+.total-banner .tb-label,.plaque .p-label,#totalFloat .pf-label,.bundle-card .bc-head{color:#7E6230 !important;}
+.plaque .p-value,#totalFloat .pf-value,.total-banner .tb-value{color:#22303A !important;text-shadow:none !important;}
+.bundle-card .bc-price,.bundle-includes .bi{color:#4A4130 !important;}
+.plaque.negative .p-value{color:#9B2516 !important;}
+.video-row{background:#ECE4D0 !important;background-image:linear-gradient(135deg,#F4EEDF,#E8D9BB) !important;}
+.video-slot{background:#FBF7EC !important;background-image:none !important;border:1px solid var(--brass) !important;}
+.video-slot .vs-label{color:#7E6230 !important;}
+footer{background:#E8D7B3 !important;background-image:linear-gradient(135deg,#EFE4C8,#E3D1A9) !important;color:#5A5140 !important;}
+footer .f-brand{color:#7E6230 !important;}
+#vaHomeBtn{background:rgba(251,247,236,0.94) !important;color:#7E6230 !important;border-color:#A8884A !important;box-shadow:0 2px 10px rgba(120,98,48,0.28) !important;}
+</style>
+</head>
+<body>
+<a href="/" id="vaHomeBtn" aria-label="Home" style="position:fixed;top:14px;left:14px;z-index:99999;display:inline-flex;align-items:center;gap:7px;padding:9px 15px;background:rgba(18,22,44,0.9);color:#d9b676;font-family:Georgia,'Times New Roman',serif;font-size:14px;font-weight:bold;letter-spacing:.5px;text-decoration:none;border:1px solid #d9b676;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.35);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);"><span style="font-size:16px;line-height:1;">&#8962;</span> Home</a>
+
+<header>
+  <div class="brand label">Verity Architecture &mdash; Book Two</div>
+  <h1>The Portfolio Architecture</h1>
+  <div class="subtitle">How to Build Your Own Passive Income Legacy</div>
+  <div class="ornament">&#10070; &#10070; &#10070;</div>
+</header>
+
+<nav>
+  <a href="#hero">The Book</a>
+  <a href="#balances">Balances</a>
+  <a href="#charts">Charts</a>
+  <a href="#library">Diagram Library</a>
+  <a href="#books">Books &amp; Bundles</a>
+  <a href="#collection">The Portfolios</a>
+  <a href="financially-trapped-hub.html">Financially Trapped</a>
+  <a href="index.html" style="color:var(--brass-light);">Verity Architecture</a>
+</nav>
+
+<!-- Floating Combined Total -->
+<a id="totalFloat" href="#balances">
+  <span class="pf-label">Combined Tracked</span>
+  <span class="pf-value" id="totalFloatVal">---</span>
+  <span class="pf-sub">9 Live Portfolios &rarr;</span>
+</a>
+
+<!-- Book Hero -->
+<section class="book-hero" id="hero">
+  <img class="book-cover" src="pa-cover-2026.jpg" alt="Portfolio Architecture by Corvus Verity">
+  <div class="book-meta">
+    <div class="bm-badge">Verity Architecture &mdash; Book Two</div>
+    <h2>The Portfolio Architecture</h2>
+    <div class="bm-tagline">How To Build Your Own Passive Income Legacy</div>
+    <div class="bm-desc">The second volume in the Verity Architecture series &mdash; the master blueprint for building and running a fleet of purpose-built portfolios. Nine real accounts, each engineered for a distinct job, all tracked in the open and updated monthly. Where <em>Financially Trapped</em> taught persistence, <em>The Portfolio Architecture</em> teaches structure: build, grow, protect, and leave a legacy.</div>
+    <div class="bm-buy">
+      <span class="btn-hero btn-hero-dim">Buy Ebook &mdash; Coming Soon</span>
+      <span class="btn-hero btn-hero-dim">Bundle &mdash; Coming Soon</span>
+      <span class="btn-hero btn-hero-dim">Paperback &mdash; Coming Soon</span>
+    </div>
+    <div class="bm-retailers">Coming to: Direct (PayPal) &middot; Amazon &middot; Kindle &middot; Barnes &amp; Noble &middot; Kobo &middot; Indigo</div>
+  </div>
+</section>
+
+<!-- Video Row -->
+<div class="video-row">
+  <div class="vr-title">From the Book &mdash; Trailers, Walkthroughs &amp; Portfolio Showcase</div>
+  <div class="video-slots">
+    <div class="video-slot"><div class="coming-pill">Coming Soon</div><div class="vs-icon">&#9654;</div><div class="vs-label">Book Trailer</div><div class="vs-sublabel">Animated Cinematic</div></div>
+    <div class="video-slot"><div class="coming-pill">Coming Soon</div><div class="vs-icon">&#9654;</div><div class="vs-label">The Fleet Strategy</div><div class="vs-sublabel">Nine Portfolios, One System</div></div>
+    <div class="video-slot"><div class="coming-pill">Coming Soon</div><div class="vs-icon">&#9654;</div><div class="vs-label">Proof of Concept</div><div class="vs-sublabel">The System at Work</div></div>
+    <div class="video-slot"><div class="coming-pill">Coming Soon</div><div class="vs-icon">&#9783;</div><div class="vs-label">Portfolio Trackers</div><div class="vs-sublabel">Excel Showcase</div></div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- ── Feature showcase ──────────────────────────────── -->
+<section id="inside">
+  <div class="sec-header"><div class="sec-badge">&#10070;</div><div class="sec-title">Inside the Blueprint</div></div>
+  <hr class="sec-rule">
+  <div class="note">Portfolio Architecture is a fully illustrated field manual. A few plates from the book &mdash; tap any image to view it full size.</div>
+  <div class="showcase" id="showcase"></div>
+</section>
+
+<!-- ── Account Balances ──────────────────────────────── -->
+<section id="balances">
+  <div class="sec-header"><div class="sec-badge">1</div><div class="sec-title">Account Balances</div></div>
+  <hr class="sec-rule">
+  <div class="total-banner">
+    <div class="tb-label">Combined Tracked Balance &mdash; The Fleet</div>
+    <div class="tb-value" id="combinedTotal">---</div>
+    <div class="tb-sub" id="combinedSub">Live brokerage values across all nine portfolios</div>
+  </div>
+  <div class="balances" id="balancePlaques"></div>
+</section>
+
+<!-- ── Charts (tabbed across all 9 portfolios) ───────── -->
+<section id="charts">
+  <div class="sec-header"><div class="sec-badge">2</div><div class="sec-title">Monthly Progress &mdash; By Portfolio</div></div>
+  <hr class="sec-rule">
+  <div class="note">Every portfolio in the fleet, tracked with the same three charts. Use the tabs to switch between accounts. Every dollar shown is real, updated monthly.</div>
+  <div class="tabs" id="tabBar"></div>
+  <div id="panels"></div>
+</section>
+
+<!-- ── Diagram Library (Appendix D) ──────────────────── -->
+<section id="library">
+  <div class="sec-header"><div class="sec-badge">3</div><div class="sec-title">The Diagram Library</div></div>
+  <hr class="sec-rule">
+  <div class="note">Appendix D &mdash; every diagram from the book in one reference section. Tap any plate to view it full size.</div>
+  <div class="gallery" id="gallery"></div>
+  <button class="gallery-more" id="galleryMore">Show All 92 Diagrams &darr;</button>
+</section>
+
+<!-- ── Books & Bundles ───────────────────────────────── -->
+<section id="books">
+  <div class="sec-header"><div class="sec-badge">4</div><div class="sec-title">Books &amp; Bundles</div></div>
+  <hr class="sec-rule">
+  <div class="note">Buy direct and cut out the middleman. Pricing and direct purchase are being finalized for launch.</div>
+  <div class="bundle-card">
+    <div class="coming-badge">Coming Soon</div>
+    <div class="bc-head">Portfolio Architecture &mdash; Complete Bundle</div>
+    <div class="bc-price">Price TBD</div>
+    <div class="bundle-includes">
+      <div class="bi">Ebook (EPUB)</div>
+      <div class="bi">Interactive HTML Book + Worksheets</div>
+      <div class="bi">Excel Worksheet Workbook</div>
+      <div class="bi">All 9 Portfolio Tracking Spreadsheets</div>
+      <div class="bi">Fleet Dashboard &amp; Monthly Charts</div>
+      <div class="bi">Works offline, no account needed</div>
+    </div>
+    <div class="btn btn-gold" style="opacity:0.4;cursor:not-allowed;text-align:center;">Available at Launch</div>
+  </div>
+  <div class="bundle-card" style="opacity:0.78;">
+    <div class="coming-badge">Coming Soon</div>
+    <div class="bc-head">Full Architects Bundle &mdash; Both Books + Everything</div>
+    <div class="bc-price">Price TBD</div>
+    <div class="bundle-includes">
+      <div class="bi">Financially Trapped (EPUB)</div>
+      <div class="bi">Portfolio Architecture (EPUB)</div>
+      <div class="bi">All Worksheets &mdash; Both Books</div>
+      <div class="bi">All Portfolio Tracking Spreadsheets</div>
+      <div class="bi">Interactive HTML Editions (Both)</div>
+      <div class="bi">Full Spreadsheet Suite</div>
+    </div>
+    <div class="btn btn-gold" style="opacity:0.4;cursor:not-allowed;text-align:center;">Available When Book Two Launches</div>
+  </div>
+  <div class="grid" style="margin-top:0.5em;">
+    <div class="card"><h3>Ebook Only</h3><div class="c-sub">EPUB format. Delivered instantly.</div><div class="spacer"></div><a class="btn btn-line" data-pending href="#">Direct &mdash; Coming Soon</a></div>
+    <div class="card"><h3>Paperback</h3><div class="c-sub">Print edition.</div><div class="spacer"></div><a class="btn btn-line" data-pending href="#">Amazon &mdash; Coming Soon</a><a class="btn btn-line" data-pending href="#">Barnes &amp; Noble &mdash; Coming Soon</a></div>
+    <div class="card"><h3>Hardcover</h3><div class="c-sub">Collector's print edition.</div><div class="spacer"></div><a class="btn btn-line" data-pending href="#">Amazon &mdash; Coming Soon</a><a class="btn btn-line" data-pending href="#">Indigo &mdash; Coming Soon</a></div>
+    <div class="card"><h3>Kindle</h3><div class="c-sub">Amazon Kindle edition.</div><div class="spacer"></div><a class="btn btn-line" data-pending href="#">Kindle &mdash; Coming Soon</a></div>
+  </div>
+</section>
+
+<!-- ── The Portfolios ────────────────────────────────── -->
+<section id="collection">
+  <div class="sec-header"><div class="sec-badge">5</div><div class="sec-title">The Portfolios</div></div>
+  <hr class="sec-rule">
+  <div class="note">Nine portfolios, each with its own page and the same three charts, tracked monthly.</div>
+  <div class="grid" id="collectionGrid"></div>
+</section>
+
+</div>
+
+<!-- Lightbox -->
+<div id="lb"><span class="lb-close">&times;</span><img src="" alt="Diagram full size"></div>
+
+<footer>
+  <div class="f-brand label" style="font-size:0.8em;">Verity Architecture</div>
+  <div style="margin-top:0.4em;">Copyright 2026 Verity Architecture. All progress shown is real account data, updated monthly. Nothing on this page is financial advice.</div>
+</footer>
+
+<script src="portfolio-data.js"></script>
+<script>
+var DEEP="#08293b",BRASS="#A8884A",BRASSDIM="#7E6230",GREEN="#2E5E3A";
+var DIAGDIR="PA%20Diagrams/",THUMBDIR="PA%20Diagrams/thumbs/";
+var fmt=function(n){return n!=null?n.toLocaleString("en-CA",{style:"currency",currency:"CAD"}):"---";};
+
+/* Order = the sequence portfolios are introduced in the book, by chapter. */
+var PA=[
+  {key:"10 ETF",      name:"10 ETF",      href:"10-etf.html"},      /* Ch 7  */
+  {key:"Centurion",   name:"Centurion",   href:"centurion.html"},   /* Ch 8  */
+  {key:"Fortress",    name:"Fortress",    href:"fortress.html"},    /* Ch 10 */
+  {key:"Tactical",    name:"Tactical",    href:"tactical.html"},    /* Ch 11 */
+  {key:"WhiteSwan",   name:"WhiteSwan",   href:"whiteswan.html"},   /* Ch 13 */
+  {key:"Developer",   name:"Developer",   href:"developer.html"},   /* Ch 14 */
+  {key:"Rebate",      name:"Rebate",      href:"rebate.html"},      /* Ch 15 */
+  {key:"REITS",       name:"REITS",       href:"reits.html"},       /* Ch 16 */
+  {key:"Quiet Titan", name:"Quiet Titan", href:"quiet-titan.html"}  /* Ch 17 */
+];
+
+/* figure number formatting helper */
+function fig(n){return (n<10?"0":"")+n;}
+
+/* ── Lightbox ── */
+var lb=document.getElementById("lb");
+function openLB(src){lb.querySelector("img").src=src;lb.classList.add("open");}
+lb.addEventListener("click",function(){lb.classList.remove("open");});
+
+/* ── Feature showcase (curated plates) ── */
+(function(){
+  var feats=[
+    {n:1, t:"The Blueprint", s:"Portfolio Architecture overview"},
+    {n:19,t:"The Big Six Categories", s:"Each portfolio with a job"},
+    {n:50,t:"The Structural Overview", s:"How the fleet fits together"},
+    {n:78,t:"A Real-World Example", s:"Structure of the opportunity"}
+  ];
+  document.getElementById("showcase").innerHTML=feats.map(function(f){
+    return '<div class="show-card" onclick="openLB(\''+DIAGDIR+'pa-fig-'+fig(f.n)+'.jpg\')">'
+      +'<img loading="lazy" src="'+THUMBDIR+'pa-fig-'+fig(f.n)+'.jpg" alt="'+f.t+'">'
+      +'<div class="sc-cap">'+f.t+'<span>'+f.s+'</span></div></div>';
+  }).join("");
+})();
+
+/* ── Combined total + balance plaques (exclude Financially Trapped) ── */
+(function(){
+  var A=(PORTFOLIO_DATA.BALANCES||[]).filter(function(b){return b.name!=="Financially Trapped";});
+  var total=A.reduce(function(s,b){return s+(typeof b.balance==="number"?b.balance:0);},0);
+  document.getElementById("combinedTotal").textContent=fmt(total);
+  var ct=document.getElementById("totalFloatVal");if(ct)ct.textContent=fmt(total);
+  var subEl=document.getElementById("combinedSub");
+  var dm=(A[0]&&A[0].sub||"").match(/[A-Z][a-z]{2}\s+\d{1,2},\s+\d{4}/);
+  if(subEl&&dm)subEl.textContent="Live brokerage values across all nine portfolios · "+dm[0];
+  var G=[
+    {label:"TFSA Accounts",          f:function(b){return b.sub.indexOf("TFSA")>=0;}},
+    {label:"RRSP Accounts",          f:function(b){return b.sub.indexOf("RRSP")>=0;}},
+    {label:"Non-Registered Accounts",f:function(b){return b.sub.indexOf("Non-Reg")>=0;}}
+  ];
+  var h="";
+  G.forEach(function(g){
+    var it=A.filter(g.f);if(!it.length)return;
+    h+='<div class="group-header">'+g.label+'</div>';
+    h+=it.map(function(a){
+      var disp=a.assetBalance!=null?a.assetBalance:a.balance;
+      var neg=disp!=null&&disp<0;
+      var tag=a.href?'a':'div';var attr=a.href?' href="'+a.href+'?from=pa"':'';
+      return '<'+tag+' class="plaque'+(neg?' negative':'')+'"'+attr+'><div class="p-label label">'+a.name+'</div><div class="p-value">'+fmt(disp)+'</div><div class="p-sub">'+a.sub+'</div></'+tag+'>';
+    }).join("");
+  });
+  document.getElementById("balancePlaques").innerHTML=h;
+})();
+
+/* ── Collection grid ── */
+document.getElementById("collectionGrid").innerHTML=PA.map(function(c){
+  return '<div class="card coll-card"><span class="tag">Portfolio Architecture</span><h3>'+c.name+'</h3><div class="c-sub">Deposits - Value - Dividends, by account.</div><div class="spacer"></div><a class="btn btn-line" href="'+c.href+'?from=pa">View Progress</a></div>';
+}).join("");
+
+/* ── Diagram Library gallery (all 92, lazy, expandable) ── */
+(function(){
+  var g=document.getElementById("gallery"),more=document.getElementById("galleryMore");
+  var INITIAL=18,TOTAL=92,shown=0;
+  function add(upto){
+    var html="";
+    for(var n=shown+1;n<=upto;n++){
+      var full=DIAGDIR+"pa-fig-"+fig(n)+".jpg",th=THUMBDIR+"pa-fig-"+fig(n)+".jpg";
+      html+='<a onclick="openLB(\''+full+'\')"><img loading="lazy" src="'+th+'" alt="Diagram '+n+'"></a>';
+    }
+    g.insertAdjacentHTML("beforeend",html);shown=upto;
+  }
+  add(INITIAL);
+  more.addEventListener("click",function(){
+    if(shown<TOTAL){add(TOTAL);more.textContent="Showing all 92 diagrams";more.style.opacity="0.5";more.style.pointerEvents="none";}
+  });
+})();
+
+/* ── Tabbed charts across all nine portfolios ── */
+Chart.defaults.font.family="Georgia, serif";Chart.defaults.color="#6b6151";
+var gridOpts={color:"rgba(34,48,58,0.08)"};
+var moneyTick={callback:function(v){return "$"+Number(v).toLocaleString();}};
+var moneyTip=function(c){return "$"+c.parsed.y.toFixed(2)+" CAD";};
+var rendered={};
+
+function buildPanel(idx){
+  var p=PA[idx];var d=PORTFOLIO_DATA[p.key]||{};
+  var months=d.months||[],deposits=d.deposits||[],value=d.value||[],dividends=d.dividends||[];
+  var showDep=d.showDeposits!==false;
+  var lastVal=value.filter(function(v){return v!=null;}).slice(-1)[0];
+  var totDep=deposits.reduce(function(a,b){return (a||0)+(b||0);},0);
+  var totDiv=dividends.reduce(function(a,b){return (a||0)+(b||0);},0);
+  var statsHtml=''
+    +'<div class="stat"><div class="s-label">Current Value</div><div class="s-value">'+fmt(lastVal)+'</div><div class="s-sub">'+(months.slice(-1)[0]||"")+'</div></div>'
+    +(showDep?'<div class="stat"><div class="s-label">Total Deposited</div><div class="s-value">'+fmt(totDep)+'</div><div class="s-sub">Cumulative</div></div>':'')
+    +'<div class="stat"><div class="s-label">Total Dividends</div><div class="s-value">'+fmt(totDiv)+'</div><div class="s-sub">Cumulative</div></div>';
+  return '<div class="tab-panel" id="panel-'+idx+'">'
+    +'<div class="stats">'+statsHtml+'</div>'
+    +(d.note?'<div class="note">'+d.note+'</div>':'')
+    +(showDep?'<div class="chart-card"><h3>Deposits by Month</h3><div class="ch-sub">New capital added each month (CAD equivalent).</div><div class="chart-wrap"><canvas id="cdep-'+idx+'"></canvas></div></div>':'')
+    +'<div class="chart-card"><h3>Investment Value by Month</h3><div class="ch-sub">Month-end market value at closing prices (CAD equivalent).</div><div class="chart-wrap"><canvas id="cval-'+idx+'"></canvas></div></div>'
+    +'<div class="chart-card"><h3>Dividends by Month</h3><div class="ch-sub">Distributions &amp; dividends received (CAD equivalent).</div><div class="chart-wrap"><canvas id="cdiv-'+idx+'"></canvas></div></div>'
+    +'<a class="tab-open" href="'+p.href+'?from=pa">Open full '+p.name+' page &rarr;</a>'
+    +'</div>';
+}
+
+function renderCharts(idx){
+  if(rendered[idx])return;rendered[idx]=true;
+  var p=PA[idx];var d=PORTFOLIO_DATA[p.key]||{};
+  var months=d.months||[],deposits=d.deposits||[],value=d.value||[],dividends=d.dividends||[];
+  var showDep=d.showDeposits!==false;
+  if(showDep){
+    var cdep=document.getElementById("cdep-"+idx);
+    if(cdep)new Chart(cdep,{type:"bar",data:{labels:months,datasets:[{label:"Deposits (CAD)",data:deposits,backgroundColor:BRASS,borderColor:BRASSDIM,borderWidth:1}]},options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:moneyTip}}},scales:{y:{beginAtZero:true,ticks:moneyTick,grid:gridOpts},x:{grid:{display:false}}}}});
+  }
+  var cval=document.getElementById("cval-"+idx);
+  if(cval)new Chart(cval,{type:"line",data:{labels:months,datasets:[{label:"Value (CAD)",data:value,borderColor:DEEP,backgroundColor:"rgba(168,136,74,0.20)",fill:true,tension:0.3,pointBackgroundColor:BRASS,pointBorderColor:DEEP,pointRadius:5,spanGaps:true}]},options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:moneyTip}}},scales:{y:{beginAtZero:true,ticks:moneyTick,grid:gridOpts},x:{grid:{display:false}}}}});
+  var cdiv=document.getElementById("cdiv-"+idx);
+  if(cdiv)new Chart(cdiv,{type:"line",data:{labels:months,datasets:[{label:"Dividends (CAD)",data:dividends,borderColor:GREEN,backgroundColor:"rgba(46,94,58,0.12)",fill:true,tension:0.38,pointRadius:4,pointBackgroundColor:GREEN,pointBorderColor:"#1e4427",spanGaps:true}]},options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:moneyTip}}},scales:{y:{beginAtZero:true,ticks:moneyTick,grid:gridOpts},x:{grid:{display:false}}}}});
+}
+
+(function(){
+  var tabBar=document.getElementById("tabBar"),panels=document.getElementById("panels");
+  tabBar.innerHTML=PA.map(function(p,i){return '<div class="tab'+(i===0?' active':'')+'" data-tab="'+i+'">'+p.name+'</div>';}).join("");
+  panels.innerHTML=PA.map(function(p,i){return buildPanel(i);}).join("");
+  document.getElementById("panel-0").classList.add("active");
+  renderCharts(0);
+  tabBar.querySelectorAll(".tab").forEach(function(t){
+    t.addEventListener("click",function(){
+      var idx=t.dataset.tab;
+      tabBar.querySelectorAll(".tab").forEach(function(x){x.classList.remove("active");});
+      panels.querySelectorAll(".tab-panel").forEach(function(x){x.classList.remove("active");});
+      t.classList.add("active");
+      document.getElementById("panel-"+idx).classList.add("active");
+      renderCharts(parseInt(idx,10));
+    });
+  });
+})();
+
+document.querySelectorAll('nav a[href^="#"]').forEach(function(a){
+  a.addEventListener("click",function(e){
+    var t=document.querySelector(a.getAttribute("href"));
+    if(t){e.preventDefault();t.scrollIntoView({behavior:"smooth"});}
+  });
+});
+</script>
+</body>
+</html>

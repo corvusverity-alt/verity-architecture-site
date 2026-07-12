@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>WS14: The Titan Vault | Financially Trapped</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:20px;}
+body{background:#0e0e1c;color:#e8e0cc;font-family:Georgia,serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;}
+#player{position:relative;width:100vw;height:100vh;background:#13132a;border:none;display:flex;flex-direction:column;overflow:hidden;}
+#prog-bar{height:16px;background:rgba(201,168,76,.12);flex-shrink:0;cursor:pointer;position:relative;user-select:none;border-top:1px solid rgba(201,168,76,.2);}
+#prog-bar:hover{background:rgba(201,168,76,.22);}
+#prog-fill{height:100%;width:0;background:#C9A84C;pointer-events:none;}
+#prog-thumb{position:absolute;top:50%;right:auto;width:20px;height:20px;border-radius:50%;background:#C9A84C;border:2px solid #fff;transform:translate(-50%,-50%);left:0;pointer-events:none;box-shadow:0 0 10px rgba(201,168,76,.7);opacity:0;transition:opacity .15s;}
+#prog-bar:hover #prog-thumb{opacity:1;}
+#fs-btn{font-family:Arial,sans-serif;font-size:0.8em;font-weight:bold;letter-spacing:.08em;color:#888;border:1px solid rgba(255,255,255,.18);background:none;padding:.38em .95em;border-radius:4px;cursor:pointer;white-space:nowrap;}
+#fs-btn:hover{color:#C9A84C;border-color:rgba(201,168,76,.5);}
+#voice-btn{font-family:Arial,sans-serif;font-size:0.8em;letter-spacing:.06em;color:#aaa;border:1px solid rgba(255,255,255,.18);background:none;padding:.38em .95em;border-radius:4px;cursor:pointer;}
+#voice-btn:hover{color:#C9A84C;border-color:rgba(201,168,76,.5);}
+#stage{flex:1;position:relative;overflow:hidden;}
+.scene{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .5s;}
+.scene.active{opacity:1;pointer-events:auto;}
+#s-play{cursor:pointer;background:radial-gradient(ellipse at center,#1e1e3a 0%,#0e0e1c 75%);}
+.ch-tag{font-family:Arial,sans-serif;font-size:0.85em;font-weight:bold;letter-spacing:.2em;text-transform:uppercase;color:#C9A84C;margin-bottom:.6em;}
+.ch-num{font-size:clamp(2.6em,7vw,4.5em);font-weight:bold;color:#C9A84C;line-height:1;text-shadow:0 0 40px rgba(201,168,76,.45);}
+.ch-title{font-size:clamp(1.1em,2.8vw,1.7em);color:#e8e0cc;margin-top:.35em;letter-spacing:.03em;}
+.ch-sub{font-size:0.9em;color:#bbb;font-style:italic;margin-top:.5em;}
+.play-ring{width:90px;height:90px;border-radius:50%;border:3px solid #C9A84C;display:flex;align-items:center;justify-content:center;margin-top:1.5em;transition:box-shadow .2s,transform .15s;}
+#s-play:hover .play-ring{box-shadow:0 0 32px rgba(201,168,76,.5);transform:scale(1.06);}
+.play-tri{width:0;height:0;border-top:18px solid transparent;border-bottom:18px solid transparent;border-left:28px solid #C9A84C;margin-left:7px;}
+#top-bar{background:#0a0a18;border-bottom:1px solid rgba(201,168,76,.2);padding:.6em 1.2em .5em;flex-shrink:0;}
+#ch-badge{font-family:Arial,sans-serif;font-size:0.72em;font-weight:bold;letter-spacing:.14em;text-transform:uppercase;color:#C9A84C;opacity:0;transition:opacity .5s;margin-bottom:.25em;}
+#ch-badge.vis{opacity:1;}
+#subtitle{font-size:1.08em;color:#fff;line-height:1.6;min-height:2.4em;}
+#subtitle span{background:none;padding:0;letter-spacing:.01em;color:#f0e8d0;}
+#controls{height:64px;display:flex;align-items:center;gap:.9em;padding:0 1.2em;background:#0a0a18;border-top:1px solid rgba(201,168,76,.2);flex-shrink:0;}
+#pause-btn{font-family:Arial,sans-serif;font-size:0.88em;font-weight:bold;letter-spacing:.1em;text-transform:uppercase;color:#C9A84C;border:2px solid rgba(201,168,76,.55);background:none;padding:.4em 1.1em;border-radius:4px;cursor:pointer;transition:background .15s;}
+#pause-btn:hover{background:rgba(201,168,76,.15);}
+#skip-btn{font-family:Arial,sans-serif;font-size:0.8em;letter-spacing:.08em;text-transform:uppercase;color:#999;border:1px solid rgba(255,255,255,.18);background:none;padding:.38em .95em;border-radius:4px;cursor:pointer;}
+#skip-btn:hover{color:#eee;}
+.ctrl-label{font-family:Arial,sans-serif;font-size:0.75em;color:#666;margin-left:auto;}
+.sc-wrap{width:92%;max-width:1400px;max-height:calc(100% - 130px);overflow-y:auto;padding:.4em 0;}
+.sc-wrap::-webkit-scrollbar{width:6px;}
+.sc-wrap::-webkit-scrollbar-thumb{background:rgba(201,168,76,.35);border-radius:3px;}
+.ws-shell{background:#0c0c20;border:1.5px solid rgba(201,168,76,.35);border-radius:6px;overflow:hidden;font-family:Arial,sans-serif;}
+.ws-hdr{padding:.65em 1.1em;border-bottom:1px solid rgba(201,168,76,.18);}
+.ws-hdr-title{font-size:0.72em;font-weight:bold;letter-spacing:.12em;text-transform:uppercase;color:#C9A84C;}
+.ws-hdr-sheet{font-size:0.95em;font-weight:bold;color:#e8e0cc;margin-top:.25em;}
+.ws-hdr-sub{font-size:0.76em;color:#999;font-style:italic;margin-top:.15em;}
+.ws-sec-band{background:rgba(201,168,76,.12);padding:.5em 1.1em;font-size:0.82em;font-weight:bold;letter-spacing:.07em;color:#C9A84C;border-top:1px solid rgba(201,168,76,.25);border-bottom:1px solid rgba(201,168,76,.18);}
+.ws-tbl{width:100%;border-collapse:collapse;}
+.ws-tbl th{background:rgba(201,168,76,.08);color:#C9A84C;font-size:0.8em;font-weight:bold;letter-spacing:.09em;padding:.55em .9em;border-bottom:1px solid rgba(201,168,76,.25);text-align:left;white-space:nowrap;}
+.ws-tbl td{font-size:0.88em;padding:.55em .9em;border-bottom:1px solid rgba(255,255,255,.05);color:#333;vertical-align:middle;}
+.ws-tbl td.filled{color:#d8cfb8;}
+.ws-tbl td.gold-val{color:#C9A84C;font-weight:bold;}
+.ws-tbl tr.active-row>td{background:rgba(201,168,76,.07);}
+.ws-tbl td.hl{background:rgba(201,168,76,.22)!important;color:#fff!important;border:2px solid rgba(201,168,76,.8)!important;border-radius:3px;}
+.ws-tbl tr.total-row>td{border-top:1.5px solid rgba(201,168,76,.4);color:#C9A84C;font-weight:bold;font-size:0.88em;padding:.55em .9em;}
+.ws-tbl td.empty-cell{color:#1e1e30;}
+.ws-calc-tbl{width:100%;border-collapse:collapse;}
+.ws-calc-tbl th{background:rgba(201,168,76,.08);color:#C9A84C;font-size:0.8em;font-weight:bold;letter-spacing:.09em;padding:.55em .9em;border-bottom:1px solid rgba(201,168,76,.25);text-align:left;}
+.ws-calc-tbl td{font-size:0.88em;padding:.65em .9em;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:middle;}
+.ws-calc-tbl td.calc-label{color:#bbb;white-space:nowrap;width:55%;}
+.ws-calc-tbl td.calc-val{color:#222238;width:45%;}
+.ws-calc-tbl td.calc-val.filled{color:#d8cfb8;}
+.ws-calc-tbl td.calc-val.gold-fill{color:#C9A84C;font-weight:bold;}
+.ws-calc-tbl td.hl{background:rgba(201,168,76,.22)!important;color:#fff!important;border:2px solid rgba(201,168,76,.8)!important;border-radius:3px;}
+.ws-quote-row{padding:.85em 1.1em;font-size:0.82em;color:#1e1e30;font-style:italic;border-top:1px solid rgba(255,255,255,.05);transition:color .6s;}
+.ws-quote-row.show{color:#C9A84C;}
+#s1 .ws-eyebrow{font-family:Arial,sans-serif;font-size:0.85em;font-weight:bold;letter-spacing:.2em;text-transform:uppercase;color:#C9A84C;margin-bottom:.6em;text-align:center;}
+#s1 .ws-title{font-size:clamp(1.6em,4vw,2.6em);font-weight:bold;color:#C9A84C;text-align:center;text-shadow:0 0 28px rgba(201,168,76,.35);}
+#s1 .ws-sub2{font-size:0.88em;color:#bbb;text-align:center;margin-top:.45em;font-style:italic;}
+#s1 .ws-desc{font-size:0.92em;color:#c8bfa8;text-align:center;margin-top:1.1em;line-height:1.75;max-width:600px;margin-left:auto;margin-right:auto;}
+#s-cta{text-align:center;}
+#s-cta .cta-done{font-size:0.9em;color:#aaa;margin-bottom:.8em;}
+#s-cta .cta-title{font-size:clamp(1.3em,3.2vw,2em);color:#C9A84C;margin-bottom:.4em;}
+.cta-btns{display:flex;gap:.9em;flex-wrap:wrap;justify-content:center;margin-top:1.2em;}
+.cta-btn{font-family:Arial,sans-serif;font-size:0.85em;font-weight:bold;letter-spacing:.1em;text-transform:uppercase;padding:.7em 1.5em;border-radius:4px;text-decoration:none;border:2px solid #C9A84C;color:#C9A84C;transition:background .15s;}
+.cta-btn.gold{background:#C9A84C;color:#0e0e1c;}
+.cta-btn:hover{background:rgba(201,168,76,.18);}
+.cta-btn.gold:hover{background:#b8953e;}
+</style>
+<link rel="stylesheet" href="ws-shared.css">
+</head>
+<body>
+<a href="/" id="vaHomeBtn" aria-label="Home" style="position:fixed;top:14px;left:14px;z-index:99999;display:inline-flex;align-items:center;gap:7px;padding:9px 15px;background:rgba(18,22,44,0.9);color:#d9b676;font-family:Georgia,'Times New Roman',serif;font-size:14px;font-weight:bold;letter-spacing:.5px;text-decoration:none;border:1px solid #d9b676;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.35);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);"><span style="font-size:16px;line-height:1;">&#8962;</span> Home</a>
+<div id="player">
+<div id="top-bar">
+<div id="ch-badge">Chapter 14 · The Titan Vault</div>
+<div id="subtitle"><span id="sub-text"></span></div>
+</div>
+<div id="stage">
+<div class="scene active" id="s-play" onclick="startAnim()">
+<div class="ch-tag">Financially Trapped &middot; Worksheet Tutorial</div>
+<div class="ch-num">WS 14</div>
+<div class="ch-title">The Titan Vault</div>
+<div class="ch-sub">Exit Velocity Gap Calculator · 10-ETF Position Planner</div>
+<div class="play-ring"><div class="play-tri"></div></div>
+</div>
+<div class="scene" id="s1">
+<div class="sc-wrap" style="text-align:center;">
+<div class="ws-eyebrow">Worksheet 14 of 16</div>
+<div class="ws-title">The Titan Vault</div>
+<div class="ws-sub2" id="ws-sub2"></div>
+<div class="ws-desc" id="s1desc"></div>
+</div>
+</div>
+
+    <div class="scene" id="s3">
+      <div class="sc-wrap">
+        <div class="ws-shell">
+          <div class="ws-hdr">
+            <div class="ws-hdr-title">Financially Trapped &middot; The Architect's Working Documents</div>
+            <div class="ws-hdr-sheet">Worksheet 14: The Titan Vault — 10-ETF Strategy</div>
+            <div class="ws-hdr-sub">Exit Velocity Gap Calculator &middot; 10-ETF Position Planner</div>
+          </div>
+          <div class="ws-sec-band">[A] Exit Velocity Gap Calculator &mdash; How far are you from financial independence?</div>
+          <table class="ws-calc-tbl">
+            <thead><tr><th>CALCULATION</th><th>YOUR NUMBER</th></tr></thead>
+          <tbody>
+            <tr><td class="calc-label">Baseline monthly income needed for independence ($)</td><td class="calc-val" id="ev1"></td></tr>
+            <tr><td class="calc-label">Target annual dividend income ($)</td><td class="calc-val" id="ev2"></td></tr>
+            <tr><td class="calc-label">Target yield assumption (%)</td><td class="calc-val gold-fill" id="ev3">12%</td></tr>
+            <tr><td class="calc-label">Capital required (Annual income &divide; yield)</td><td class="calc-val" id="ev4"></td></tr>
+            <tr><td class="calc-label">Current portfolio value ($)</td><td class="calc-val" id="ev5"></td></tr>
+            <tr><td class="calc-label">Exit Velocity Gap (Capital needed minus current)</td><td class="calc-val gold-fill" id="ev6"></td></tr>
+            <tr><td class="calc-label">Progress to Exit Velocity (%)</td><td class="calc-val" id="ev7"></td></tr>
+          </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="scene" id="s4">
+      <div class="sc-wrap">
+        <div class="ws-shell">
+          <div class="ws-hdr">
+            <div class="ws-hdr-title">Financially Trapped &middot; The Architect's Working Documents</div>
+            <div class="ws-hdr-sheet">Worksheet 14: The Titan Vault — 10-ETF Strategy</div>
+          </div>
+          <div class="ws-sec-band">[B] 10-ETF Position Planner &mdash; The diversified growth and income allocation</div>
+          <table class="ws-tbl">
+            <thead><tr><th>ETF TICKER</th><th>TARGET % ALLOCATION</th><th>ROLE / DESCRIPTION</th><th>CURRENT VALUE ($)</th><th>STATUS</th></tr></thead>
+          <tbody>
+            <tr id="et1"><td id="e1a" class="empty-cell">&middot;</td><td id="e1b" class="empty-cell">&middot;</td><td id="e1c" class="empty-cell">&middot;</td><td id="e1d" class="empty-cell">&middot;</td><td id="e1e" class="empty-cell">&middot;</td></tr>
+            <tr id="et2"><td id="e2a" class="empty-cell">&middot;</td><td id="e2b" class="empty-cell">&middot;</td><td id="e2c" class="empty-cell">&middot;</td><td id="e2d" class="empty-cell">&middot;</td><td id="e2e" class="empty-cell">&middot;</td></tr>
+            <tr id="et3"><td id="e3a" class="empty-cell">&middot;</td><td id="e3b" class="empty-cell">&middot;</td><td id="e3c" class="empty-cell">&middot;</td><td id="e3d" class="empty-cell">&middot;</td><td id="e3e" class="empty-cell">&middot;</td></tr>
+            <tr id="et4"><td id="e4a" class="empty-cell">&middot;</td><td id="e4b" class="empty-cell">&middot;</td><td id="e4c" class="empty-cell">&middot;</td><td id="e4d" class="empty-cell">&middot;</td><td id="e4e" class="empty-cell">&middot;</td></tr>
+            <tr id="et5"><td id="e5a" class="empty-cell">&middot;</td><td id="e5b" class="empty-cell">&middot;</td><td id="e5c" class="empty-cell">&middot;</td><td id="e5d" class="empty-cell">&middot;</td><td id="e5e" class="empty-cell">&middot;</td></tr>
+            <tr id="et6"><td id="e6a" class="empty-cell">&middot;</td><td id="e6b" class="empty-cell">&middot;</td><td id="e6c" class="empty-cell">&middot;</td><td id="e6d" class="empty-cell">&middot;</td><td id="e6e" class="empty-cell">&middot;</td></tr>
+            <tr id="et7"><td id="e7a" class="empty-cell">&middot;</td><td id="e7b" class="empty-cell">&middot;</td><td id="e7c" class="empty-cell">&middot;</td><td id="e7d" class="empty-cell">&middot;</td><td id="e7e" class="empty-cell">&middot;</td></tr>
+            <tr id="et8"><td id="e8a" class="empty-cell">&middot;</td><td id="e8b" class="empty-cell">&middot;</td><td id="e8c" class="empty-cell">&middot;</td><td id="e8d" class="empty-cell">&middot;</td><td id="e8e" class="empty-cell">&middot;</td></tr>
+            <tr id="et9"><td id="e9a" class="empty-cell">&middot;</td><td id="e9b" class="empty-cell">&middot;</td><td id="e9c" class="empty-cell">&middot;</td><td id="e9d" class="empty-cell">&middot;</td><td id="e9e" class="empty-cell">&middot;</td></tr>
+            <tr id="et10"><td id="e0a" class="empty-cell">&middot;</td><td id="e0b" class="empty-cell">&middot;</td><td id="e0c" class="empty-cell">&middot;</td><td id="e0d" class="empty-cell">&middot;</td><td id="e0e" class="empty-cell">&middot;</td></tr>
+            <tr class="total-row"><td>TOTAL</td><td id="etf-pct" class="gold-val">100%</td><td></td><td id="etf-val" class="gold-val">$___</td><td></td></tr>
+          </tbody>
+          </table>
+          <div class="ws-quote-row" id="wsQuote14">"Growth builds the walls. Gold guards the gate."</div>
+        </div>
+      </div>
+    </div>
+<div class="scene" id="s-cta">
+<div class="cta-done">Worksheet 14 complete</div>
+<div class="cta-title">The Titan Vault</div>
+<div style="font-size:.78em;color:#aaa;font-style:italic;">Exit Velocity calculated. 10-ETF positions planned. The Vault is ready to be built.</div>
+<div class="cta-btns">
+<a class="cta-btn gold" href="financially-trapped-hub.html#tutorials">Back to All Tutorials</a>
+<a class="cta-btn" href="#" onclick="resetAnim();return false;">Watch Again</a>
+</div>
+</div>
+</div>
+<div id="controls">
+<button id="pause-btn" onclick="togglePause()" style="display:none;">&#9208; Pause</button>
+<button id="skip-btn" onclick="skipToEnd()" style="display:none;">Skip &#8594;</button>
+<button id="voice-btn" onclick="toggleVoice()">&#128266; Voice</button>
+<div class="ctrl-label" id="ctrl-label">Click play to begin</div>
+<button id="fs-btn" onclick="toggleFullscreen()">&#9974; Fullscreen</button>
+</div>
+<div id="prog-bar" title="Click to seek">
+<div id="prog-fill"></div>
+<div id="prog-thumb"></div>
+</div>
+</div>
+<script>
+var SEQ=[8000,48000,55000];
+
+var CLK={elapsed:0,lastTick:0,running:false,raf:null,speechPaused:false};
+var EVENTS=[];var TOTAL_MS=0;
+var progEl=document.getElementById('prog-fill');var progThumb=document.getElementById('prog-thumb');
+var subEl=document.getElementById('sub-text');var pauseBtn=document.getElementById('pause-btn');
+var skipBtn=document.getElementById('skip-btn');var ctrlLabel=document.getElementById('ctrl-label');
+var VOICE_ON=true;var synth=window.speechSynthesis||null;var VOX=[];
+function loadV(){if(synth)VOX=synth.getVoices();}
+if(synth){loadV();if(synth.onvoiceschanged!==undefined)synth.onvoiceschanged=loadV;}
+function speak(txt){if(!VOICE_ON||!synth||!txt)return;synth.cancel();var u=new SpeechSynthesisUtterance(txt.replace(/[""''"']/g,"'"));u.rate=0.88;u.pitch=1.0;u.volume=1.0;var voices=VOX.length?VOX:synth.getVoices();var v=voices.find(function(x){return/samantha|karen|moira|victoria|allison|ava|alice|tessa|zoe/i.test(x.name);})||voices.find(function(x){return x.lang.startsWith('en')&&x.localService;})||voices.find(function(x){return x.lang.startsWith('en');});if(v)u.voice=v;CLK.speechPaused=true;u.onend=function(){CLK.speechPaused=false;if(CLK.running)CLK.lastTick=performance.now();};u.onerror=function(){CLK.speechPaused=false;if(CLK.running)CLK.lastTick=performance.now();};synth.speak(u);}
+function toggleVoice(){VOICE_ON=!VOICE_ON;if(!VOICE_ON&&synth)synth.cancel();document.getElementById('voice-btn').textContent=VOICE_ON?'🔊 Voice':'🔇 Muted';}
+function showScene(id){document.querySelectorAll('.scene').forEach(function(s){s.classList.remove('active');});var el=document.getElementById(id);if(el)el.classList.add('active');}
+function setSub(t){subEl.textContent=t;speak(t);}function clrSub(){subEl.textContent='';if(synth)synth.cancel();}
+function hl(id){document.querySelectorAll('.hl').forEach(function(c){c.classList.remove('hl');});var el=document.getElementById(id);if(el)el.classList.add('hl');}
+function fill(id,val,cls){var el=document.getElementById(id);if(!el)return;el.textContent=val;el.classList.remove('empty-cell','hl');el.classList.add(cls||'filled');}
+function hlOff(){document.querySelectorAll('.hl').forEach(function(c){c.classList.remove('hl');});}
+function clkTick(now){if(!CLK.running)return;if(!CLK.speechPaused){CLK.elapsed+=now-CLK.lastTick;EVENTS.forEach(function(ev){if(!ev.fired&&CLK.elapsed>=ev.t){ev.fn();ev.fired=true;}});var pct=Math.min(CLK.elapsed/TOTAL_MS*100,100);progEl.style.width=pct+'%';progThumb.style.left=pct+'%';}CLK.lastTick=now;CLK.raf=requestAnimationFrame(clkTick);}
+function startAnim(){document.getElementById('s-play').classList.remove('active');buildEvents();CLK.elapsed=0;CLK.running=true;CLK.lastTick=performance.now();CLK.raf=requestAnimationFrame(clkTick);}
+function togglePause(){if(CLK.running){CLK.running=false;cancelAnimationFrame(CLK.raf);if(synth)synth.cancel();pauseBtn.textContent='▶ Resume';}else{CLK.running=true;CLK.lastTick=performance.now();CLK.raf=requestAnimationFrame(clkTick);pauseBtn.textContent='⏸ Pause';}}
+function skipToEnd(){CLK.running=false;cancelAnimationFrame(CLK.raf);if(synth)synth.cancel();EVENTS.forEach(function(ev){if(!ev.fired){ev.fn();ev.fired=true;}});progEl.style.width='100%';}
+function resetAnim(){CLK.running=false;cancelAnimationFrame(CLK.raf);if(synth)synth.cancel();CLK.elapsed=0;hardReset();progEl.style.width='0';progThumb.style.left='0';ctrlLabel.textContent='Click play to begin';showScene('s-play');}
+var progBar=document.getElementById('prog-bar');var seeking=false;
+function seekTo(pct){var targetMs=pct*TOTAL_MS;CLK.running=false;cancelAnimationFrame(CLK.raf);CLK.speechPaused=false;if(synth)synth.cancel();hardReset();CLK.elapsed=targetMs;EVENTS.forEach(function(ev){if(ev.t<=targetMs){ev.fn();ev.fired=true;}});progEl.style.width=(pct*100)+'%';progThumb.style.left=(pct*100)+'%';if(targetMs>0){CLK.running=true;CLK.lastTick=performance.now();CLK.raf=requestAnimationFrame(clkTick);pauseBtn.textContent='⏸ Pause';}}
+function getSeekPct(e){var r=progBar.getBoundingClientRect();var x=(e.touches?e.touches[0].clientX:e.clientX)-r.left;return Math.max(0,Math.min(1,x/r.width));}
+progBar.addEventListener('mousedown',function(e){if(!CLK.elapsed&&!CLK.running)return;seeking=true;seekTo(getSeekPct(e));});
+progBar.addEventListener('mousemove',function(e){var p=getSeekPct(e);progThumb.style.left=(p*100)+'%';if(seeking)seekTo(p);});
+progBar.addEventListener('mouseup',function(){seeking=false;});document.addEventListener('mouseup',function(){seeking=false;});
+progBar.addEventListener('touchstart',function(e){if(!CLK.elapsed&&!CLK.running)return;e.preventDefault();seeking=true;seekTo(getSeekPct(e));},{passive:false});
+progBar.addEventListener('touchmove',function(e){e.preventDefault();if(seeking)seekTo(getSeekPct(e));},{passive:false});
+progBar.addEventListener('touchend',function(){seeking=false;});
+function toggleFullscreen(){var el=document.getElementById('player');var btn=document.getElementById('fs-btn');if(!document.fullscreenElement){(el.requestFullscreen||el.webkitRequestFullscreen||el.mozRequestFullScreen).call(el);btn.textContent='✕ Exit Full';}else{(document.exitFullscreen||document.webkitExitFullscreen||document.mozCancelFullScreen).call(document);btn.textContent='⛶ Fullscreen';}}
+document.addEventListener('fullscreenchange',function(){if(!document.fullscreenElement)document.getElementById('fs-btn').textContent='⛶ Fullscreen';});
+
+
+function buildEvents(){
+  EVENTS=[];var t=0;TOTAL_MS=SEQ[0]+SEQ[1]+SEQ[2];
+  function at(off,fn){EVENTS.push({t:t+off,fired:false,fn:fn});}
+  at(0,function(){
+    showScene('s1');document.getElementById('ch-badge').classList.add('vis');
+    pauseBtn.style.display='inline-block';skipBtn.style.display='inline-block';
+    ctrlLabel.textContent='WS 14 of 16';
+    document.getElementById('ws-sub2').textContent='Exit Velocity Gap Calculator · 10-ETF Position Planner';
+    setSub('Worksheet 14: The Titan Vault. This is the advanced portfolio architecture — a 10-ETF strategy designed for long-term capital growth alongside income production.');
+  });
+  at(4500,function(){document.getElementById('s1desc').textContent='The Titan Vault is your RRSP or long-horizon vehicle. While your TFSA engines pay current bills with high-yield income positions, the Vault grows capital that will eventually become a second income layer.';});
+  at(8500,function(){setSub('This worksheet calculates your Exit Velocity Gap — the exact distance between where you are and where you need to be for true financial independence.');});
+  t+=SEQ[0];
+
+  at(0,function(){showScene('s3');setSub('Section A: The Exit Velocity Gap Calculator. Seven fields that tell you your exact financial independence number and how close you are to reaching it.');});
+  at(4500,function(){hl('ev1');setSub('BASELINE MONTHLY INCOME NEEDED: What does your life actually cost per month? Rent, food, transport, utilities. No luxuries yet — just the number to survive and thrive comfortably.');});
+  at(9500,function(){fill('ev1','$2,000/month');hl('ev2');setSub('TARGET ANNUAL DIVIDEND INCOME: Monthly baseline times 12. $2,000 per month equals $24,000 per year. This is the annual passive income you need from your engines.');});
+  at(14500,function(){fill('ev2','$24,000/year');setSub('TARGET YIELD: 12 percent. This is the yield assumption used throughout the entire Financially Trapped system. Conservative but achievable with the right Canadian income positions.');});
+  at(18500,function(){hl('ev4');setSub('CAPITAL REQUIRED: Annual income divided by target yield. $24,000 divided by 0.12 equals $200,000. That is your Exit Velocity number. $200,000 in engines pays your life.');});
+  at(24000,function(){fill('ev4','$200,000');hl('ev5');setSub('CURRENT PORTFOLIO VALUE: What are all your engines worth today? Pull from your brokerage statements.');});
+  at(29000,function(){fill('ev5','$27,350');hl('ev6');setSub('EXIT VELOCITY GAP: $200,000 minus $27,350 equals $172,650. That is the distance remaining. Not a discouraging number — it is a precise target.');});
+  at(35000,function(){fill('ev6','$172,650 remaining');hl('ev7');setSub('PROGRESS: $27,350 divided by $200,000 equals 13.7 percent. You are 13.7 percent of the way to financial independence. And DRIP is compounding that number upward every month.');});
+  at(41000,function(){fill('ev7','13.7%');hlOff();setSub('13.7 percent complete. The gap is visible. The target is known. The machine is running toward it automatically. Now plan the vault that will hold the capital.');});
+  t+=SEQ[1];
+
+  at(0,function(){showScene('s4');setSub('Section B: The 10-ETF Position Planner. These are the pre-defined positions for the Titan Vault. Each serves a role in the diversified architecture.');});
+  at(4000,function(){fill('e1a','VFV');fill('e1b','20%');fill('e1c','S&P 500 growth core (USD)');fill('e1d','$0');fill('e1e','Target');hlOff();setSub('VFV: 20 percent. S&P 500 index. The single most powerful growth position available to a Canadian investor. 20 percent of the vault lives here.');});
+  at(9000,function(){fill('e2a','XEF');fill('e2b','10%');fill('e2c','International developed markets');fill('e2d','$0');fill('e2e','Target');hlOff();setSub('XEF: 10 percent. International developed markets. Europe, Japan, Australia. Diversification beyond North America.');});
+  at(14000,function(){fill('e3a','XEC');fill('e3b','5%');fill('e3c','Emerging markets (growth)');fill('e3d','$0');fill('e3e','Target');hlOff();setSub('XEC: 5 percent. Emerging markets. Higher risk, higher long-term reward. Small allocation because the volatility is real.');});
+  at(19000,function(){fill('e4a','XIC');fill('e4b','10%');fill('e4c','Canadian equity market');fill('e4d','$0');fill('e4e','Target');hlOff();setSub('XIC: 10 percent. Canadian equity index. Home country exposure with Canadian tax efficiency.');});
+  at(23000,function(){fill('e5a','ZRE');fill('e5b','10%');fill('e5c','Canadian REIT index');fill('e5d','$0');fill('e5e','Target');hlOff();setSub('ZRE: 10 percent. Canadian REITs. Income from real estate without owning property. Monthly distributions that support the Vault.');});
+  at(27000,function(){fill('e6a','CGL.C');fill('e6b','10%');fill('e6c','Gold — the gate guardian');fill('e6d','$0');fill('e6e','Target');hlOff();setSub('CGL.C: 10 percent. Physical gold ETF. Not for growth — for protection. When equity markets collapse, gold holds. This is your financial moat.');});
+  at(32000,function(){fill('e7a','XIU');fill('e7b','10%');fill('e7c','TSX 60 — large cap Canada');fill('e7d','$0');fill('e7e','Target');hlOff();});
+  at(35000,function(){fill('e8a','XBAL');fill('e8b','10%');fill('e8c','Balanced all-in-one (60/40)');fill('e8d','$0');fill('e8e','Target');hlOff();});
+  at(38000,function(){fill('e9a','ZDV');fill('e9b','10%');fill('e9c','Canadian dividend income ETF');fill('e9d','$0');fill('e9e','Target');hlOff();});
+  at(41000,function(){fill('e0a','QQC.F');fill('e0b','5%');fill('e0c','NASDAQ 100 tech growth');fill('e0d','$0');fill('e0e','Target');hlOff();document.getElementById('etf-pct').textContent='100%';setSub('All 10 positions planned. 100 percent allocation mapped. VFV anchors growth at 20%. Gold protects at 10%. Income ETFs run the middle. This is the Vault architecture.');});
+  at(47000,function(){document.getElementById('wsQuote14').classList.add('show');setSub('Growth builds the walls. Gold guards the gate.');});
+  t+=SEQ[2];
+  at(0,function(){showScene('s-cta');clrSub();pauseBtn.style.display='none';skipBtn.style.display='none';ctrlLabel.textContent='Worksheet 14 complete';CLK.running=false;});
+}
+
+
+function hardReset(){
+  CLK.running=false;cancelAnimationFrame(CLK.raf);if(synth)synth.cancel();
+  ['ev1','ev2','ev4','ev5','ev6','ev7'].forEach(function(id){var el=document.getElementById(id);if(el){el.textContent='';el.className='calc-val';}});
+  ['ev3'].forEach(function(id){var el=document.getElementById(id);if(el){el.textContent='12%';el.className='calc-val gold-fill';}});
+  ['e1a','e1b','e1c','e1d','e1e','e2a','e2b','e2c','e2d','e2e','e3a','e3b','e3c','e3d','e3e','e4a','e4b','e4c','e4d','e4e','e5a','e5b','e5c','e5d','e5e','e6a','e6b','e6c','e6d','e6e','e7a','e7b','e7c','e7d','e7e','e8a','e8b','e8c','e8d','e8e','e9a','e9b','e9c','e9d','e9e','e0a','e0b','e0c','e0d','e0e'].forEach(function(id){var el=document.getElementById(id);if(el){el.textContent='·';el.className='empty-cell';}});
+  var ep=document.getElementById('etf-pct');if(ep)ep.textContent='100%';
+  document.getElementById('wsQuote14').classList.remove('show');
+}
+</script>
+<script src="ws-shared.js"></script>
+</body>
+</html>lementById('ws-sub2').textContent='';
+  document.getElementById('ch-badge').classList.remove('vis');
+  pauseBtn.style.display='none';skipBtn.style.display='none';pauseBtn.textContent='⏸ Pause';setSub('');buildEvents();
+}
+
+</script>
+</body>
+</html>

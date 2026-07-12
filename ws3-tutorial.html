@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>WS3: The Triple-TFSA Blueprint | Financially Trapped</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:20px;}
+body{background:#0e0e1c;color:#e8e0cc;font-family:Georgia,serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;}
+#player{position:relative;width:100vw;height:100vh;background:#13132a;border:none;display:flex;flex-direction:column;overflow:hidden;}
+#prog-bar{height:16px;background:rgba(201,168,76,.12);flex-shrink:0;cursor:pointer;position:relative;user-select:none;border-top:1px solid rgba(201,168,76,.2);}
+#prog-bar:hover{background:rgba(201,168,76,.22);}
+#prog-fill{height:100%;width:0;background:#C9A84C;pointer-events:none;}
+#prog-thumb{position:absolute;top:50%;right:auto;width:20px;height:20px;border-radius:50%;background:#C9A84C;border:2px solid #fff;transform:translate(-50%,-50%);left:0;pointer-events:none;box-shadow:0 0 10px rgba(201,168,76,.7);opacity:0;transition:opacity .15s;}
+#prog-bar:hover #prog-thumb{opacity:1;}
+#fs-btn{font-family:Arial,sans-serif;font-size:0.8em;font-weight:bold;letter-spacing:.08em;color:#888;border:1px solid rgba(255,255,255,.18);background:none;padding:.38em .95em;border-radius:4px;cursor:pointer;white-space:nowrap;}
+#fs-btn:hover{color:#C9A84C;border-color:rgba(201,168,76,.5);}
+#voice-btn{font-family:Arial,sans-serif;font-size:0.8em;letter-spacing:.06em;color:#aaa;border:1px solid rgba(255,255,255,.18);background:none;padding:.38em .95em;border-radius:4px;cursor:pointer;}
+#voice-btn:hover{color:#C9A84C;border-color:rgba(201,168,76,.5);}
+#stage{flex:1;position:relative;overflow:hidden;}
+.scene{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .5s;}
+.scene.active{opacity:1;pointer-events:auto;}
+#s-play{cursor:pointer;background:radial-gradient(ellipse at center,#1e1e3a 0%,#0e0e1c 75%);}
+.ch-tag{font-family:Arial,sans-serif;font-size:0.85em;font-weight:bold;letter-spacing:.2em;text-transform:uppercase;color:#C9A84C;margin-bottom:.6em;}
+.ch-num{font-size:clamp(2.6em,7vw,4.5em);font-weight:bold;color:#C9A84C;line-height:1;text-shadow:0 0 40px rgba(201,168,76,.45);}
+.ch-title{font-size:clamp(1.1em,2.8vw,1.7em);color:#e8e0cc;margin-top:.35em;letter-spacing:.03em;}
+.ch-sub{font-size:0.9em;color:#bbb;font-style:italic;margin-top:.5em;}
+.play-ring{width:90px;height:90px;border-radius:50%;border:3px solid #C9A84C;display:flex;align-items:center;justify-content:center;margin-top:1.5em;transition:box-shadow .2s,transform .15s;}
+#s-play:hover .play-ring{box-shadow:0 0 32px rgba(201,168,76,.5);transform:scale(1.06);}
+.play-tri{width:0;height:0;border-top:18px solid transparent;border-bottom:18px solid transparent;border-left:28px solid #C9A84C;margin-left:7px;}
+#top-bar{background:#0a0a18;border-bottom:1px solid rgba(201,168,76,.2);padding:.6em 1.2em .5em;flex-shrink:0;}
+#ch-badge{font-family:Arial,sans-serif;font-size:0.72em;font-weight:bold;letter-spacing:.14em;text-transform:uppercase;color:#C9A84C;opacity:0;transition:opacity .5s;margin-bottom:.25em;}
+#ch-badge.vis{opacity:1;}
+#subtitle{font-size:1.08em;color:#fff;line-height:1.6;min-height:2.4em;}
+#subtitle span{background:none;padding:0;letter-spacing:.01em;color:#f0e8d0;}
+#controls{height:64px;display:flex;align-items:center;gap:.9em;padding:0 1.2em;background:#0a0a18;border-top:1px solid rgba(201,168,76,.2);flex-shrink:0;}
+#pause-btn{font-family:Arial,sans-serif;font-size:0.88em;font-weight:bold;letter-spacing:.1em;text-transform:uppercase;color:#C9A84C;border:2px solid rgba(201,168,76,.55);background:none;padding:.4em 1.1em;border-radius:4px;cursor:pointer;transition:background .15s;}
+#pause-btn:hover{background:rgba(201,168,76,.15);}
+#skip-btn{font-family:Arial,sans-serif;font-size:0.8em;letter-spacing:.08em;text-transform:uppercase;color:#999;border:1px solid rgba(255,255,255,.18);background:none;padding:.38em .95em;border-radius:4px;cursor:pointer;}
+#skip-btn:hover{color:#eee;}
+.ctrl-label{font-family:Arial,sans-serif;font-size:0.75em;color:#666;margin-left:auto;}
+.sc-wrap{width:92%;max-width:1400px;max-height:calc(100% - 130px);overflow-y:auto;padding:.4em 0;}
+.sc-wrap::-webkit-scrollbar{width:6px;}
+.sc-wrap::-webkit-scrollbar-thumb{background:rgba(201,168,76,.35);border-radius:3px;}
+.ws-shell{background:#0c0c20;border:1.5px solid rgba(201,168,76,.35);border-radius:6px;overflow:hidden;font-family:Arial,sans-serif;}
+.ws-hdr{padding:.65em 1.1em;border-bottom:1px solid rgba(201,168,76,.18);}
+.ws-hdr-title{font-size:0.72em;font-weight:bold;letter-spacing:.12em;text-transform:uppercase;color:#C9A84C;}
+.ws-hdr-sheet{font-size:0.95em;font-weight:bold;color:#e8e0cc;margin-top:.25em;}
+.ws-hdr-sub{font-size:0.76em;color:#999;font-style:italic;margin-top:.15em;}
+.ws-sec-band{background:rgba(201,168,76,.12);padding:.5em 1.1em;font-size:0.82em;font-weight:bold;letter-spacing:.07em;color:#C9A84C;border-top:1px solid rgba(201,168,76,.25);border-bottom:1px solid rgba(201,168,76,.18);}
+.ws-tbl{width:100%;border-collapse:collapse;}
+.ws-tbl th{background:rgba(201,168,76,.08);color:#C9A84C;font-size:0.8em;font-weight:bold;letter-spacing:.09em;padding:.55em .9em;border-bottom:1px solid rgba(201,168,76,.25);text-align:left;white-space:nowrap;}
+.ws-tbl td{font-size:0.88em;padding:.55em .9em;border-bottom:1px solid rgba(255,255,255,.05);color:#333;vertical-align:middle;}
+.ws-tbl td.filled{color:#d8cfb8;}
+.ws-tbl td.gold-val{color:#C9A84C;font-weight:bold;}
+.ws-tbl tr.active-row>td{background:rgba(201,168,76,.07);}
+.ws-tbl td.hl{background:rgba(201,168,76,.22)!important;color:#fff!important;border:2px solid rgba(201,168,76,.8)!important;border-radius:3px;}
+.ws-tbl tr.total-row>td{border-top:1.5px solid rgba(201,168,76,.4);color:#C9A84C;font-weight:bold;font-size:0.88em;padding:.55em .9em;}
+.ws-tbl td.empty-cell{color:#1e1e30;}
+.ws-calc-tbl{width:100%;border-collapse:collapse;}
+.ws-calc-tbl th{background:rgba(201,168,76,.08);color:#C9A84C;font-size:0.8em;font-weight:bold;letter-spacing:.09em;padding:.55em .9em;border-bottom:1px solid rgba(201,168,76,.25);text-align:left;}
+.ws-calc-tbl td{font-size:0.88em;padding:.65em .9em;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:middle;}
+.ws-calc-tbl td.calc-label{color:#bbb;white-space:nowrap;width:55%;}
+.ws-calc-tbl td.calc-val{color:#222238;width:45%;}
+.ws-calc-tbl td.calc-val.filled{color:#d8cfb8;}
+.ws-calc-tbl td.calc-val.gold-fill{color:#C9A84C;font-weight:bold;}
+.ws-calc-tbl td.hl{background:rgba(201,168,76,.22)!important;color:#fff!important;border:2px solid rgba(201,168,76,.8)!important;border-radius:3px;}
+.ws-calc-tbl tr.highlight-row td{background:rgba(201,168,76,.06);}
+.ws-quote-row{padding:.85em 1.1em;font-size:0.82em;color:#1e1e30;font-style:italic;border-top:1px solid rgba(255,255,255,.05);transition:color .6s;}
+.ws-quote-row.show{color:#C9A84C;}
+#s1 .ws-eyebrow{font-family:Arial,sans-serif;font-size:0.85em;font-weight:bold;letter-spacing:.2em;text-transform:uppercase;color:#C9A84C;margin-bottom:.6em;text-align:center;}
+#s1 .ws-title{font-size:clamp(1.6em,4vw,2.6em);font-weight:bold;color:#C9A84C;text-align:center;text-shadow:0 0 28px rgba(201,168,76,.35);}
+#s1 .ws-sub2{font-size:0.88em;color:#bbb;text-align:center;margin-top:.45em;font-style:italic;}
+#s1 .ws-desc{font-size:0.92em;color:#c8bfa8;text-align:center;margin-top:1.1em;line-height:1.75;max-width:600px;margin-left:auto;margin-right:auto;}
+#s-cta{text-align:center;}
+#s-cta .cta-done{font-size:0.9em;color:#aaa;margin-bottom:.8em;}
+#s-cta .cta-title{font-size:clamp(1.3em,3.2vw,2em);color:#C9A84C;margin-bottom:.4em;}
+.cta-btns{display:flex;gap:.9em;flex-wrap:wrap;justify-content:center;margin-top:1.2em;}
+.cta-btn{font-family:Arial,sans-serif;font-size:0.85em;font-weight:bold;letter-spacing:.1em;text-transform:uppercase;padding:.7em 1.5em;border-radius:4px;text-decoration:none;border:2px solid #C9A84C;color:#C9A84C;transition:background .15s;}
+.cta-btn.gold{background:#C9A84C;color:#0e0e1c;}
+.cta-btn:hover{background:rgba(201,168,76,.18);}
+.cta-btn.gold:hover{background:#b8953e;}
+</style>
+<link rel="stylesheet" href="ws-shared.css">
+</head>
+<body>
+<a href="/" id="vaHomeBtn" aria-label="Home" style="position:fixed;top:14px;left:14px;z-index:99999;display:inline-flex;align-items:center;gap:7px;padding:9px 15px;background:rgba(18,22,44,0.9);color:#d9b676;font-family:Georgia,'Times New Roman',serif;font-size:14px;font-weight:bold;letter-spacing:.5px;text-decoration:none;border:1px solid #d9b676;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.35);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);"><span style="font-size:16px;line-height:1;">&#8962;</span> Home</a>
+<div id="player">
+<div id="top-bar">
+<div id="ch-badge">Chapter 3 · The Triple-TFSA Blueprint</div>
+<div id="subtitle"><span id="sub-text"></span></div>
+</div>
+<div id="stage">
+<div class="scene active" id="s-play" onclick="startAnim()">
+<div class="ch-tag">Financially Trapped &middot; Worksheet Tutorial</div>
+<div class="ch-num">WS 3</div>
+<div class="ch-title">The Triple-TFSA Blueprint</div>
+<div class="ch-sub">Three-Engine Setup · Build Timeline</div>
+<div class="play-ring"><div class="play-tri"></div></div>
+</div>
+<div class="scene" id="s1">
+<div class="sc-wrap" style="text-align:center;">
+<div class="ws-eyebrow">Worksheet 3 of 16</div>
+<div class="ws-title">The Triple-TFSA Blueprint</div>
+<div class="ws-sub2" id="ws-sub2"></div>
+<div class="ws-desc" id="s1desc"></div>
+</div>
+</div>
+
+    <div class="scene" id="s3">
+      <div class="sc-wrap">
+        <div class="ws-shell">
+          <div class="ws-hdr">
+            <div class="ws-hdr-title">Financially Trapped &middot; The Architect's Working Documents</div>
+            <div class="ws-hdr-sheet">Worksheet 3: The Triple-TFSA Blueprint</div>
+            <div class="ws-hdr-sub">Three-Engine Account Setup &middot; Build Timeline</div>
+          </div>
+          <div class="ws-sec-band">[A] Three-Engine Account Setup</div>
+          <table class="ws-tbl">
+            <thead><tr><th>ENGINE</th><th>NICKNAME</th><th>PLATFORM</th><th>ACCOUNT TYPE</th><th>STATUS</th><th>NOTES</th></tr></thead>
+            <tbody>
+              <tr id="er1"><td id="e1a" class="empty-cell">&middot;</td><td id="e1b" class="empty-cell">&middot;</td><td id="e1c" class="empty-cell">&middot;</td><td id="e1d" class="empty-cell">&middot;</td><td id="e1e" class="empty-cell">&middot;</td><td id="e1f" class="empty-cell">&middot;</td></tr>
+              <tr id="er2"><td id="e2a" class="empty-cell">&middot;</td><td id="e2b" class="empty-cell">&middot;</td><td id="e2c" class="empty-cell">&middot;</td><td id="e2d" class="empty-cell">&middot;</td><td id="e2e" class="empty-cell">&middot;</td><td id="e2f" class="empty-cell">&middot;</td></tr>
+              <tr id="er3"><td id="e3a" class="empty-cell">&middot;</td><td id="e3b" class="empty-cell">&middot;</td><td id="e3c" class="empty-cell">&middot;</td><td id="e3d" class="empty-cell">&middot;</td><td id="e3e" class="empty-cell">&middot;</td><td id="e3f" class="empty-cell">&middot;</td></tr>
+              <tr><td class="empty-cell">&middot;</td><td class="empty-cell">&middot;</td><td class="empty-cell">&middot;</td><td class="empty-cell">&middot;</td><td class="empty-cell">&middot;</td><td class="empty-cell">&middot;</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="scene" id="s4">
+      <div class="sc-wrap">
+        <div class="ws-shell">
+          <div class="ws-hdr">
+            <div class="ws-hdr-title">Financially Trapped &middot; The Architect's Working Documents</div>
+            <div class="ws-hdr-sheet">Worksheet 3: The Triple-TFSA Blueprint</div>
+          </div>
+          <div class="ws-sec-band">[B] Build Timeline</div>
+          <table class="ws-tbl">
+            <thead><tr><th>PHASE</th><th>MILESTONE</th><th>TARGET DATE</th><th>CAPITAL REQUIRED</th><th>NOTES</th></tr></thead>
+            <tbody>
+              <tr id="tr1"><td id="t1a" class="empty-cell">&middot;</td><td id="t1b" class="empty-cell">&middot;</td><td id="t1c" class="empty-cell">&middot;</td><td id="t1d" class="empty-cell">&middot;</td><td id="t1e" class="empty-cell">&middot;</td></tr>
+              <tr id="tr2"><td id="t2a" class="empty-cell">&middot;</td><td id="t2b" class="empty-cell">&middot;</td><td id="t2c" class="empty-cell">&middot;</td><td id="t2d" class="empty-cell">&middot;</td><td id="t2e" class="empty-cell">&middot;</td></tr>
+              <tr id="tr3"><td id="t3a" class="empty-cell">&middot;</td><td id="t3b" class="empty-cell">&middot;</td><td id="t3c" class="empty-cell">&middot;</td><td id="t3d" class="empty-cell">&middot;</td><td id="t3e" class="empty-cell">&middot;</td></tr>
+              <tr><td class="empty-cell">&middot;</td><td class="empty-cell">&middot;</td><td class="empty-cell">&middot;</td><td class="empty-cell">&middot;</td><td class="empty-cell">&middot;</td></tr>
+              <tr><td class="empty-cell">&middot;</td><td class="empty-cell">&middot;</td><td class="empty-cell">&middot;</td><td class="empty-cell">&middot;</td><td class="empty-cell">&middot;</td></tr>
+            </tbody>
+          </table>
+          <div class="ws-quote-row" id="wsQuote3">"One is none. Two is one. Three is a business."</div>
+        </div>
+      </div>
+    </div>
+<div class="scene" id="s-cta">
+<div class="cta-done">Worksheet 3 complete</div>
+<div class="cta-title">The Triple-TFSA Blueprint</div>
+<div style="font-size:.78em;color:#aaa;font-style:italic;">Three engines defined. Build timeline set. The fleet exists on paper. Now build it in reality.</div>
+<div class="cta-btns">
+<a class="cta-btn gold" href="financially-trapped-hub.html#tutorials">Back to All Tutorials</a>
+<a class="cta-btn" href="#" onclick="resetAnim();return false;">Watch Again</a>
+</div>
+</div>
+</div>
+<div id="controls">
+<button id="pause-btn" onclick="togglePause()" style="display:none;">&#9208; Pause</button>
+<button id="skip-btn" onclick="skipToEnd()" style="display:none;">Skip &#8594;</button>
+<button id="voice-btn" onclick="toggleVoice()">&#128266; Voice</button>
+<div class="ctrl-label" id="ctrl-label">Click play to begin</div>
+<button id="fs-btn" onclick="toggleFullscreen()">&#9974; Fullscreen</button>
+</div>
+<div id="prog-bar" title="Click to seek">
+<div id="prog-fill"></div>
+<div id="prog-thumb"></div>
+</div>
+</div>
+<script>
+var SEQ=[8000,50000,45000];
+
+var CLK={elapsed:0,lastTick:0,running:false,raf:null,speechPaused:false};
+var EVENTS=[];
+var TOTAL_MS=0;
+var progEl=document.getElementById('prog-fill');
+var progThumb=document.getElementById('prog-thumb');
+var subEl=document.getElementById('sub-text');
+var pauseBtn=document.getElementById('pause-btn');
+var skipBtn=document.getElementById('skip-btn');
+var ctrlLabel=document.getElementById('ctrl-label');
+
+/* ── Web Speech API ── */
+var VOICE_ON=true;
+var synth=window.speechSynthesis||null;
+var VOX=[];
+function loadV(){if(synth)VOX=synth.getVoices();}
+if(synth){loadV();if(synth.onvoiceschanged!==undefined)synth.onvoiceschanged=loadV;}
+function speak(txt){
+  if(!VOICE_ON||!synth||!txt)return;
+  synth.cancel();
+  var u=new SpeechSynthesisUtterance(txt.replace(/[“”‘’"']/g,"'"));
+  u.rate=0.88;u.pitch=1.0;u.volume=1.0;
+  var voices=VOX.length?VOX:synth.getVoices();
+  var v=voices.find(function(x){return/samantha|karen|moira|victoria|allison|ava|alice|tessa|zoe/i.test(x.name);})||
+        voices.find(function(x){return x.lang.startsWith('en')&&x.localService;})||
+        voices.find(function(x){return x.lang.startsWith('en');});
+  if(v)u.voice=v;
+  CLK.speechPaused=true;
+  u.onend=function(){CLK.speechPaused=false;if(CLK.running)CLK.lastTick=performance.now();};
+  u.onerror=function(){CLK.speechPaused=false;if(CLK.running)CLK.lastTick=performance.now();};
+  synth.speak(u);
+}
+function toggleVoice(){
+  VOICE_ON=!VOICE_ON;
+  if(!VOICE_ON&&synth)synth.cancel();
+  document.getElementById('voice-btn').textContent=VOICE_ON?'🔊 Voice':'🔇 Muted';
+}
+
+function showScene(id){document.querySelectorAll('.scene').forEach(function(s){s.classList.remove('active');});var el=document.getElementById(id);if(el)el.classList.add('active');}
+function setSub(t){subEl.textContent=t;speak(t);}
+function clrSub(){subEl.textContent='';if(synth)synth.cancel();}
+function hl(id){document.querySelectorAll('.hl').forEach(function(c){c.classList.remove('hl');});var el=document.getElementById(id);if(el)el.classList.add('hl');}
+function fill(id,val,cls){var el=document.getElementById(id);if(!el)return;el.textContent=val;el.classList.remove('empty-cell','hl');el.classList.add(cls||'filled');}
+function hlOff(){document.querySelectorAll('.hl').forEach(function(c){c.classList.remove('hl');});}
+
+function clkTick(now){
+  if(!CLK.running)return;
+  if(!CLK.speechPaused){
+    CLK.elapsed+=now-CLK.lastTick;
+    EVENTS.forEach(function(ev){if(!ev.fired&&CLK.elapsed>=ev.t){ev.fn();ev.fired=true;}});
+    var pct=Math.min(CLK.elapsed/TOTAL_MS*100,100);
+    progEl.style.width=pct+'%';
+    progThumb.style.left=pct+'%';
+  }
+  CLK.lastTick=now;
+  CLK.raf=requestAnimationFrame(clkTick);
+}
+
+function startAnim(){
+  document.getElementById('s-play').classList.remove('active');
+  buildEvents();CLK.elapsed=0;CLK.running=true;CLK.lastTick=performance.now();CLK.raf=requestAnimationFrame(clkTick);
+}
+function togglePause(){
+  if(CLK.running){CLK.running=false;cancelAnimationFrame(CLK.raf);if(synth)synth.cancel();pauseBtn.textContent='▶ Resume';}
+  else{CLK.running=true;CLK.lastTick=performance.now();CLK.raf=requestAnimationFrame(clkTick);pauseBtn.textContent='⏸ Pause';}
+}
+function skipToEnd(){CLK.running=false;cancelAnimationFrame(CLK.raf);if(synth)synth.cancel();EVENTS.forEach(function(ev){if(!ev.fired){ev.fn();ev.fired=true;}});progEl.style.width='100%';}
+function resetAnim(){CLK.running=false;cancelAnimationFrame(CLK.raf);if(synth)synth.cancel();CLK.elapsed=0;hardReset();progEl.style.width='0';progThumb.style.left='0';ctrlLabel.textContent='Click play to begin';showScene('s-play');}
+
+var progBar=document.getElementById('prog-bar');
+var seeking=false;
+function seekTo(pct){
+  var targetMs=pct*TOTAL_MS;
+  CLK.running=false;cancelAnimationFrame(CLK.raf);CLK.speechPaused=false;if(synth)synth.cancel();
+  hardReset();CLK.elapsed=targetMs;
+  EVENTS.forEach(function(ev){if(ev.t<=targetMs){ev.fn();ev.fired=true;}});
+  progEl.style.width=(pct*100)+'%';progThumb.style.left=(pct*100)+'%';
+  if(targetMs>0){CLK.running=true;CLK.lastTick=performance.now();CLK.raf=requestAnimationFrame(clkTick);pauseBtn.textContent='⏸ Pause';}
+}
+function getSeekPct(e){var r=progBar.getBoundingClientRect();var x=(e.touches?e.touches[0].clientX:e.clientX)-r.left;return Math.max(0,Math.min(1,x/r.width));}
+progBar.addEventListener('mousedown',function(e){if(!CLK.elapsed&&!CLK.running)return;seeking=true;seekTo(getSeekPct(e));});
+progBar.addEventListener('mousemove',function(e){var p=getSeekPct(e);progThumb.style.left=(p*100)+'%';if(seeking)seekTo(p);});
+progBar.addEventListener('mouseup',function(){seeking=false;});
+document.addEventListener('mouseup',function(){seeking=false;});
+progBar.addEventListener('touchstart',function(e){if(!CLK.elapsed&&!CLK.running)return;e.preventDefault();seeking=true;seekTo(getSeekPct(e));},{passive:false});
+progBar.addEventListener('touchmove',function(e){e.preventDefault();if(seeking)seekTo(getSeekPct(e));},{passive:false});
+progBar.addEventListener('touchend',function(){seeking=false;});
+
+function toggleFullscreen(){
+  var el=document.getElementById('player');
+  var btn=document.getElementById('fs-btn');
+  if(!document.fullscreenElement){(el.requestFullscreen||el.webkitRequestFullscreen||el.mozRequestFullScreen).call(el);btn.textContent='✕ Exit Full';}
+  else{(document.exitFullscreen||document.webkitExitFullscreen||document.mozCancelFullScreen).call(document);btn.textContent='⛶ Fullscreen';}
+}
+document.addEventListener('fullscreenchange',function(){if(!document.fullscreenElement)document.getElementById('fs-btn').textContent='⛶ Fullscreen';});
+
+
+function buildEvents(){
+  EVENTS=[];var t=0;
+  TOTAL_MS=SEQ[0]+SEQ[1]+SEQ[2];
+  function at(off,fn){EVENTS.push({t:t+off,fired:false,fn:fn});}
+
+  at(0,function(){
+    showScene('s1');document.getElementById('ch-badge').classList.add('vis');
+    pauseBtn.style.display='inline-block';skipBtn.style.display='inline-block';
+    ctrlLabel.textContent='WS 3 of 16';
+    document.getElementById('ws-sub2').textContent='Three-Engine Account Setup · Build Timeline';
+    setSub('Worksheet 3: The Triple-TFSA Blueprint. One account is fragile. Three accounts is a fortress.');
+  });
+  at(3500,function(){document.getElementById('s1desc').textContent='The blueprint requires three separate TFSA engines on separate platforms, each with a distinct strategy. Redundancy is not a luxury - it is architecture.';});
+  at(7000,function(){setSub('You will define each engine, give it a nickname, assign it a platform, and build a phase-based timeline to bring all three online.');});
+  t+=SEQ[0];
+
+  // S3: Engine Setup
+  at(0,function(){showScene('s3');setSub('Section A: Three-Engine Account Setup. You need three accounts. Not one. Not two. Three. Each with a specific role.');});
+  at(4000,function(){hl('e1a');setSub('ENGINE 1: This is your primary income engine. The foundation. Your highest-yield dividend machine. Label it Engine 1.');});
+  at(7500,function(){fill('e1a','Engine 1');hl('e1b');setSub('NICKNAME: Give each engine a memorable name. This is personal - it should mean something. Try The Starter, The Anchor, or your own name.');});
+  at(12000,function(){fill('e1b','The Anchor');hl('e1c');setSub('PLATFORM: Wealthsimple Trade is the standard platform for Canadian investors starting out. Commission-free, fractional shares, instant DRIP.');});
+  at(16500,function(){fill('e1c','Wealthsimple Trade');hl('e1d');setSub('ACCOUNT TYPE: TFSA. Tax-Free Savings Account. Every dollar of growth and income inside this account is yours, tax-free, forever.');});
+  at(21000,function(){fill('e1d','TFSA');hl('e1e');setSub('STATUS: Open means the account exists and has been funded. In Progress means you are building it. Planned means it is not yet open.');});
+  at(25000,function(){fill('e1e','Open');fill('e1f','Primary income engine');hlOff();setSub('Engine 1 is defined. Now repeat this process for Engine 2.');});
+  at(30000,function(){hl('e2a');setSub('ENGINE 2: A backup income source. Different platform, different set of holdings. If Engine 1 has a platform outage, Engine 2 keeps paying you.');});
+  at(34000,function(){fill('e2a','Engine 2');fill('e2b','The Reserve');fill('e2c','Questrade');fill('e2d','TFSA');fill('e2e','In Progress');fill('e2f','Backup platform, diversified holds');hlOff();setSub('Engine 2 defined. Different platform from Engine 1. This is intentional. Never concentrate in one place.');});
+  at(40000,function(){hl('e3a');setSub('ENGINE 3: This is your growth or specialty engine. RRSP, RESP, or a thematic TFSA. It serves a specific long-term mission.');});
+  at(44000,function(){fill('e3a','Engine 3');fill('e3b','The Vault');fill('e3c','Wealthsimple Trade');fill('e3d','RRSP');fill('e3e','Planned');fill('e3f','Growth engine, ETF-focused');hlOff();setSub('Three engines defined. Each with a nickname, a platform, a type, and a status. This is no longer a wish list. It is a blueprint.');});
+  t+=SEQ[1];
+
+  // S4: Build Timeline
+  at(0,function(){showScene('s4');setSub('Section B: The Build Timeline. Every engine needs a phase, a milestone, a date, and capital required. Vague plans fail. Dated plans get built.');});
+  at(4000,function(){hl('t1a');setSub('PHASE 1: The Ignition. This is opening your first engine and making your first purchase. It does not matter how small. Starting is the entire milestone.');});
+  at(8000,function(){fill('t1a','Phase 1');fill('t1b','Open Engine 1, first purchase');hl('t1c');setSub('TARGET DATE: Set a real date. Not someday. Not soon. A month and a year. Write it here and hold yourself to it.');});
+  at(13000,function(){fill('t1c','July 2026');hl('t1d');setSub('CAPITAL REQUIRED: Even $100 is real capital. The machine does not care how small you start - it cares that you started.');});
+  at(17000,function(){fill('t1d','$100');fill('t1e','First injection, DRIP on');hlOff();});
+  at(20000,function(){hl('t2a');setSub('PHASE 2: The Expansion. Engine 2 comes online. A second platform, a second stream of income. Your first real redundancy.');});
+  at(24000,function(){fill('t2a','Phase 2');fill('t2b','Open Engine 2, fund to $500');fill('t2c','Oct 2026');fill('t2d','$500');fill('t2e','Second platform active');hlOff();});
+  at(29000,function(){hl('t3a');setSub('PHASE 3: The Fleet. Engine 3 is operational. You now have three income sources, on at least two platforms. You are no longer fragile.');});
+  at(33000,function(){fill('t3a','Phase 3');fill('t3b','Engine 3 funded, all three active');fill('t3c','Mar 2027');fill('t3d','$1,000');fill('t3e','Full fleet operational');hlOff();setSub('Your build timeline is set. Phases, milestones, dates, and capital requirements. This is an engineering document, not a daydream.');});
+  at(39000,function(){document.getElementById('wsQuote3').classList.add('show');setSub('One is none. Two is one. Three is a business.');});
+  t+=SEQ[2];
+
+  at(0,function(){showScene('s-cta');clrSub();pauseBtn.style.display='none';skipBtn.style.display='none';ctrlLabel.textContent='Worksheet 3 complete';CLK.running=false;});
+}
+
+
+function hardReset(){
+  CLK.running=false;cancelAnimationFrame(CLK.raf);if(synth)synth.cancel();
+  ['e1a','e1b','e1c','e1d','e1e','e1f','e2a','e2b','e2c','e2d','e2e','e2f','e3a','e3b','e3c','e3d','e3e','e3f'].forEach(function(id){var el=document.getElementById(id);if(el){el.textContent='·';el.className='empty-cell';}});
+  ['t1a','t1b','t1c','t1d','t1e','t2a','t2b','t2c','t2d','t2e','t3a','t3b','t3c','t3d','t3e'].forEach(function(id){var el=document.getElementById(id);if(el){el.textContent='·';el.className='empty-cell';}});
+  document.getElementById('wsQuote3').classList.remove('show');
+}
+</script>
+<script src="ws-shared.js"></script>
+</body>
+</html>lementById('ws-sub2').textContent='';
+  document.getElementById('ch-badge').classList.remove('vis');
+  pauseBtn.style.display='none';skipBtn.style.display='none';pauseBtn.textContent='⏸ Pause';setSub('');
+  buildEvents();
+}
+
+</script>
+</body>
+</html>
