@@ -45,9 +45,9 @@ const PORTFOLIO_DATA = {
     label:    "Financially Trapped — Starter",
     note:     "Reset May 14 2026. Seeded from ~$31 CAD gold proceeds. $50/month contributions beginning June 2026.",
     months:   ["May 2026", "Jun 2026"],
-    deposits: [0,          50],
-    value:    [31.51,      0],
-    dividends:[0.10,       0]
+    deposits: [0,          53.65],
+    value:    [31.51,      80.38],
+    dividends:[0.10,       0.26]
   },
 
   /* ══════════════════════════════════════════════════════════
@@ -190,7 +190,7 @@ const PORTFOLIO_DATA = {
     { name: "Quiet Titan",         balance: 22704.02, href: "quiet-titan.html",       sub: "TFSA · Jun 12, 2026" },
     { name: "Centurion",           balance:  2092.20, href: "centurion.html",          sub: "TFSA · Jun 12, 2026" },
     { name: "Tactical Tax Free",   balance:  1846.29, href: "tactical.html",           sub: "TFSA · Jun 12, 2026" },
-    { name: "Financially Trapped", balance:    47.15, href: "financially-trapped.html",sub: "TFSA · Proof of Concept · Jun 12, 2026" },
+    { name: "Financially Trapped", balance:    84.58, href: "financially-trapped.html",sub: "TFSA · Proof of Concept · Jun 30, 2026" },
     { name: "REITS",               balance:   212.14, href: "reits.html",              sub: "TFSA · Jun 12, 2026" },
     { name: "WhiteSwan",           balance:   105.05, href: "whiteswan.html",          sub: "TFSA · Active Trading · Jun 12, 2026" },
     { name: "Developer",           balance:   200.58, href: "developer.html",          sub: "TFSA · Jun 12, 2026" },
