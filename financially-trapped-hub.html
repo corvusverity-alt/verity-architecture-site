@@ -141,6 +141,7 @@ footer .f-brand{color:var(--gold);}
 </head>
 <body>
 <a href="/" id="vaHomeBtn" aria-label="Home" style="position:fixed;top:14px;left:14px;z-index:99999;display:inline-flex;align-items:center;gap:7px;padding:9px 15px;background:rgba(18,22,44,0.9);color:#d9b676;font-family:Georgia,'Times New Roman',serif;font-size:14px;font-weight:bold;letter-spacing:.5px;text-decoration:none;border:1px solid #d9b676;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.35);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);"><span style="font-size:16px;line-height:1;">&#8962;</span> Home</a>
+<a href="#" id="vaBackBtn" aria-label="Back" onclick="if(document.referrer&&document.referrer.indexOf(location.host)>-1){history.back();}else if(history.length>1){history.back();}else{location.href='/';}return false;" style="position:fixed;top:60px;left:14px;z-index:99999;display:inline-flex;align-items:center;gap:7px;padding:9px 15px;background:rgba(18,22,44,0.9);color:#d9b676;font-family:Georgia,'Times New Roman',serif;font-size:14px;font-weight:bold;letter-spacing:.5px;text-decoration:none;border:1px solid #d9b676;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.35);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);"><span style="font-size:16px;line-height:1;">&#8592;</span> Back</a>
 
 <header>
   <div class="brand label">Verity Architecture</div>
@@ -177,6 +178,7 @@ footer .f-brand{color:var(--gold);}
     <div class="bm-desc">A systematic framework for escaping financial inertia &mdash; one engineered position at a time. Real strategies, real account data, zero fluff. The book that started the portfolios you're looking at right now.</div>
     <div class="bm-buy">
       <a class="btn-hero btn-hero-gold" href="#" id="heroEbook">Buy Ebook &mdash; $14.99</a>
+      <a class="btn-hero btn-hero-line" href="/worksheets">Free Worksheets &rarr;</a>
       <span class="btn-hero btn-hero-dim">Book One Bundle &mdash; Coming Soon</span>
       <span class="btn-hero btn-hero-dim">Paperback &mdash; Coming Soon</span>
       <a class="btn-hero btn-hero-line" href="https://www.amazon.ca/dp/B0H6M2W9HZ" target="_blank" rel="noopener">Amazon Kindle &mdash; CAD $9.99</a>
