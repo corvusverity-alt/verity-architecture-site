@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Financially Trapped — The Architect's Working Documents</title>
+<style>
+:root{--dark:#1A1A2E;--gold:#C9A84C;--light-gold:#F5E6C8;--gold-dim:#A88830;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Georgia,"Times New Roman",serif;background:#F0EFE8;color:#1A1A2E;min-height:100vh;}
+
+/* ── Sidebar nav ─────────────────────────── */
+.sidebar{position:fixed;top:0;left:0;width:180px;height:100vh;background:#1A1A2E;overflow-y:auto;z-index:100;padding-bottom:2em;}
+.sidebar-logo{padding:1.2em 1em 0.8em;border-bottom:2px solid #C9A84C;text-align:center;}
+.sidebar-logo .logo-title{color:#C9A84C;font-size:0.65em;letter-spacing:0.15em;text-transform:uppercase;font-family:Arial,sans-serif;font-weight:bold;line-height:1.4;}
+.tab-btn{display:flex;flex-direction:column;align-items:flex-start;width:100%;padding:0.55em 0.8em;background:transparent;border:none;border-bottom:1px solid rgba(201,168,76,0.15);cursor:pointer;text-align:left;transition:background 0.15s;}
+.tab-btn:hover{background:rgba(201,168,76,0.12);}
+.tab-btn.active{background:#C9A84C;}
+.tab-btn.active .tab-num,.tab-btn.active .tab-name{color:#1A1A2E;}
+.tab-num{font-family:Arial,sans-serif;font-size:0.6em;font-weight:bold;color:#C9A84C;letter-spacing:0.1em;}
+.tab-btn.active .tab-num{color:#1A1A2E;}
+.tab-name{font-size:0.72em;color:#CCC;margin-top:0.1em;line-height:1.2;}
+
+/* ── Main content ────────────────────────── */
+.main{margin-left:180px;min-height:100vh;padding:0;}
+.ws-panel{max-width:860px;margin:0 auto;padding:0 1.5em 3em;}
+
+/* ── Worksheet header ────────────────────── */
+.ws-top-bar{background:#1A1A2E;color:#C9A84C;font-family:Arial,sans-serif;font-size:0.68em;font-weight:bold;letter-spacing:0.18em;text-transform:uppercase;padding:0.6em 1.5em;margin:0 -1.5em;}
+.ws-head{padding:1.2em 0 0.6em;}
+.ws-title{font-size:1.8em;font-weight:bold;color:#1A1A2E;margin-bottom:0.15em;}
+.ws-sub{font-style:italic;color:#555;font-size:0.95em;}
+.ws-rule{border:none;border-top:2px solid #C9A84C;margin:0.8em 0 1.2em;}
+.ws-instruction{font-style:italic;color:#555;font-size:0.92em;margin:0.3em 0 0.8em;border-left:4px solid #C9A84C;padding-left:0.8em;background:#F5E6C8;padding:0.5em 0.8em;border-radius:0 4px 4px 0;}
+
+/* ── Section badges ──────────────────────── */
+.sec-header{display:flex;align-items:center;gap:0.7em;margin:1.6em 0 0.6em;}
+.sec-badge{width:28px;height:28px;border-radius:50%;background:#C9A84C;color:#1A1A2E;font-weight:bold;font-size:0.9em;display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif;flex-shrink:0;}
+.sec-title{font-weight:bold;font-size:1.05em;color:#1A1A2E;}
+
+/* ── Tables ──────────────────────────────── */
+.table-wrap{width:100%;overflow-x:auto;margin:0.5em 0 1em;border:2px solid #C9A84C;border-radius:4px;}
+table{width:100%;border-collapse:collapse;font-size:0.875em;}
+thead tr th{background:#1A1A2E;color:#C9A84C;font-family:Arial,sans-serif;font-size:0.78em;font-weight:bold;letter-spacing:0.06em;text-transform:uppercase;padding:0.55em 0.75em;border-right:1px solid rgba(201,168,76,0.3);text-align:left;white-space:nowrap;}
+tbody tr td{padding:0.45em 0.6em;border-bottom:1px solid #DDD;border-right:1px solid #EEE;vertical-align:middle;}
+tbody tr:nth-child(even) td{background:#FAFAF6;}
+tbody tr:last-child td{border-bottom:none;}
+tfoot tr td{background:#F5E6C8;font-weight:bold;padding:0.5em 0.75em;border-top:2px solid #C9A84C;}
+.total-label{font-family:Arial,sans-serif;font-size:0.8em;letter-spacing:0.05em;text-transform:uppercase;}
+.total-val{font-weight:bold;color:#1A1A2E;}
+.calc-cell{background:#F5F5F0;color:#1A1A2E;font-weight:500;}
+.leech-cell{color:#c0392b;font-weight:bold;}
+
+/* ── Inputs ──────────────────────────────── */
+.cell-input{width:100%;border:1px solid #CCC;border-radius:3px;padding:0.3em 0.4em;font-size:0.9em;font-family:Georgia,serif;background:#FFF;color:#1A1A2E;}
+.cell-input:focus{outline:2px solid #C9A84C;border-color:#C9A84C;}
+select.cell-input{cursor:pointer;}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:0.6em 1.2em;margin:0.5em 0 1em;}
+.form-row{display:flex;flex-direction:column;gap:0.2em;}
+.form-row label{font-size:0.82em;color:#555;font-family:Arial,sans-serif;}
+.form-input{border:1px solid #CCC;border-radius:4px;padding:0.45em 0.6em;font-size:0.95em;font-family:Georgia,serif;width:100%;}
+.form-input:focus{outline:2px solid #C9A84C;}
+
+/* ── Pills / status badges ───────────────── */
+.pill{display:inline-block;padding:0.15em 0.6em;border-radius:20px;font-size:0.75em;font-family:Arial,sans-serif;font-weight:bold;letter-spacing:0.04em;}
+.pill.crawl{background:#F5E6C8;color:#8B6914;border:1px solid #C9A84C;}
+.pill.walk{background:#D4EDDA;color:#1A5C2A;border:1px solid #28A745;}
+.pill.run{background:#D1ECF1;color:#0C5460;border:1px solid #17A2B8;}
+.pill.leech{background:#F8D7DA;color:#721C24;border:1px solid #F5C6CB;}
+
+/* ── Checklist ───────────────────────────── */
+.checklist{display:flex;flex-direction:column;gap:0.5em;margin:0.5em 0 1em;}
+.checklist label{display:flex;align-items:flex-start;gap:0.6em;font-size:0.92em;cursor:pointer;padding:0.4em 0.6em;border-radius:4px;border:1px solid #E0E0E0;background:#FFF;}
+.checklist label:hover{background:#F5E6C8;}
+.checklist input[type=checkbox]{margin-top:0.15em;accent-color:#C9A84C;width:16px;height:16px;flex-shrink:0;}
+
+/* ── Calc results ────────────────────────── */
+.calc-result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:0.8em;margin:1em 0;}
+.result-card{background:#FFF;border:1px solid #DDD;border-radius:6px;padding:0.8em;text-align:center;}
+.result-card.highlight-card{background:#1A1A2E;border-color:#C9A84C;}
+.result-label{font-family:Arial,sans-serif;font-size:0.68em;letter-spacing:0.08em;text-transform:uppercase;color:#777;margin-bottom:0.3em;}
+.highlight-card .result-label{color:#C9A84C;}
+.result-val{font-size:1.2em;font-weight:bold;color:#1A1A2E;}
+.highlight-card .result-val{color:#C9A84C;font-size:1.35em;}
+.calc-box{background:#F5E6C8;border:1px solid #C9A84C;border-radius:4px;padding:0.7em 1em;margin-top:0.5em;font-size:0.9em;}
+
+/* ── Progress bar ────────────────────────── */
+.progress-block{background:#1A1A2E;border-radius:6px;padding:1.2em 1.4em;margin:1.2em 0;}
+.progress-label{font-family:Arial,sans-serif;font-size:0.65em;letter-spacing:0.2em;text-transform:uppercase;color:#C9A84C;margin-bottom:0.4em;}
+.progress-nums{margin-bottom:0.6em;}
+.progress-big{font-size:2.5em;font-weight:bold;color:#FFF;}
+.progress-of{font-size:1.1em;color:#AAA;}
+.progress-bar-wrap{background:rgba(255,255,255,0.1);border-radius:20px;height:10px;margin:0.5em 0;}
+.progress-bar{background:#C9A84C;height:10px;border-radius:20px;transition:width 0.3s;}
+.progress-note{font-style:italic;color:#C9A84C;font-size:0.82em;margin-top:0.4em;}
+
+/* ── Add row button ──────────────────────── */
+.add-row-btn{background:transparent;border:1px dashed #C9A84C;color:#C9A84C;padding:0.35em 1em;border-radius:4px;cursor:pointer;font-size:0.82em;margin-top:0.3em;font-family:Arial,sans-serif;}
+.add-row-btn:hover{background:#F5E6C8;}
+
+/* ── Revolt summary ──────────────────────── */
+.revolt-summary{display:flex;gap:1.5em;flex-wrap:wrap;background:#1A1A2E;border-radius:6px;padding:1em 1.4em;margin-top:1em;}
+.revolt-item{color:#CCC;font-size:0.88em;} .revolt-item strong{color:#C9A84C;}
+
+/* ── Quote bar ───────────────────────────── */
+.ws-quote{background:#1A1A2E;color:#C9A84C;font-style:italic;font-size:0.95em;padding:1em 1.5em;margin:2em -1.5em 0;text-align:center;letter-spacing:0.02em;}
+
+/* ── Footer ──────────────────────────────── */
+.ws-footer{display:flex;justify-content:space-between;font-family:Arial,sans-serif;font-size:0.68em;letter-spacing:0.1em;text-transform:uppercase;color:#888;padding:0.8em 0;border-top:1px solid #CCC;margin-top:1.5em;}
+
+/* ── Print ───────────────────────────────── */
+@media print{.sidebar{display:none;}.main{margin-left:0;}.ws-panel{display:block!important;page-break-after:always;}}
+@media(max-width:600px){.sidebar{width:100%;height:auto;position:relative;}.main{margin-left:0;}}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-title">Financially<br>Trapped<br>Worksheets</div>
+  </div>
+  <button class="tab-btn" id="tab-1" onclick="showWS(1)"><span class="tab-num">W1</span><span class="tab-name">Shopping Cart Pr…</span></button>
+<button class="tab-btn" id="tab-2" onclick="showWS(2)"><span class="tab-num">W2</span><span class="tab-name">Pantry-Level Math</span></button>
+<button class="tab-btn" id="tab-3" onclick="showWS(3)"><span class="tab-num">W3</span><span class="tab-name">Triple-TFSA Blue…</span></button>
+<button class="tab-btn" id="tab-4" onclick="showWS(4)"><span class="tab-num">W4</span><span class="tab-name">Leech and the Cage</span></button>
+<button class="tab-btn" id="tab-5" onclick="showWS(5)"><span class="tab-num">W5</span><span class="tab-name">Redundancy of th…</span></button>
+<button class="tab-btn" id="tab-6" onclick="showWS(6)"><span class="tab-num">W6</span><span class="tab-name">Bill Slayer</span></button>
+<button class="tab-btn" id="tab-7" onclick="showWS(7)"><span class="tab-num">W7</span><span class="tab-name">Threading the Ne…</span></button>
+<button class="tab-btn" id="tab-8" onclick="showWS(8)"><span class="tab-num">W8</span><span class="tab-name">40-Hour Banked W…</span></button>
+<button class="tab-btn" id="tab-9" onclick="showWS(9)"><span class="tab-num">W9</span><span class="tab-name">Household Perime…</span></button>
+<button class="tab-btn" id="tab-10" onclick="showWS(10)"><span class="tab-num">W10</span><span class="tab-name">Smooth Ride</span></button>
+<button class="tab-btn" id="tab-11" onclick="showWS(11)"><span class="tab-num">W11</span><span class="tab-name">Chaos Discount</span></button>
+<button class="tab-btn" id="tab-12" onclick="showWS(12)"><span class="tab-num">W12</span><span class="tab-name">Bulkhead Strategy</span></button>
+<button class="tab-btn" id="tab-13" onclick="showWS(13)"><span class="tab-num">W13</span><span class="tab-name">DRIP</span></button>
+<button class="tab-btn" id="tab-14" onclick="showWS(14)"><span class="tab-num">W14</span><span class="tab-name">Titan Vault</span></button>
+<button class="tab-btn" id="tab-15" onclick="showWS(15)"><span class="tab-num">W15</span><span class="tab-name">Exit Strategy</span></button>
+<button class="tab-btn" id="tab-16" onclick="showWS(16)"><span class="tab-num">W16</span><span class="tab-name">Eternal Architect</span></button>
+</div>
+
+<div class="main">
+  <div class="ws-panel" id="ws-1" style="display:none">
+<div class="ws-top-bar">FINANCIALLY TRAPPED &nbsp;·&nbsp; THE ARCHITECT'S WORKING DOCUMENTS</div>
+<div class="ws-head">
+  <h2 class="ws-title">Worksheet 1: The Shopping Cart Protocol</h2>
+  <p class="ws-sub">Found Money Log · TFSA Setup Checklist · First Injection Record</p>
+</div>
+<div class="ws-rule"></div>
+<p class="ws-instruction">Every dollar that arrives at zero cost to your body goes directly into the machine. This worksheet captures the first fuel.</p>
+
+<div class="sec-header"><span class="sec-badge">A</span><span class="sec-title">Found Money Log</span></div>
+<p class="ws-instruction">Record every zero-cost dollar. Tax refunds, rebate cheques, found money, cashback, deposit returns.</p>
+<div class="table-wrap">
+<table id="found-log">
+<thead><tr><th>Date</th><th>Source</th><th>Amount ($)</th><th>Deployed To</th></tr></thead>
+<tbody id="found-rows">
+  <tr>
+    <td><input type="date" class="cell-input" onchange="updateFoundTotal()"></td>
+    <td><input type="text" class="cell-input" placeholder="e.g. Tax refund"></td>
+    <td><input type="number" class="cell-input num" placeholder="0.00" onchange="updateFoundTotal()"></td>
+    <td><input type="text" class="cell-input" placeholder="e.g. Engine 1 – QYLD"></td>
+  </tr>
+  <tr>
+    <td><input type="date" class="cell-input" onchange="updateFoundTotal()"></td>
+    <td><input type="text" class="cell-input" placeholder="e.g. Shopping cart loonie"></td>
+    <td><input type="number" class="cell-input num" placeholder="0.00" onchange="updateFoundTotal()"></td>
+    <td><input type="text" class="cell-input" placeholder="e.g. Engine 1 – HDIV"></td>
+  </tr>
+  <tr>
+    <td><input type="date" class="cell-input" onchange="updateFoundTotal()"></td>
+    <td><input type="text" class="cell-input" placeholder="Add source..."></td>
+    <td><input type="number" class="cell-input num" placeholder="0.00" onchange="updateFoundTotal()"></td>
+    <td><input type="text" class="cell-input"></td>
+  </tr>
+</tbody>
+<tfoot><tr><td colspan="2" class="total-label">Total Found Capital</td><td class="total-val" id="found-total">$0.00</td><td></td></tr></tfoot>
+</table>
+</div>
+<button class="add-row-btn" onclick="addFoundRow()">+ Add Row</button>
+
+<div class="sec-header"><span class="sec-badge">B</span><span class="sec-title">TFSA Setup Checklist</span></div>
+<div class="checklist">
+  <label><input type="checkbox"> Choose a self-directed brokerage (Questrade or Wealthsimple Trade)</label>
+  <label><input type="checkbox"> Open a TFSA account (Engine 1 — Rebate Portfolio)</label>
+  <label><input type="checkbox"> Confirm contribution room with CRA My Account</label>
+  <label><input type="checkbox"> Set up a recurring bi-weekly transfer (even $25 counts)</label>
+  <label><input type="checkbox"> Purchase first income-generating position (target: 12%+ yield)</label>
+  <label><input type="checkbox"> Activate DRIP on first position</label>
+  <label><input type="checkbox"> Record first dividend received</label>
+</div>
+
+<div class="sec-header"><span class="sec-badge">C</span><span class="sec-title">First Injection Record</span></div>
+<div class="form-grid">
+  <div class="form-row"><label>Date of first injection</label><input type="date" class="form-input"></div>
+  <div class="form-row"><label>Amount deployed ($)</label><input type="number" class="form-input" placeholder="e.g. 1.00"></div>
+  <div class="form-row"><label>Platform</label>
+    <select class="form-input"><option>Questrade</option><option>Wealthsimple</option><option>Other</option></select>
+  </div>
+  <div class="form-row"><label>Ticker purchased</label><input type="text" class="form-input" placeholder="e.g. QYLD"></div>
+  <div class="form-row"><label>Units acquired</label><input type="number" class="form-input" placeholder="e.g. 0.05"></div>
+  <div class="form-row"><label>Est. annual dividend ($)</label><input type="number" class="form-input" id="w1-div" oninput="w1calc()"></div>
+  <div class="form-row"><label>First bill this will execute</label><input type="text" class="form-input" placeholder="e.g. Netflix ($18/mo)"></div>
+</div>
+<div class="calc-box" id="w1-result">Fill in the annual dividend above to see your first Days of Freedom calculation.</div>
+
+<script>
+function addFoundRow(){
+  var t=document.getElementById('found-rows');
+  var r=t.insertRow(-1);
+  r.innerHTML='<td><input type="date" class="cell-input" onchange="updateFoundTotal()"></td><td><input type="text" class="cell-input" placeholder="Source"></td><td><input type="number" class="cell-input num" placeholder="0.00" onchange="updateFoundTotal()"></td><td><input type="text" class="cell-input"></td>';
+}
+function updateFoundTotal(){
+  var rows=document.querySelectorAll('#found-rows .num');
+  var t=0; rows.forEach(function(r){t+=parseFloat(r.value)||0;});
+  document.getElementById('found-total').textContent='$'+t.toFixed(2);
+}
+function w1calc(){
+  var d=parseFloat(document.getElementById('w1-div').value)||0;
+  if(d>0){
+    var dof=(d/65.75).toFixed(1);
+    document.getElementById('w1-result').innerHTML='<strong>Estimated Days of Freedom (at $65.75/day survival):</strong> '+dof+' days — the machine has started.';
+  }
+}
+</script>
+<div class="ws-quote">&#8220;Every zero-cost dollar is a soldier that doesn't cost you a knee.&#8221;</div><div class="ws-footer"><span>VERITY ARCHITECTURE · CORVUS VERITY · 2026</span><span>Worksheet 1 of 16</span></div></div>
+<div class="ws-panel" id="ws-2" style="display:none">
+<div class="ws-top-bar">FINANCIALLY TRAPPED &nbsp;·&nbsp; THE ARCHITECT'S WORKING DOCUMENTS</div>
+<div class="ws-head">
+  <h2 class="ws-title">Worksheet 2: The Pantry-Level Math</h2>
+  <p class="ws-sub">Price every bill. Set the first Engine target. Calculate your Days of Freedom baseline.</p>
+</div>
+<div class="ws-rule"></div>
+<p class="ws-instruction">Engine Price = Annual Cost ÷ 0.12 &nbsp;·&nbsp; Build smallest Engine Price first &nbsp;·&nbsp; Every executed bill is permanent freedom</p>
+
+<div class="sec-header"><span class="sec-badge">A</span><span class="sec-title">My Pantry Spreadsheet</span></div>
+<p class="ws-instruction">Enter your bills below. Annual and Engine Price calculate automatically.</p>
+<div class="table-wrap">
+<table id="pantry-table">
+<thead><tr><th>Bill / Expense</th><th>Monthly ($)</th><th>Annual ($)</th><th>Engine Price ($)</th><th>Status</th></tr></thead>
+<tbody id="pantry-rows">
+  <tr>
+    <td><input type="text" class="cell-input" value="Netflix" oninput="pantryCalc(this)"></td>
+    <td><input type="number" class="cell-input num" value="18" oninput="pantryCalc(this)"></td>
+    <td class="calc-cell" data-annual></td>
+    <td class="calc-cell" data-engine></td>
+    <td class="calc-cell" data-status></td>
+  </tr>
+  <tr>
+    <td><input type="text" class="cell-input" value="Internet" oninput="pantryCalc(this)"></td>
+    <td><input type="number" class="cell-input num" value="80" oninput="pantryCalc(this)"></td>
+    <td class="calc-cell" data-annual></td>
+    <td class="calc-cell" data-engine></td>
+    <td class="calc-cell" data-status></td>
+  </tr>
+  <tr>
+    <td><input type="text" class="cell-input" placeholder="Add a bill..."></td>
+    <td><input type="number" class="cell-input num" placeholder="0" oninput="pantryCalc(this)"></td>
+    <td class="calc-cell" data-annual></td>
+    <td class="calc-cell" data-engine></td>
+    <td class="calc-cell" data-status></td>
+  </tr>
+  <tr>
+    <td><input type="text" class="cell-input" placeholder="Add a bill..."></td>
+    <td><input type="number" class="cell-input num" placeholder="0" oninput="pantryCalc(this)"></td>
+    <td class="calc-cell" data-annual></td>
+    <td class="calc-cell" data-engine></td>
+    <td class="calc-cell" data-status></td>
+  </tr>
+</tbody>
+<tfoot>
+  <tr><td colspan="1" class="total-label">Total</td>
+  <td class="total-val" id="p-monthly">—</td>
+  <td class="total-val" id="p-annual">—</td>
+  <td class="total-val" id="p-engine">—</td>
+  <td></td></tr>
+</tfoot>
+</table>
+</div>
+<button class="add-row-btn" onclick="addPantryRow()">+ Add Bill</button>
+
+<div class="sec-header"><span class="sec-badge">B</span><span class="sec-title">Days of Freedom Calculator</span></div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Metric</th><th>Your Number</th><th>Result</th></tr></thead>
+<tbody>
+  <tr>
+    <td>Annual survival cost (all essential bills)</td>
+    <td><input type="number" class="cell-input num" id="dof-expenses" value="24000" oninput="dofCalc()"></td>
+    <td class="calc-cell" id="dof-daily">$65.75/day</td>
+  </tr>
+  <tr>
+    <td>Total annual dividends from all engines</td>
+    <td><input type="number" class="cell-input num" id="dof-divs" value="0" oninput="dofCalc()"></td>
+    <td class="calc-cell" id="dof-result">0 days</td>
+  </tr>
+  <tr>
+    <td>Freedom Status %</td>
+    <td class="calc-cell" id="dof-pct" colspan="2">0%</td>
+  </tr>
+</tbody>
+</table>
+</div>
+
+<div class="progress-block" id="dof-progress-block">
+  <div class="progress-label">DAYS OF FREEDOM OWNED</div>
+  <div class="progress-nums"><span class="progress-big" id="dof-days">0</span><span class="progress-of"> / 365</span></div>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="dof-bar" style="width:0%"></div></div>
+  <div class="progress-note" id="dof-note">The Crawl — every injection closes this gap permanently</div>
+</div>
+
+<script>
+function pantryCalc(el){
+  var rows=document.querySelectorAll('#pantry-rows tr');
+  var totM=0,totA=0,totE=0;
+  rows.forEach(function(row){
+    var numInput=row.querySelector('.num');
+    var m=parseFloat(numInput?numInput.value:0)||0;
+    var a=m*12; var e=a/0.12;
+    var cells=row.querySelectorAll('.calc-cell');
+    if(cells[0]) cells[0].textContent=m?'$'+a.toFixed(2):'—';
+    if(cells[1]) cells[1].textContent=m?'$'+e.toFixed(2):'—';
+    if(cells[2]){
+      if(!m){cells[2].innerHTML='—';}
+      else if(e<1000){cells[2].innerHTML='<span class="pill crawl">Crawling</span>';}
+      else if(e<10000){cells[2].innerHTML='<span class="pill walk">Walking</span>';}
+      else{cells[2].innerHTML='<span class="pill run">Running</span>';}
+    }
+    totM+=m; totA+=a; totE+=e;
+  });
+  document.getElementById('p-monthly').textContent=totM?'$'+totM.toFixed(2)+'/mo':'—';
+  document.getElementById('p-annual').textContent=totA?'$'+totA.toFixed(2)+'/yr':'—';
+  document.getElementById('p-engine').textContent=totE?'$'+totE.toFixed(2)+' needed':'—';
+}
+function addPantryRow(){
+  var t=document.getElementById('pantry-rows');
+  var r=t.insertRow(-1);
+  r.innerHTML='<td><input type="text" class="cell-input" placeholder="Bill name..."></td><td><input type="number" class="cell-input num" placeholder="0" oninput="pantryCalc(this)"></td><td class="calc-cell" data-annual></td><td class="calc-cell" data-engine></td><td class="calc-cell" data-status></td>';
+}
+function dofCalc(){
+  var exp=parseFloat(document.getElementById('dof-expenses').value)||24000;
+  var div=parseFloat(document.getElementById('dof-divs').value)||0;
+  var daily=exp/365;
+  var days=div/daily;
+  var pct=Math.min(100,(days/365)*100);
+  document.getElementById('dof-daily').textContent='$'+daily.toFixed(2)+'/day';
+  document.getElementById('dof-result').textContent=Math.floor(days)+' days';
+  document.getElementById('dof-days').textContent=Math.floor(days);
+  document.getElementById('dof-bar').style.width=pct+'%';
+  document.getElementById('dof-pct').textContent=(pct).toFixed(1)+'%';
+  var note=days<30?'The Crawl — every injection closes this gap permanently':days<180?'The Walk — the machine is building momentum':days<365?'The Run — Exit Velocity is within reach':'EXIT VELOCITY ACHIEVED — the machine breathes on its own';
+  document.getElementById('dof-note').textContent=note;
+}
+window.onload=function(){pantryCalc();dofCalc();};
+</script>
+<div class="ws-quote">&#8220;A 12% yield isn't a percentage — it's a free bag of milk.&#8221;</div><div class="ws-footer"><span>VERITY ARCHITECTURE · CORVUS VERITY · 2026</span><span>Worksheet 2 of 16</span></div></div>
+<div class="ws-panel" id="ws-3" style="display:none">
+<div class="ws-top-bar">FINANCIALLY TRAPPED &nbsp;·&nbsp; THE ARCHITECT'S WORKING DOCUMENTS</div>
+<div class="ws-head">
+  <h2 class="ws-title">Worksheet 3: The Triple-TFSA Blueprint</h2>
+  <p class="ws-sub">Name the three accounts. Set the mission for each. Plan the build sequence.</p>
+</div>
+<div class="ws-rule"></div>
+<div class="sec-header"><span class="sec-badge">A</span><span class="sec-title">My Three-Engine Account Setup</span></div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Engine</th><th>Account Nickname</th><th>Platform</th><th>Account Type</th><th>Status</th><th>Notes</th></tr></thead>
+<tbody>
+  <tr>
+    <td><strong>ENGINE 1</strong><br><small>Rebate Portfolio</small></td>
+    <td><input type="text" class="cell-input" placeholder="e.g. Bill Slayer"></td>
+    <td><select class="cell-input"><option>Questrade</option><option>Wealthsimple</option><option>Other</option></select></td>
+    <td><select class="cell-input"><option>TFSA</option><option>RRSP</option><option>Cash</option></select></td>
+    <td><label><input type="checkbox" onchange="e1check(this)"> Open</label><br><label><input type="checkbox"> Funded</label></td>
+    <td><input type="text" class="cell-input" placeholder="High-yield dividends"></td>
+  </tr>
+  <tr>
+    <td><strong>ENGINE 2</strong><br><small>Corporate Landlord</small></td>
+    <td><input type="text" class="cell-input" placeholder="e.g. The Landlord"></td>
+    <td><select class="cell-input"><option>Questrade</option><option>Wealthsimple</option><option>Other</option></select></td>
+    <td><select class="cell-input"><option>TFSA</option><option>RRSP</option><option>Cash</option></select></td>
+    <td><label><input type="checkbox"> Open</label><br><label><input type="checkbox"> Funded</label></td>
+    <td><input type="text" class="cell-input" placeholder="REITs, utilities, telecom"></td>
+  </tr>
+  <tr>
+    <td><strong>ENGINE 3</strong><br><small>Titan Vault</small></td>
+    <td><input type="text" class="cell-input" placeholder="e.g. The Titan Vault"></td>
+    <td><select class="cell-input"><option>Questrade</option><option>Wealthsimple</option><option>Other</option></select></td>
+    <td><select class="cell-input"><option>TFSA</option><option>RRSP</option><option>Cash</option></select></td>
+    <td><label><input type="checkbox"> Open</label><br><label><input type="checkbox"> Funded</label></td>
+    <td><input type="text" class="cell-input" placeholder="10 ETF growth strategy"></td>
+  </tr>
+</tbody>
+</table>
+</div>
+
+<div class="sec-header"><span class="sec-badge">B</span><span class="sec-title">Build Timeline</span></div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Phase</th><th>Milestone</th><th>My Target Date</th><th>Capital Required ($)</th><th>Notes</th></tr></thead>
+<tbody>
+  <tr><td><strong>Year 1 — The Crawl</strong></td><td>Engine 1 executing 3+ Pantry targets</td><td><input type="date" class="cell-input"></td><td><input type="number" class="cell-input" placeholder="e.g. 3000"></td><td><input type="text" class="cell-input"></td></tr>
+  <tr><td><strong>Year 2 — The Walk</strong></td><td>Engine 2 seeded. First REIT position held.</td><td><input type="date" class="cell-input"></td><td><input type="number" class="cell-input" placeholder="e.g. 15000"></td><td><input type="text" class="cell-input"></td></tr>
+  <tr><td><strong>Year 3+ — The Run</strong></td><td>Engine 3 opened. Titan receiving surplus capital.</td><td><input type="date" class="cell-input"></td><td><input type="number" class="cell-input" placeholder="e.g. 40000"></td><td><input type="text" class="cell-input"></td></tr>
+  <tr><td><strong>Target Year</strong></td><td>Full Exit Velocity. All 3 valves open.</td><td><input type="date" class="cell-input"></td><td><input type="number" class="cell-input" placeholder="e.g. 200000"></td><td><input type="text" class="cell-input"></td></tr>
+</tbody>
+</table>
+</div>
+<div class="ws-quote">&#8220;One is none. Two is one. Three is a business.&#8221;</div><div class="ws-footer"><span>VERITY ARCHITECTURE · CORVUS VERITY · 2026</span><span>Worksheet 3 of 16</span></div></div>
+<div class="ws-panel" id="ws-4" style="display:none">
+<div class="ws-top-bar">FINANCIALLY TRAPPED &nbsp;·&nbsp; THE ARCHITECT'S WORKING DOCUMENTS</div>
+<div class="ws-head">
+  <h2 class="ws-title">Worksheet 4: The Leech and the Cage</h2>
+  <p class="ws-sub">Audit your current holdings. Calculate the MER cost. Plan the escape from the Cage.</p>
+</div>
+<div class="ws-rule"></div>
+<div class="sec-header"><span class="sec-badge">A</span><span class="sec-title">MER Audit — Current Holdings</span></div>
+<p class="ws-instruction">Find the MER on every fund you currently hold. Anything above 0.50% is a Leech. Calculate what it's costing you annually.</p>
+<div class="table-wrap">
+<table id="mer-table">
+<thead><tr><th>Fund / Holding</th><th>Institution</th><th>Current Value ($)</th><th>MER %</th><th>Annual Fee ($)</th><th>Action</th></tr></thead>
+<tbody id="mer-rows">
+  <tr>
+    <td><input type="text" class="cell-input" placeholder="e.g. Balanced Mutual Fund"></td>
+    <td><input type="text" class="cell-input" placeholder="e.g. TD Bank"></td>
+    <td><input type="number" class="cell-input num" placeholder="8000" oninput="merCalc(this)"></td>
+    <td><input type="number" class="cell-input num" step="0.01" placeholder="2.45" oninput="merCalc(this)"></td>
+    <td class="calc-cell" data-fee></td>
+    <td><select class="cell-input"><option>— assess —</option><option>KEEP — low MER</option><option>LEECH — transfer out</option><option>EVALUATE</option></select></td>
+  </tr>
+  <tr>
+    <td><input type="text" class="cell-input" placeholder="Fund name"></td>
+    <td><input type="text" class="cell-input" placeholder="Institution"></td>
+    <td><input type="number" class="cell-input num" placeholder="0" oninput="merCalc(this)"></td>
+    <td><input type="number" class="cell-input num" step="0.01" placeholder="0.00" oninput="merCalc(this)"></td>
+    <td class="calc-cell" data-fee></td>
+    <td><select class="cell-input"><option>— assess —</option><option>KEEP — low MER</option><option>LEECH — transfer out</option><option>EVALUATE</option></select></td>
+  </tr>
+</tbody>
+<tfoot><tr><td colspan="4" class="total-label">Total Annual Fees Paid</td><td class="total-val" id="mer-total">$0.00</td><td></td></tr></tfoot>
+</table>
+</div>
+<button class="add-row-btn" onclick="addMerRow()">+ Add Holding</button>
+
+<div class="sec-header"><span class="sec-badge">B</span><span class="sec-title">The True MER Cost Over 30 Years</span></div>
+<p class="ws-instruction">See the compounding damage of fees vs. the Architect's approach.</p>
+<div class="form-grid">
+  <div class="form-row"><label>Your starting balance ($)</label><input type="number" class="form-input" id="mer-bal" value="10000" oninput="merProjection()"></div>
+  <div class="form-row"><label>Your current MER (%)</label><input type="number" class="form-input" id="mer-rate" step="0.01" value="2.45" oninput="merProjection()"></div>
+  <div class="form-row"><label>Gross annual return (%)</label><input type="number" class="form-input" id="mer-gross" value="8" oninput="merProjection()"></div>
+</div>
+<div class="table-wrap" id="mer-proj-table" style="margin-top:1em">
+<table>
+<thead><tr><th>Scenario</th><th>MER</th><th>Net Return</th><th>30-Year Value ($)</th><th>30-Year Loss to Fees ($)</th></tr></thead>
+<tbody>
+  <tr><td>The Architect (Questrade/WS ETF)</td><td>0.10%</td><td id="net-arch">—</td><td id="val-arch">—</td><td>—</td></tr>
+  <tr><td><strong>Your current MER</strong></td><td id="your-mer-cell">2.45%</td><td id="net-yours">—</td><td id="val-yours">—</td><td id="loss-yours" class="leech-cell">—</td></tr>
+  <tr><td>The Leech (high MER bank product)</td><td>2.50%</td><td id="net-leech">—</td><td id="val-leech">—</td><td id="loss-leech" class="leech-cell">—</td></tr>
+</tbody>
+</table>
+</div>
+
+<script>
+function merCalc(el){
+  var rows=document.querySelectorAll('#mer-rows tr');
+  var total=0;
+  rows.forEach(function(row){
+    var inputs=row.querySelectorAll('.num');
+    var val=parseFloat(inputs[0]?inputs[0].value:0)||0;
+    var mer=parseFloat(inputs[1]?inputs[1].value:0)||0;
+    var fee=val*(mer/100);
+    var feeCell=row.querySelector('[data-fee]');
+    if(feeCell) feeCell.textContent=fee?'$'+fee.toFixed(2):'—';
+    total+=fee;
+  });
+  document.getElementById('mer-total').textContent='$'+total.toFixed(2);
+}
+function addMerRow(){
+  var t=document.getElementById('mer-rows');
+  var r=t.insertRow(-1);
+  r.innerHTML='<td><input type="text" class="cell-input" placeholder="Fund name"></td><td><input type="text" class="cell-input" placeholder="Institution"></td><td><input type="number" class="cell-input num" placeholder="0" oninput="merCalc(this)"></td><td><input type="number" class="cell-input num" step="0.01" placeholder="0.00" oninput="merCalc(this)"></td><td class="calc-cell" data-fee></td><td><select class="cell-input"><option>— assess —</option><option>KEEP — low MER</option><option>LEECH — transfer out</option><option>EVALUATE</option></select></td>';
+}
+function fv(pv,rate,years){return pv*Math.pow(1+rate/100,years);}
+function merProjection(){
+  var bal=parseFloat(document.getElementById('mer-bal').value)||10000;
+  var mer=parseFloat(document.getElementById('mer-rate').value)||2.45;
+  var gross=parseFloat(document.getElementById('mer-gross').value)||8;
+  var archNet=gross-0.10; var yourNet=gross-mer; var leechNet=gross-2.50;
+  var archVal=fv(bal,archNet,30); var yourVal=fv(bal,yourNet,30); var leechVal=fv(bal,leechNet,30);
+  document.getElementById('net-arch').textContent=(archNet).toFixed(2)+'%';
+  document.getElementById('net-yours').textContent=(yourNet).toFixed(2)+'%';
+  document.getElementById('net-leech').textContent=(leechNet).toFixed(2)+'%';
+  document.getElementById('val-arch').textContent='$'+Math.round(archVal).toLocaleString();
+  document.getElementById('val-yours').textContent='$'+Math.round(yourVal).toLocaleString();
+  document.getElementById('val-leech').textContent='$'+Math.round(leechVal).toLocaleString();
+  document.getElementById('your-mer-cell').textContent=mer.toFixed(2)+'%';
+  document.getElementById('loss-yours').textContent='-$'+Math.round(archVal-yourVal).toLocaleString();
+  document.getElementById('loss-leech').textContent='-$'+Math.round(archVal-leechVal).toLocaleString();
+}
+window.onload=function(){merProjection();};
+</script>
+<div class="ws-quote">&#8220;The Leech doesn't steal in one event. It bleeds you by the month, invisibly, forever.&#8221;</div><div class="ws-footer"><span>VERITY ARCHITECTURE · CORVUS VERITY · 2026</span><span>Worksheet 4 of 16</span></div></div>
+<div class="ws-panel" id="ws-5" style="display:none">
+<div class="ws-top-bar">FINANCIALLY TRAPPED &nbsp;·&nbsp; THE ARCHITECT'S WORKING DOCUMENTS</div>
+<div class="ws-head">
+  <h2 class="ws-title">Worksheet 5: The Redundancy of the Fleet</h2>
+  <p class="ws-sub">Map your Single Points of Failure. Build the redundancy layer.</p>
+</div>
+<div class="ws-rule"></div><p class="ws-instruction">Map every Single Point of Failure. Build the redundancy layer. The goal: no one failure stops the fleet.</p>
+<div class="sec-header"><span class="sec-badge">A</span><span class="sec-title">SPOF Inventory</span></div>
+<div class="table-wrap"><table>
+<thead><tr><th>System / Income Source</th><th>Single or Redundant?</th><th>Backup Plan</th><th>Priority to Fix</th></tr></thead>
+<tbody>
+<tr><td>Employment income</td><td><input type="text" class="cell-input" placeholder="Single employer"></td><td><input type="text" class="cell-input" placeholder="Side income, EI eligibility"></td><td><select class="cell-input"><option>Critical</option><option>High</option><option>Medium</option><option>Low</option></select></td></tr>
+<tr><td>Income vehicle (platform)</td><td><input type="text" class="cell-input" placeholder="e.g. Questrade only"></td><td><input type="text" class="cell-input" placeholder="e.g. Open Wealthsimple backup"></td><td><select class="cell-input"><option>Critical</option><option>High</option><option>Medium</option><option>Low</option></select></td></tr>
+<tr><td>Engine 1 positions</td><td><input type="text" class="cell-input" placeholder=""></td><td><input type="text" class="cell-input" placeholder=""></td><td><select class="cell-input"><option>Critical</option><option>High</option><option>Medium</option><option>Low</option></select></td></tr>
+<tr><td>Engine 2 positions</td><td><input type="text" class="cell-input" placeholder=""></td><td><input type="text" class="cell-input" placeholder=""></td><td><select class="cell-input"><option>Critical</option><option>High</option><option>Medium</option><option>Low</option></select></td></tr>
+<tr><td>Emergency cash reserve</td><td><input type="text" class="cell-input" placeholder=""></td><td><input type="text" class="cell-input" placeholder=""></td><td><select class="cell-input"><option>Critical</option><option>High</option><option>Medium</option><option>Low</option></select></td></tr>
+</tbody></table></div>
+<div class="sec-header"><span class="sec-badge">B</span><span class="sec-title">Vehicle Fleet Status</span></div>
+<div class="table-wrap"><table>
+<thead><tr><th>Platform</th><th>Account</th><th>Status</th><th>Engine(s) Held</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><input type="text" class="cell-input" placeholder="e.g. Questrade"></td><td><select class="cell-input"><option>TFSA</option><option>RRSP</option><option>Cash</option></select></td><td><select class="cell-input"><option>Open</option><option>Funded</option><option>Active</option><option>Inactive</option></select></td><td><input type="text" class="cell-input" placeholder=""></td><td><input type="text" class="cell-input" placeholder=""></td></tr>
+<tr><td><input type="text" class="cell-input" placeholder="e.g. Wealthsimple"></td><td><select class="cell-input"><option>TFSA</option><option>RRSP</option><option>Cash</option></select></td><td><select class="cell-input"><option>Open</option><option>Funded</option><option>Active</option><option>Inactive</option></select></td><td><input type="text" class="cell-input" placeholder=""></td><td><input type="text" class="cell-input" placeholder=""></td></tr>
+<tr><td><input type="text" class="cell-input" placeholder=""></td><td><select class="cell-input"><option>TFSA</option><option>RRSP</option><option>Cash</option></select></td><td><select class="cell-input"><option>Open</option><option>Funded</option><option>Active</option><option>Inactive</option></select></td><td><input type="text" class="cell-input" placeholder=""></td><td><input type="text" class="cell-input" placeholder=""></td></tr>
+</tbody></table></div>
+<div class="ws-quote">&#8220;Redundancy is not paranoia. It is the difference between a delay and a collapse.&#8221;</div><div class="ws-footer"><span>VERITY ARCHITECTURE · CORVUS VERITY · 2026</span><span>Worksheet 5 of 16</span></div></div>
+<div class="ws-panel" id="ws-6" style="display:none">
+<div class="ws-top-bar">FINANCIALLY TRAPPED &nbsp;·&nbsp; THE ARCHITECT'S WORKING DOCUMENTS</div>
+<div class="ws-head">
+  <h2 class="ws-title">Worksheet 6: The Bill Slayer</h2>
+  <p class="ws-sub">Price every bill as an Engine target. Build your Execution List. Track Return Pipe progress.</p>
+</div>
+<div class="ws-rule"></div>
+<p class="ws-instruction">Every bill on this list is a target. Engine Price = Annual Cost ÷ 0.12. Build from smallest to largest. Each executed bill is a permanent Return Pipe.</p>
+
+<div class="sec-header"><span class="sec-badge">A</span><span class="sec-title">My Bill Execution List</span></div>
+<div class="table-wrap">
+<table id="bill-table">
+<thead><tr><th>Bill / Expense</th><th>Monthly ($)</th><th>Annual ($)</th><th>Engine Price ($)</th><th>Status</th><th>Target Date</th></tr></thead>
+<tbody id="bill-rows">
+  <tr>
+    <td><input type="text" class="cell-input" value="Netflix"></td>
+    <td><input type="number" class="cell-input num" value="18" oninput="billCalc(this)"></td>
+    <td class="calc-cell" data-annual>$216</td>
+    <td class="calc-cell" data-engine>$1,800</td>
+    <td><select class="cell-input pill-sel" onchange="updatePill(this)"><option value="crawl">Crawling</option><option value="targeting">Targeting</option><option value="done">✓ Executed</option></select></td>
+    <td><input type="date" class="cell-input"></td>
+  </tr>
+  <tr>
+    <td><input type="text" class="cell-input" placeholder="Add a bill..."></td>
+    <td><input type="number" class="cell-input num" placeholder="0" oninput="billCalc(this)"></td>
+    <td class="calc-cell" data-annual>—</td>
+    <td class="calc-cell" data-engine>—</td>
+    <td><select class="cell-input pill-sel" onchange="updatePill(this)"><option value="crawl">Crawling</option><option value="targeting">Targeting</option><option value="done">✓ Executed</option></select></td>
+    <td><input type="date" class="cell-input"></td>
+  </tr>
+  <tr>
+    <td><input type="text" class="cell-input" placeholder="Add a bill..."></td>
+    <td><input type="number" class="cell-input num" placeholder="0" oninput="billCalc(this)"></td>
+    <td class="calc-cell" data-annual>—</td>
+    <td class="calc-cell" data-engine>—</td>
+    <td><select class="cell-input pill-sel" onchange="updatePill(this)"><option value="crawl">Crawling</option><option value="targeting">Targeting</option><option value="done">✓ Executed</option></select></td>
+    <td><input type="date" class="cell-input"></td>
+  </tr>
+</tbody>
+<tfoot><tr><td colspan="2" class="total-label">Return Pipe Total</td><td class="total-val" id="bill-annual">—</td><td class="total-val" id="bill-engine">—</td><td colspan="2"></td></tr></tfoot>
+</table>
+</div>
+<button class="add-row-btn" onclick="addBillRow()">+ Add Bill</button>
+
+<div class="sec-header"><span class="sec-badge">B</span><span class="sec-title">Return Pipe Revolt — Companies You Pay That You Can Also Own</span></div>
+<p class="ws-instruction"><em>If you pay a company every month, find out if they are publicly traded. Install a Return Pipe and make them pay you back.</em></p>
+<div class="table-wrap">
+<table id="revolt-table">
+<thead><tr><th>Company You Pay</th><th>Monthly Bill ($)</th><th>Ticker / REIT</th><th>Current Yield (%)</th><th>Amount Invested ($)</th><th>Monthly Return Pipe ($)</th></tr></thead>
+<tbody id="revolt-rows">
+  <tr>
+    <td><input type="text" class="cell-input" value="Enbridge (gas)"></td>
+    <td><input type="number" class="cell-input num" value="180" oninput="revoltCalc()"></td>
+    <td><input type="text" class="cell-input" value="ENB"></td>
+    <td><input type="number" class="cell-input num" value="7" step="0.1" oninput="revoltCalc()"></td>
+    <td><input type="number" class="cell-input num" placeholder="0" oninput="revoltCalc()"></td>
+    <td class="calc-cell" data-pipe>—</td>
+  </tr>
+  <tr>
+    <td><input type="text" class="cell-input" value="Telus (phone)"></td>
+    <td><input type="number" class="cell-input num" value="95" oninput="revoltCalc()"></td>
+    <td><input type="text" class="cell-input" value="T"></td>
+    <td><input type="number" class="cell-input num" value="6.5" step="0.1" oninput="revoltCalc()"></td>
+    <td><input type="number" class="cell-input num" placeholder="0" oninput="revoltCalc()"></td>
+    <td class="calc-cell" data-pipe>—</td>
+  </tr>
+  <tr>
+    <td><input type="text" class="cell-input" placeholder="Company..."></td>
+    <td><input type="number" class="cell-input num" placeholder="0" oninput="revoltCalc()"></td>
+    <td><input type="text" class="cell-input" placeholder="Ticker"></td>
+    <td><input type="number" class="cell-input num" placeholder="0.0" step="0.1" oninput="revoltCalc()"></td>
+    <td><input type="number" class="cell-input num" placeholder="0" oninput="revoltCalc()"></td>
+    <td class="calc-cell" data-pipe>—</td>
+  </tr>
+  <tr>
+    <td><input type="text" class="cell-input" placeholder="Company..."></td>
+    <td><input type="number" class="cell-input num" placeholder="0" oninput="revoltCalc()"></td>
+    <td><input type="text" class="cell-input" placeholder="Ticker"></td>
+    <td><input type="number" class="cell-input num" placeholder="0.0" step="0.1" oninput="revoltCalc()"></td>
+    <td><input type="number" class="cell-input num" placeholder="0" oninput="revoltCalc()"></td>
+    <td class="calc-cell" data-pipe>—</td>
+  </tr>
+</tbody>
+<tfoot><tr><td colspan="4" class="total-label">Total Monthly Return Pipe</td><td class="total-val" id="revolt-invested">—</td><td class="total-val" id="revolt-pipe">—</td></tr></tfoot>
+</table>
+</div>
+<button class="add-row-btn" onclick="addRevoltRow()">+ Add Company</button>
+
+<div class="sec-header" style="margin-top:24px"><span class="sec-badge" style="background:#2E5827">✓</span><span class="sec-title">Track A Summary — Executed Bills</span></div>
+<div class="revolt-summary" id="revolt-summary">
+  <div class="revolt-item">Bills Executed: <strong id="executed-count">0</strong></div>
+  <div class="revolt-item">Annual savings returned: <strong id="executed-annual">$0</strong></div>
+  <div class="revolt-item">Capital deployed: <strong id="executed-engine">$0</strong></div>
+</div>
+
+<script>
+function billCalc(el){
+  var rows=document.querySelectorAll('#bill-rows tr');
+  var totA=0,totE=0,execA=0,execE=0,execCount=0;
+  rows.forEach(function(row){
+    var m=parseFloat(row.querySelector('.num')&&row.querySelector('.num').value)||0;
+    var a=m*12; var e=a/0.12;
+    var ac=row.querySelector('[data-annual]'); var ec=row.querySelector('[data-engine]');
+    if(ac) ac.textContent=m?'$'+a.toFixed(2):'—';
+    if(ec) ec.textContent=m?'$'+e.toFixed(2):'—';
+    totA+=a; totE+=e;
+    var sel=row.querySelector('.pill-sel');
+    if(sel&&sel.value==='done'){execA+=a;execE+=e;execCount++;}
+  });
+  document.getElementById('bill-annual').textContent=totA?'$'+totA.toFixed(2)+'/yr':'—';
+  document.getElementById('bill-engine').textContent=totE?'$'+totE.toFixed(2):'—';
+  document.getElementById('executed-count').textContent=execCount;
+  document.getElementById('executed-annual').textContent='$'+execA.toFixed(2);
+  document.getElementById('executed-engine').textContent='$'+execE.toFixed(2);
+}
+function updatePill(sel){billCalc(sel);}
+function revoltCalc(){
+  var rows=document.querySelectorAll('#revolt-rows tr');
+  var totInvested=0,totPipe=0;
+  rows.forEach(function(row){
+    var inputs=row.querySelectorAll('.num');
+    var invested=parseFloat(inputs[2]&&inputs[2].value)||0;
+    var yield_pct=parseFloat(inputs[1]&&inputs[1].value)||0;
+    var pipe=(invested*(yield_pct/100))/12;
+    var pipeEl=row.querySelector('[data-pipe]');
+    if(pipeEl) pipeEl.textContent=invested&&yield_pct?'$'+pipe.toFixed(2):'—';
+    totInvested+=invested; totPipe+=pipe;
+  });
+  document.getElementById('revolt-invested').textContent=totInvested?'$'+totInvested.toFixed(2):'—';
+  document.getElementById('revolt-pipe').textContent=totPipe?'$'+totPipe.toFixed(2)+'/mo':'—';
+}
+function addRevoltRow(){
+  var t=document.getElementById('revolt-rows');
+  var r=t.insertRow(-1);
+  r.innerHTML='<td><input type="text" class="cell-input" placeholder="Company..."></td><td><input type="number" class="cell-input num" placeholder="0" oninput="revoltCalc()"></td><td><input type="text" class="cell-input" placeholder="Ticker"></td><td><input type="number" class="cell-input num" placeholder="0.0" step="0.1" oninput="revoltCalc()"></td><td><input type="number" class="cell-input num" placeholder="0" oninput="revoltCalc()"></td><td class="calc-cell" data-pipe>—</td>';
+}
+function addBillRow(){
+  var t=document.getElementById('bill-rows');
+  var r=t.insertRow(-1);
+  r.innerHTML='<td><input type="text" class="cell-input" placeholder="Bill..."></td><td><input type="number" class="cell-input num" placeholder="0" oninput="billCalc(this)"></td><td class="calc-cell" data-annual>—</td><td class="calc-cell" data-engine>—</td><td><select class="cell-input pill-sel" onchange="updatePill(this)"><option value="crawl">Crawling</option><option value="targeting">Targeting</option><option value="done">✓ Executed</option></select></td><td><input type="date" class="cell-input"></td>';
+}
+window.onload=function(){billCalc();revoltCalc();};
+</script>
+<div class="ws-quote">&#8220;Don't pay your bills — buy the companies that send them.&#8221;</div><div class="ws-footer"><span>VERITY ARCHITECTURE · CORVUS VERITY · 2026</span><span>Worksheet 6 of 16</span></div></div>
+<div class="ws-panel" id="ws-7" style="display:none">
+<div class="ws-top-bar">FINANCIALLY TRAPPED &nbsp;·&nbsp; THE ARCHITECT'S WORKING DOCUMENTS</div>
+<div class="ws-head">
+  <h2 class="ws-title">Worksheet 7: Threading the Needle</h2>
+  <p class="ws-sub">Apply the Debt Decision Matrix. Lock in your injection commitment. Build your Hard Month Protocol.</p>
+</div>
+<div class="ws-rule"></div><p class="ws-instruction">The $50 injection that must never stop. Apply the Debt Decision Matrix. Lock in your protocol.</p>
+<div class="sec-header"><span class="sec-badge">A</span><span class="sec-title">Debt Decision Matrix</span></div>
+<div class="table-wrap"><table>
+<thead><tr><th>Debt / Bill</th><th>Balance ($)</th><th>Rate (%)</th><th>Min Payment ($)</th><th>Decision</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><input type="text" class="cell-input" placeholder="e.g. Credit card"></td><td><input type="number" class="cell-input" placeholder=""></td><td><input type="number" class="cell-input" placeholder=""></td><td><input type="number" class="cell-input" placeholder=""></td><td><select class="cell-input"><option>Pay minimum</option><option>Attack aggressively</option><option>Skip temporarily</option><option>Negotiate</option></select></td><td><input type="text" class="cell-input" placeholder=""></td></tr>
+<tr><td><input type="text" class="cell-input" placeholder="e.g. Car loan"></td><td><input type="number" class="cell-input" placeholder=""></td><td><input type="number" class="cell-input" placeholder=""></td><td><input type="number" class="cell-input" placeholder=""></td><td><select class="cell-input"><option>Pay minimum</option><option>Attack aggressively</option><option>Skip temporarily</option><option>Negotiate</option></select></td><td><input type="text" class="cell-input" placeholder=""></td></tr>
+<tr><td><input type="text" class="cell-input" placeholder=""></td><td><input type="number" class="cell-input" placeholder=""></td><td><input type="number" class="cell-input" placeholder=""></td><td><input type="number" class="cell-input" placeholder=""></td><td><select class="cell-input"><option>Pay minimum</option><option>Attack aggressively</option><option>Skip temporarily</option><option>Negotiate</option></select></td><td><input type="text" class="cell-input" placeholder=""></td></tr>
+<tr><td><input type="text" class="cell-input" placeholder=""></td><td><input type="number" class="cell-input" placeholder=""></td><td><input type="number" class="cell-input" placeholder=""></td><td><input type="number" class="cell-input" placeholder=""></td><td><select class="cell-input"><option>Pay minimum</option><option>Attack aggressively</option><option>Skip temporarily</option><option>Negotiate</option></select></td><td><input type="text" class="cell-input" placeholder=""></td></tr>
+</tbody></table></div>
+<div class="sec-header"><span class="sec-badge">B</span><span class="sec-title">Injection Commitment</span></div>
+<div class="table-wrap"><table>
+<thead><tr><th>Commitment</th><th>Your Answer</th></tr></thead>
+<tbody>
+<tr><td>My bi-weekly injection amount (minimum)</td><td><input type="text" class="cell-input" placeholder="e.g. $50"></td></tr>
+<tr><td>Day of injection (payday)</td><td><input type="text" class="cell-input" placeholder="e.g. Every second Friday"></td></tr>
+<tr><td>Platform and account</td><td><input type="text" class="cell-input" placeholder="e.g. Questrade TFSA"></td></tr>
+<tr><td>What I will NOT touch even in a hard month</td><td><input type="text" class="cell-input" placeholder="This injection amount"></td></tr>
+</tbody></table></div>
+
+<div class="sec-header"><span class="sec-badge">C</span><span class="sec-title">Hard Month Protocol</span></div>
+<p class="ws-instruction">These are your rules for a hard month. Write them now, when you are calm — not when you are panicking.</p>
+<div class="checklist">
+  <label><input type="checkbox"> Minimum injection ($50 or your committed amount) goes in regardless of what else is happening</label>
+  <label><input type="checkbox"> Check Engine 1 dividend income — the machine is still producing even during hard months</label>
+  <label><input type="checkbox"> Identify one non-essential expense to pause (not cancel — pause)</label>
+  <label><input type="checkbox"> Do not sell. Volatility is not a loss. A sold position is a permanent loss.</label>
+  <label><input type="checkbox"> Write down what caused the hard month so you can build a sinking fund for it</label>
+  <label><input type="checkbox"> Remind yourself: the $89.02 balance kept the machine alive. This month is no different.</label>
+</div>
+<div class="ws-quote">&#8220;The thread cannot break. This is not metaphor — it is the architecture.&#8221;</div><div class="ws-footer"><span>VERITY ARCHITECTURE · CORVUS VERITY · 2026</span><span>Worksheet 7 of 16</span></div></div>
+<div class="ws-panel" id="ws-8" style="display:none">
+<div class="ws-top-bar">FINANCIALLY TRAPPED &nbsp;·&nbsp; THE ARCHITECT'S WORKING DOCUMENTS</div>
+<div class="ws-head">
+  <h2 class="ws-title">Worksheet 8: The 40-Hour Banked Week</h2>
+  <p class="ws-sub">Calculate your labor conversion rate. Plan your Sprint architecture.</p>
+</div>
+<div class="ws-rule"></div>
+<div class="sec-header"><span class="sec-badge">A</span><span class="sec-title">Labor Conversion Rate</span></div>
+<p class="ws-instruction">Every overtime hour is capital fuel. This worksheet converts your labor into permanent Return Pipes.</p>
+<div class="form-grid">
+  <div class="form-row"><label>Your regular hourly rate ($)</label><input type="number" class="form-input" id="hourly" value="22" oninput="laborCalc()"></div>
+  <div class="form-row"><label>Overtime multiplier</label><select class="form-input" id="ot-mult" onchange="laborCalc()"><option value="1.5">1.5x (time-and-a-half)</option><option value="2.0">2.0x (double time)</option><option value="1.25">1.25x (shift premium)</option></select></div>
+  <div class="form-row"><label>Estimated tax rate (%)</label><input type="number" class="form-input" id="tax-rate" value="30" oninput="laborCalc()"></div>
+  <div class="form-row"><label>OT hours in this sprint</label><input type="number" class="form-input" id="ot-hours" value="20" oninput="laborCalc()"></div>
+</div>
+<div class="calc-result-grid" id="labor-results">
+  <div class="result-card"><div class="result-label">OT hourly rate</div><div class="result-val" id="ot-rate">—</div></div>
+  <div class="result-card"><div class="result-label">Gross sprint income</div><div class="result-val" id="gross-sprint">—</div></div>
+  <div class="result-card"><div class="result-label">After-tax (est.)</div><div class="result-val" id="net-sprint">—</div></div>
+  <div class="result-card highlight-card"><div class="result-label">Engine Capital deployed</div><div class="result-val" id="engine-capital">—</div></div>
+</div>
+
+<div class="sec-header"><span class="sec-badge">B</span><span class="sec-title">Sprint Target Plan</span></div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Sprint Goal</th><th>Target Capital ($)</th><th>Current Capital ($)</th><th>Gap ($)</th><th>OT Hours Needed</th><th>Status</th></tr></thead>
+<tbody id="sprint-rows">
+  <tr>
+    <td><input type="text" class="cell-input" placeholder="e.g. Fund Engine 1 – QYLD $500"></td>
+    <td><input type="number" class="cell-input num" placeholder="500" oninput="sprintCalc(this)"></td>
+    <td><input type="number" class="cell-input num" placeholder="0" oninput="sprintCalc(this)"></td>
+    <td class="calc-cell" data-gap>—</td>
+    <td class="calc-cell" data-hours>—</td>
+    <td><select class="cell-input"><option>Planning</option><option>In Progress</option><option>✓ Complete</option></select></td>
+  </tr>
+  <tr>
+    <td><input type="text" class="cell-input" placeholder="Sprint goal..."></td>
+    <td><input type="number" class="cell-input num" placeholder="0" oninput="sprintCalc(this)"></td>
+    <td><input type="number" class="cell-input num" placeholder="0" oninput="sprintCalc(this)"></td>
+    <td class="calc-cell" data-gap>—</td>
+    <td class="calc-cell" data-hours>—</td>
+    <td><select class="cell-input"><option>Planning</option><option>In Progress</option><option>✓ Complete</option></select></td>
+  </tr>
+</tbody>
+</table>
+</div>
+<button class="add-row-btn" onclick="addSprintRow()">+ Add Sprint Goal</button>
+
+<script>
+function laborCalc(){
+  var base=parseFloat(document.getElementById('hourly').value)||22;
+  var mult=parseFloat(document.getElementById('ot-mult').value)||1.5;
+  var tax=parseFloat(document.getElementById('tax-rate').value)||30;
+  var hrs=parseFloat(document.getElementById('ot-hours').value)||0;
+  var otRate=base*mult;
+  var gross=otRate*hrs;
+  var net=gross*(1-tax/100);
+  document.getElementById('ot-rate').textContent='$'+otRate.toFixed(2)+'/hr';
+  document.getElementById('gross-sprint').textContent='$'+gross.toFixed(2);
+  document.getElementById('net-sprint').textContent='$'+net.toFixed(2);
+  document.getElementById('engine-capital').textContent='$'+net.toFixed(2)+' → Engine';
+  sprintCalc(null,net);
+}
+function sprintCalc(el,netOverride){
+  var base=parseFloat(document.getElementById('hourly').value)||22;
+  var mult=parseFloat(document.getElementById('ot-mult').value)||1.5;
+  var tax=parseFloat(document.getElementById('tax-rate').value)||30;
+  var netHourly=base*mult*(1-tax/100);
+  var rows=document.querySelectorAll('#sprint-rows tr');
+  rows.forEach(function(row){
+    var nums=row.querySelectorAll('.num');
+    var target=parseFloat(nums[0]?nums[0].value:0)||0;
+    var current=parseFloat(nums[1]?nums[1].value:0)||0;
+    var gap=Math.max(0,target-current);
+    var hoursNeeded=netHourly>0?Math.ceil(gap/netHourly):0;
+    var gapCell=row.querySelector('[data-gap]');
+    var hoursCell=row.querySelector('[data-hours]');
+    if(gapCell) gapCell.textContent=gap?'$'+gap.toFixed(2):'✓ Funded';
+    if(hoursCell) hoursCell.textContent=hoursNeeded?hoursNeeded+' hrs':'—';
+  });
+}
+function addSprintRow(){
+  var t=document.getElementById('sprint-rows');
+  var r=t.insertRow(-1);
+  r.innerHTML='<td><input type="text" class="cell-input" placeholder="Sprint goal..."></td><td><input type="number" class="cell-input num" placeholder="0" oninput="sprintCalc(this)"></td><td><input type="number" class="cell-input num" placeholder="0" oninput="sprintCalc(this)"></td><td class="calc-cell" data-gap>—</td><td class="calc-cell" data-hours>—</td><td><select class="cell-input"><option>Planning</option><option>In Progress</option><option>✓ Complete</option></select></td>';
+}
+window.onload=function(){laborCalc();};
+</script>
+<div class="ws-quote">&#8220;Every overtime hour belongs to the Architect. The machine gets paid first.&#8221;</div><div class="ws-footer"><span>VERITY ARCHITECTURE · CORVUS VERITY · 2026</span><span>Worksheet 8 of 16</span></div></div>
+<div class="ws-panel" id="ws-9" style="display:none">
+<div class="ws-top-bar">FINANCIALLY TRAPPED &nbsp;·&nbsp; THE ARCHITECT'S WORKING DOCUMENTS</div>
+<div class="ws-head">
+  <h2 class="ws-title">Worksheet 9: The Household Perimeter</h2>
+  <p class="ws-sub">TFSA capacity assessment · Project Liberty tracker · Semi-Fortress progress</p>
+</div>
+<div class="ws-rule"></div><p class="ws-instruction">Map who is inside the architecture. Build Project Liberty. Begin the Semi-Fortress.</p>
+<div class="sec-header"><span class="sec-badge">A</span><span class="sec-title">TFSA Capacity Assessment</span></div>
+<div class="table-wrap"><table>
+<thead><tr><th>Metric</th><th>Your Number ($)</th></tr></thead>
+<tbody>
+<tr><td>Lifetime TFSA contribution room (check CRA My Account)</td><td><input type="number" class="cell-input" placeholder=""></td></tr>
+<tr><td>Amount already contributed (all years)</td><td><input type="number" class="cell-input" placeholder=""></td></tr>
+<tr><td>Available contribution room remaining</td><td><input type="number" class="cell-input" placeholder=""></td></tr>
+<tr><td>Target allocation to Engine 1</td><td><input type="number" class="cell-input" placeholder=""></td></tr>
+<tr><td>Target allocation to Engine 2</td><td><input type="number" class="cell-input" placeholder=""></td></tr>
+<tr><td>Target allocation to Engine 3</td><td><input type="number" class="cell-input" placeholder=""></td></tr>
+</tbody></table></div>
+<div class="sec-header"><span class="sec-badge">B</span><span class="sec-title">Project Liberty — Household Target Bills</span></div>
+<div class="table-wrap"><table>
+<thead><tr><th>Person</th><th>Target Bill</th><th>Annual Cost ($)</th><th>Engine Price ($)</th><th>Progress</th><th>Target Date</th></tr></thead>
+<tbody>
+<tr><td><input type="text" class="cell-input" placeholder="e.g. Partner/Spouse"></td><td><input type="text" class="cell-input" placeholder="e.g. Cell phone"></td><td><input type="number" class="cell-input" placeholder=""></td><td><input type="number" class="cell-input" placeholder=""></td><td><select class="cell-input"><option>Not started</option><option>Seeded</option><option>50%</option><option>75%</option><option>Executed</option></select></td><td><input type="date" class="cell-input"></td></tr>
+<tr><td><input type="text" class="cell-input" placeholder="e.g. Child 1"></td><td><input type="text" class="cell-input" placeholder="e.g. Streaming"></td><td><input type="number" class="cell-input" placeholder=""></td><td><input type="number" class="cell-input" placeholder=""></td><td><select class="cell-input"><option>Not started</option><option>Seeded</option><option>50%</option><option>75%</option><option>Executed</option></select></td><td><input type="date" class="cell-input"></td></tr>
+<tr><td><input type="text" class="cell-input" placeholder=""></td><td><input type="text" class="cell-input" placeholder=""></td><td><input type="number" class="cell-input" placeholder=""></td><td><input type="number" class="cell-input" placeholder=""></td><td><select class="cell-input"><option>Not started</option><option>Seeded</option><option>50%</option><option>75%</option><option>Executed</option></select></td><td><input type="date" class="cell-input"></td></tr>
+</tbody></table></div>
+<div class="ws-quote">&#8220;Independence is a solo mission. Freedom is a group project.&#8221;</div><div class="ws-footer"><span>VERITY ARCHITECTURE · CORVUS VERITY · 2026</span><span>Worksheet 9 of 16</span></div></div>
+<div class="ws-panel" id="ws-10" style="display:none">
+<div class="ws-top-bar">FINANCIALLY TRAPPED &nbsp;·&nbsp; THE ARCHITECT'S WORKING DOCUMENTS</div>
+<div class="ws-head">
+  <h2 class="ws-title">Worksheet 10: The Smooth Ride</h2>
+  <p class="ws-sub">January 1st Calibration · Sinking Fund Inventory · Exit Velocity Gap</p>
+</div>
+<div class="ws-rule"></div><p class="ws-instruction">The January 1st Calibration. The Sinking Fund Architecture. The Exit Velocity Gap.</p>
+<div class="sec-header"><span class="sec-badge">A</span><span class="sec-title">January 1st Calibration Checklist</span></div>
+<div class="table-wrap"><table>
+<thead><tr><th>Check</th><th>Status</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>Total annual dividends from all engines</td><td><select class="cell-input"><option>Not checked</option><option>✓ Checked</option><option>Needs update</option></select></td><td><input type="text" class="cell-input" placeholder=""></td></tr>
+<tr><td>Exit Velocity Gap (annual dividends vs. baseline)</td><td><select class="cell-input"><option>Not checked</option><option>✓ Checked</option><option>Needs update</option></select></td><td><input type="text" class="cell-input" placeholder=""></td></tr>
+<tr><td>TFSA contribution room available for new year</td><td><select class="cell-input"><option>Not checked</option><option>✓ Checked</option><option>Needs update</option></select></td><td><input type="text" class="cell-input" placeholder=""></td></tr>
+<tr><td>DRIP status on all positions — all active?</td><td><select class="cell-input"><option>Not checked</option><option>✓ Checked</option><option>Needs update</option></select></td><td><input type="text" class="cell-input" placeholder=""></td></tr>
+<tr><td>Injection amount — increase by $25 or more?</td><td><select class="cell-input"><option>Not checked</option><option>✓ Checked</option><option>Needs update</option></select></td><td><input type="text" class="cell-input" placeholder=""></td></tr>
+<tr><td>Any Leech positions to eliminate this year?</td><td><select class="cell-input"><option>Not checked</option><option>✓ Checked</option><option>Needs update</option></select></td><td><input type="text" class="cell-input" placeholder=""></td></tr>
+</tbody></table></div>
+<div class="sec-header"><span class="sec-badge">B</span><span class="sec-title">Sinking Fund Inventory</span></div>
+<div class="table-wrap"><table>
+<thead><tr><th>Fund Name</th><th>Monthly Deposit ($)</th><th>Target Amount ($)</th><th>Current Balance ($)</th><th>% Complete</th><th>Target Date</th></tr></thead>
+<tbody>
+<tr><td><input type="text" class="cell-input" placeholder="e.g. Property tax"></td><td><input type="number" class="cell-input" placeholder=""></td><td><input type="number" class="cell-input" placeholder=""></td><td><input type="number" class="cell-input" placeholder=""></td><td></td><td><input type="date" class="cell-input"></td></tr>
+<tr><td><input type="text" class="cell-input" placeholder="e.g. Car maintenance"></td><td><input type="number" class="cell-input" placeholder=""></td><td><input type="number" class="cell-input" placeholder=""></td><td><input type="number" class="cell-input" placeholder=""></td><td></td><td><input type="date" class="cell-input"></td></tr>
+<tr><td><input type="text" class="cell-input" placeholder="e.g. Home insurance"></td><td><input type="number" class="cell-input" placeholder=""></td><td><input type="number" class="cell-input" placeholder=""></td><td><input type="number" class="cell-input" placeholder=""></td><td></td><td><input type="date" class="cell-input"></td></tr>
+<tr><td><input type="text" class="cell-input" placeholder="e.g. Vacation / buffer"></td><td><input type="number" class="cell-input" placeholder=""></td><td><input type="number" class="cell-input" placeholder=""></td><td><input type="number" class="cell-input" placeholder=""></td><td></td><td><input type="date" class="cell-input"></td></tr>
+</tbody></table></div>
+<div class="ws-quote">&#8220;The Smooth Ride is not luck. It is the architecture operating correctly.&#8221;</div><div class="ws-footer"><span>VERITY ARCHITECTURE · CORVUS VERITY · 2026</span><span>Worksheet 10 of 16</span></div></div>
+<div class="ws-panel" id="ws-11" style="display:none">
+<div class="ws-top-bar">FINANCIALLY TRAPPED &nbsp;·&nbsp; THE ARCHITECT'S WORKING DOCUMENTS</div>
+<div class="ws-head">
+  <h2 class="ws-title">Worksheet 11: The Chaos Discount</h2>
+  <p class="ws-sub">Pre-Calculated Discount Multipliers · DRIP Audit · Personal Protocol</p>
+</div>
+<div class="ws-rule"></div><p class="ws-instruction">Pre-Calculate your entry prices now. When the screens are red, you execute — you don't think.</p>
+<div class="sec-header"><span class="sec-badge">A</span><span class="sec-title">Pre-Calculated Discount Multipliers</span></div>
+<div class="table-wrap"><table>
+<thead><tr><th>Position / ETF</th><th>Current Price ($)</th><th>–10%</th><th>–20%</th><th>–30%</th><th>–40%</th><th>Action at –20%+</th></tr></thead>
+<tbody>
+<tr><td><input type="text" class="cell-input" placeholder="e.g. QYLD"></td><td><input type="number" class="cell-input" placeholder=""></td><td></td><td></td><td></td><td></td><td><input type="text" class="cell-input" placeholder="e.g. Double injection"></td></tr>
+<tr><td><input type="text" class="cell-input" placeholder="e.g. ZRE"></td><td><input type="number" class="cell-input" placeholder=""></td><td></td><td></td><td></td><td></td><td><input type="text" class="cell-input" placeholder=""></td></tr>
+<tr><td><input type="text" class="cell-input" placeholder="e.g. VFV"></td><td><input type="number" class="cell-input" placeholder=""></td><td></td><td></td><td></td><td></td><td><input type="text" class="cell-input" placeholder=""></td></tr>
+<tr><td><input type="text" class="cell-input" placeholder=""></td><td><input type="number" class="cell-input" placeholder=""></td><td></td><td></td><td></td><td></td><td><input type="text" class="cell-input" placeholder=""></td></tr>
+</tbody></table></div>
+<div class="sec-header"><span class="sec-badge">B</span><span class="sec-title">DRIP Audit</span></div>
+<div class="table-wrap"><table>
+<thead><tr><th>Position</th><th>Platform</th><th>DRIP Active?</th><th>Monthly Reinvestment (est. $)</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><input type="text" class="cell-input" placeholder=""></td><td><input type="text" class="cell-input" placeholder=""></td><td><select class="cell-input"><option>Yes — Fully active</option><option>Partial — whole shares only</option><option>No — set it up</option></select></td><td><input type="number" class="cell-input" placeholder=""></td><td><input type="text" class="cell-input" placeholder=""></td></tr>
+<tr><td><input type="text" class="cell-input" placeholder=""></td><td><input type="text" class="cell-input" placeholder=""></td><td><select class="cell-input"><option>Yes — Fully active</option><option>Partial — whole shares only</option><option>No — set it up</option></select></td><td><input type="number" class="cell-input" placeholder=""></td><td><input type="text" class="cell-input" placeholder=""></td></tr>
+<tr><td><input type="text" class="cell-input" placeholder=""></td><td><input type="text" class="cell-input" placeholder=""></td><td><select class="cell-input"><option>Yes — Fully active</option><option>Partial — whole shares only</option><option>No — set it up</option></select></td><td><input type="number" class="cell-input" placeholder=""></td><td><input type="text" class="cell-input" placeholder=""></td></tr>
+</tbody></table></div>
+<div class="ws-quote">&#8220;The best time to buy a lifeboat is when everyone else is jumping off the ship.&#8221;</div><div class="ws-footer"><span>VERITY ARCHITECTURE · CORVUS VERITY · 2026</span><span>Worksheet 11 of 16</span></div></div>
+<div class="ws-panel" id="ws-12" style="display:none">
+<div class="ws-top-bar">FINANCIALLY TRAPPED &nbsp;·&nbsp; THE ARCHITECT'S WORKING DOCUMENTS</div>
+<div class="ws-head">
+  <h2 class="ws-title">Worksheet 12: The Bulkhead Strategy</h2>
+  <p class="ws-sub">Fleet Bulkhead Tracker · Sector Coverage Check · Injection Direction</p>
+</div>
+<div class="ws-rule"></div><p class="ws-instruction">No single sector owns more than 10–15% of the fleet. Map your current exposure.</p>
+<div class="sec-header"><span class="sec-badge">A</span><span class="sec-title">Fleet Bulkhead Tracker</span></div>
+<div class="table-wrap"><table>
+<thead><tr><th>Sector</th><th>Target % (max 15%)</th><th>Current Value ($)</th><th>Current % of Fleet</th><th>Status</th><th>Next Injection Direction?</th></tr></thead>
+<tbody>
+<tr><td>Telecom (e.g. BCE, T, TELUS)</td><td><input type="number" class="cell-input" placeholder=""></td><td><input type="number" class="cell-input" placeholder=""></td><td></td><td><select class="cell-input"><option>On target</option><option>Overweight — pause</option><option>Underweight — add</option></select></td><td><select class="cell-input"><option>Yes</option><option>No</option></select></td></tr>
+<tr><td>Energy (e.g. ENB, PPL, SU)</td><td><input type="number" class="cell-input" placeholder=""></td><td><input type="number" class="cell-input" placeholder=""></td><td></td><td><select class="cell-input"><option>On target</option><option>Overweight — pause</option><option>Underweight — add</option></select></td><td><select class="cell-input"><option>Yes</option><option>No</option></select></td></tr>
+<tr><td>REITs (e.g. CAR.UN, DIR.UN)</td><td><input type="number" class="cell-input" placeholder=""></td><td><input type="number" class="cell-input" placeholder=""></td><td></td><td><select class="cell-input"><option>On target</option><option>Overweight — pause</option><option>Underweight — add</option></select></td><td><select class="cell-input"><option>Yes</option><option>No</option></select></td></tr>
+<tr><td>Financials (e.g. RY, TD, BNS)</td><td><input type="number" class="cell-input" placeholder=""></td><td><input type="number" class="cell-input" placeholder=""></td><td></td><td><select class="cell-input"><option>On target</option><option>Overweight — pause</option><option>Underweight — add</option></select></td><td><select class="cell-input"><option>Yes</option><option>No</option></select></td></tr>
+<tr><td>Covered-call ETFs (e.g. QYLD, HDIV)</td><td><input type="number" class="cell-input" placeholder=""></td><td><input type="number" class="cell-input" placeholder=""></td><td></td><td><select class="cell-input"><option>On target</option><option>Overweight — pause</option><option>Underweight — add</option></select></td><td><select class="cell-input"><option>Yes</option><option>No</option></select></td></tr>
+<tr><td>Other / Tech / Global ETF</td><td><input type="number" class="cell-input" placeholder=""></td><td><input type="number" class="cell-input" placeholder=""></td><td></td><td><select class="cell-input"><option>On target</option><option>Overweight — pause</option><option>Underweight — add</option></select></td><td><select class="cell-input"><option>Yes</option><option>No</option></select></td></tr>
+</tbody></table></div>
+<div class="ws-quote">&#8220;A crash in one sector is contained. A crash in all sectors is what destroys a fleet built without bulkheads.&#8221;</div><div class="ws-footer"><span>VERITY ARCHITECTURE · CORVUS VERITY · 2026</span><span>Worksheet 12 of 16</span></div></div>
+<div class="ws-panel" id="ws-13" style="display:none">
+<div class="ws-top-bar">FINANCIALLY TRAPPED &nbsp;·&nbsp; THE ARCHITECT'S WORKING DOCUMENTS</div>
+<div class="ws-head">
+  <h2 class="ws-title">Worksheet 13: DRIP: The Automatic Refueler</h2>
+  <p class="ws-sub">DRIP Activation Log · Days of Freedom Projection · Valve Readiness</p>
+</div>
+<div class="ws-rule"></div><p class="ws-instruction">Every dividend reinvested is a soldier that never eats, never sleeps, and never asks for a raise.</p>
+<div class="sec-header"><span class="sec-badge">A</span><span class="sec-title">DRIP Activation Log</span></div>
+<div class="table-wrap"><table>
+<thead><tr><th>Position</th><th>Engine</th><th>Platform</th><th>DRIP Status</th><th>Fractional?</th><th>Monthly Reinvestment (est. $)</th><th>Date Activated</th></tr></thead>
+<tbody>
+<tr><td><input type="text" class="cell-input" placeholder=""></td><td><select class="cell-input"><option>Engine 1</option><option>Engine 2</option><option>Engine 3</option></select></td><td><select class="cell-input"><option>Questrade</option><option>Wealthsimple</option><option>Other</option></select></td><td><select class="cell-input"><option>Active</option><option>Pending</option><option>Not yet set up</option></select></td><td><select class="cell-input"><option>Yes</option><option>No (whole shares)</option></select></td><td><input type="number" class="cell-input" placeholder=""></td><td><input type="date" class="cell-input"></td></tr>
+<tr><td><input type="text" class="cell-input" placeholder=""></td><td><select class="cell-input"><option>Engine 1</option><option>Engine 2</option><option>Engine 3</option></select></td><td><select class="cell-input"><option>Questrade</option><option>Wealthsimple</option><option>Other</option></select></td><td><select class="cell-input"><option>Active</option><option>Pending</option><option>Not yet set up</option></select></td><td><select class="cell-input"><option>Yes</option><option>No (whole shares)</option></select></td><td><input type="number" class="cell-input" placeholder=""></td><td><input type="date" class="cell-input"></td></tr>
+<tr><td><input type="text" class="cell-input" placeholder=""></td><td><select class="cell-input"><option>Engine 1</option><option>Engine 2</option><option>Engine 3</option></select></td><td><select class="cell-input"><option>Questrade</option><option>Wealthsimple</option><option>Other</option></select></td><td><select class="cell-input"><option>Active</option><option>Pending</option><option>Not yet set up</option></select></td><td><select class="cell-input"><option>Yes</option><option>No (whole shares)</option></select></td><td><input type="number" class="cell-input" placeholder=""></td><td><input type="date" class="cell-input"></td></tr>
+</tbody></table></div>
+<div class="sec-header"><span class="sec-badge">B</span><span class="sec-title">Valve Readiness Checklist</span></div>
+<div class="table-wrap"><table>
+<thead><tr><th>Valve</th><th>Condition</th><th>Ready?</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>VALVE 1 — Bill-Neutral</td><td>Engine 1 + 2 dividends cover all essential monthly bills</td><td><select class="cell-input"><option>Not yet</option><option>Approaching</option><option>✓ Open</option></select></td><td><input type="text" class="cell-input" placeholder=""></td></tr>
+<tr><td>VALVE 2 — Maintaining</td><td>Dividends fully replace income needed without new injections</td><td><select class="cell-input"><option>Not yet</option><option>Approaching</option><option>✓ Open</option></select></td><td><input type="text" class="cell-input" placeholder=""></td></tr>
+<tr><td>VALVE 3 — Exit Velocity</td><td>Titan capital &gt; Exit Velocity threshold. Labor optional.</td><td><select class="cell-input"><option>Not yet</option><option>Approaching</option><option>✓ Open</option></select></td><td><input type="text" class="cell-input" placeholder=""></td></tr>
+</tbody></table></div>
+<div class="ws-quote">&#8220;Don't eat your seed corn. Plant it until you own the whole field.&#8221;</div><div class="ws-footer"><span>VERITY ARCHITECTURE · CORVUS VERITY · 2026</span><span>Worksheet 13 of 16</span></div></div>
+<div class="ws-panel" id="ws-14" style="display:none">
+<div class="ws-top-bar">FINANCIALLY TRAPPED &nbsp;·&nbsp; THE ARCHITECT'S WORKING DOCUMENTS</div>
+<div class="ws-head">
+  <h2 class="ws-title">Worksheet 14: The Titan Vault</h2>
+  <p class="ws-sub">Exit Velocity Gap · 10-ETF Position Planner · Titan Opening Checklist</p>
+</div>
+<div class="ws-rule"></div>
+<div class="sec-header"><span class="sec-badge">A</span><span class="sec-title">Exit Velocity Gap Calculator</span></div>
+<p class="ws-instruction">Exit Velocity is the point where Engine dividends cover your full survival baseline — permanently. Calculate your gap.</p>
+<div class="form-grid">
+  <div class="form-row"><label>Monthly survival baseline ($)</label><input type="number" class="form-input" id="ev-monthly" value="2000" oninput="evCalc()"></div>
+  <div class="form-row"><label>Current annual dividends (all engines) ($)</label><input type="number" class="form-input" id="ev-divs" value="0" oninput="evCalc()"></div>
+  <div class="form-row"><label>Target yield rate (%)</label><input type="number" class="form-input" id="ev-yield" value="12" oninput="evCalc()"></div>
+</div>
+<div class="calc-result-grid">
+  <div class="result-card"><div class="result-label">Annual baseline needed</div><div class="result-val" id="ev-annual-need">—</div></div>
+  <div class="result-card"><div class="result-label">Capital needed for Exit Velocity</div><div class="result-val" id="ev-capital-need">—</div></div>
+  <div class="result-card"><div class="result-label">Current portfolio (est.)</div><div class="result-val" id="ev-current">—</div></div>
+  <div class="result-card highlight-card"><div class="result-label">Exit Velocity Gap</div><div class="result-val" id="ev-gap">—</div></div>
+</div>
+<div class="progress-block" id="ev-progress">
+  <div class="progress-label">PROGRESS TO EXIT VELOCITY</div>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="ev-bar" style="width:0%"></div></div>
+  <div class="progress-note" id="ev-note">Enter your numbers above to see your Exit Velocity progress</div>
+</div>
+
+<div class="sec-header"><span class="sec-badge">B</span><span class="sec-title">10-ETF Position Planner</span></div>
+<div class="table-wrap">
+<table id="etf-table">
+<thead><tr><th>ETF Ticker</th><th>Purpose</th><th>Target %</th><th>Current Value ($)</th><th>Current %</th><th>Action</th></tr></thead>
+<tbody id="etf-rows">
+  <tr><td><input type="text" class="cell-input" value="VFV" oninput="etfCalc()"></td><td><input type="text" class="cell-input" value="S&amp;P 500 Core"></td><td><input type="number" class="cell-input num" value="20" oninput="etfCalc()"></td><td><input type="number" class="cell-input num" placeholder="0" oninput="etfCalc()"></td><td class="calc-cell" data-pct>—</td><td class="calc-cell" data-action>—</td></tr>
+  <tr><td><input type="text" class="cell-input" value="XEF" oninput="etfCalc()"></td><td><input type="text" class="cell-input" value="International Developed"></td><td><input type="number" class="cell-input num" value="10" oninput="etfCalc()"></td><td><input type="number" class="cell-input num" placeholder="0" oninput="etfCalc()"></td><td class="calc-cell" data-pct>—</td><td class="calc-cell" data-action>—</td></tr>
+  <tr><td><input type="text" class="cell-input" value="XEC" oninput="etfCalc()"></td><td><input type="text" class="cell-input" value="Emerging Markets"></td><td><input type="number" class="cell-input num" value="5" oninput="etfCalc()"></td><td><input type="number" class="cell-input num" placeholder="0" oninput="etfCalc()"></td><td class="calc-cell" data-pct>—</td><td class="calc-cell" data-action>—</td></tr>
+  <tr><td><input type="text" class="cell-input" value="XIC" oninput="etfCalc()"></td><td><input type="text" class="cell-input" value="Canadian Equity"></td><td><input type="number" class="cell-input num" value="10" oninput="etfCalc()"></td><td><input type="number" class="cell-input num" placeholder="0" oninput="etfCalc()"></td><td class="calc-cell" data-pct>—</td><td class="calc-cell" data-action>—</td></tr>
+  <tr><td><input type="text" class="cell-input" value="ZRE" oninput="etfCalc()"></td><td><input type="text" class="cell-input" value="Canadian REITs"></td><td><input type="number" class="cell-input num" value="10" oninput="etfCalc()"></td><td><input type="number" class="cell-input num" placeholder="0" oninput="etfCalc()"></td><td class="calc-cell" data-pct>—</td><td class="calc-cell" data-action>—</td></tr>
+  <tr><td><input type="text" class="cell-input" value="CGL.C" oninput="etfCalc()"></td><td><input type="text" class="cell-input" value="Gold Hedge"></td><td><input type="number" class="cell-input num" value="10" oninput="etfCalc()"></td><td><input type="number" class="cell-input num" placeholder="0" oninput="etfCalc()"></td><td class="calc-cell" data-pct>—</td><td class="calc-cell" data-action>—</td></tr>
+  <tr><td><input type="text" class="cell-input" value="XIU" oninput="etfCalc()"></td><td><input type="text" class="cell-input" value="TSX 60 Core"></td><td><input type="number" class="cell-input num" value="10" oninput="etfCalc()"></td><td><input type="number" class="cell-input num" placeholder="0" oninput="etfCalc()"></td><td class="calc-cell" data-pct>—</td><td class="calc-cell" data-action>—</td></tr>
+  <tr><td><input type="text" class="cell-input" value="XBAL" oninput="etfCalc()"></td><td><input type="text" class="cell-input" value="Balanced Core"></td><td><input type="number" class="cell-input num" value="10" oninput="etfCalc()"></td><td><input type="number" class="cell-input num" placeholder="0" oninput="etfCalc()"></td><td class="calc-cell" data-pct>—</td><td class="calc-cell" data-action>—</td></tr>
+  <tr><td><input type="text" class="cell-input" value="ZDV" oninput="etfCalc()"></td><td><input type="text" class="cell-input" value="Canadian Dividend"></td><td><input type="number" class="cell-input num" value="10" oninput="etfCalc()"></td><td><input type="number" class="cell-input num" placeholder="0" oninput="etfCalc()"></td><td class="calc-cell" data-pct>—</td><td class="calc-cell" data-action>—</td></tr>
+  <tr><td><input type="text" class="cell-input" value="QQC" oninput="etfCalc()"></td><td><input type="text" class="cell-input" value="NASDAQ / Tech"></td><td><input type="number" class="cell-input num" value="5" oninput="etfCalc()"></td><td><input type="number" class="cell-input num" placeholder="0" oninput="etfCalc()"></td><td class="calc-cell" data-pct>—</td><td class="calc-cell" data-action>—</td></tr>
+</tbody>
+<tfoot><tr><td colspan="2" class="total-label">Total</td><td class="total-val" id="etf-target-total">100%</td><td class="total-val" id="etf-val-total">$0</td><td class="total-val" id="etf-pct-total">—</td><td></td></tr></tfoot>
+</table>
+</div>
+
+<script>
+function evCalc(){
+  var mo=parseFloat(document.getElementById('ev-monthly').value)||2000;
+  var divs=parseFloat(document.getElementById('ev-divs').value)||0;
+  var yld=parseFloat(document.getElementById('ev-yield').value)||12;
+  var annNeed=mo*12;
+  var capNeed=annNeed/(yld/100);
+  var currentPortfolio=divs/(yld/100);
+  var gap=Math.max(0,capNeed-currentPortfolio);
+  var pct=Math.min(100,(currentPortfolio/capNeed)*100);
+  document.getElementById('ev-annual-need').textContent='$'+Math.round(annNeed).toLocaleString()+'/yr';
+  document.getElementById('ev-capital-need').textContent='$'+Math.round(capNeed).toLocaleString();
+  document.getElementById('ev-current').textContent='$'+Math.round(currentPortfolio).toLocaleString();
+  document.getElementById('ev-gap').textContent=gap?'$'+Math.round(gap).toLocaleString()+' remaining':'EXIT VELOCITY REACHED!';
+  document.getElementById('ev-bar').style.width=pct+'%';
+  document.getElementById('ev-note').textContent=pct.toFixed(1)+'% to Exit Velocity — '+Math.round(gap/(mo)).toLocaleString()+' months of baseline remaining';
+}
+function etfCalc(){
+  var rows=document.querySelectorAll('#etf-rows tr');
+  var totalVal=0;
+  rows.forEach(function(r){var n=r.querySelectorAll('.num');var v=parseFloat(n[1]?n[1].value:0)||0;totalVal+=v;});
+  var totTgt=0,totPct=0;
+  rows.forEach(function(r){
+    var n=r.querySelectorAll('.num');
+    var tgt=parseFloat(n[0]?n[0].value:0)||0;
+    var val=parseFloat(n[1]?n[1].value:0)||0;
+    var pct=totalVal>0?(val/totalVal*100):0;
+    var diff=pct-tgt;
+    var pctCell=r.querySelector('[data-pct]');
+    var actCell=r.querySelector('[data-action]');
+    if(pctCell) pctCell.textContent=totalVal>0?pct.toFixed(1)+'%':'—';
+    if(actCell){
+      if(totalVal===0){actCell.textContent='—';}
+      else if(diff< -2){actCell.innerHTML='<span class="pill crawl">ADD</span>';}
+      else if(diff>2){actCell.innerHTML='<span class="pill leech">TRIM</span>';}
+      else{actCell.innerHTML='<span class="pill run">ON TARGET</span>';}
+    }
+    totTgt+=tgt;
+  });
+  document.getElementById('etf-val-total').textContent='$'+totalVal.toLocaleString();
+  document.getElementById('etf-target-total').textContent=totTgt+'%';
+}
+window.onload=function(){evCalc();etfCalc();};
+</script>
+<div class="ws-quote">&#8220;Growth builds the walls. Gold guards the gate.&#8221;</div><div class="ws-footer"><span>VERITY ARCHITECTURE · CORVUS VERITY · 2026</span><span>Worksheet 14 of 16</span></div></div>
+<div class="ws-panel" id="ws-15" style="display:none">
+<div class="ws-top-bar">FINANCIALLY TRAPPED &nbsp;·&nbsp; THE ARCHITECT'S WORKING DOCUMENTS</div>
+<div class="ws-head">
+  <h2 class="ws-title">Worksheet 15: The Exit Strategy</h2>
+  <p class="ws-sub">Three-Valve Status Map · Three-Tab Pantry Setup · Freedom Budget</p>
+</div>
+<div class="ws-rule"></div><p class="ws-instruction">Three valves. When all three are open, the architecture is complete.</p>
+<div class="sec-header"><span class="sec-badge">A</span><span class="sec-title">Three-Valve Status Map</span></div>
+<div class="table-wrap"><table>
+<thead><tr><th>Valve</th><th>Description</th><th>Current Status</th><th>Annual Dividends ($)</th><th>Threshold ($)</th><th>Gap ($)</th></tr></thead>
+<tbody>
+<tr><td>VALVE 1 — Bill-Neutral</td><td>Engine 1 + 2 income covers all monthly bills</td><td><select class="cell-input"><option>Closed</option><option>Partial</option><option>✓ OPEN</option></select></td><td><input type="number" class="cell-input" placeholder=""></td><td><input type="number" class="cell-input" placeholder=""></td><td></td></tr>
+<tr><td>VALVE 2 — Maintaining</td><td>Full income replacement — no new injections needed</td><td><select class="cell-input"><option>Closed</option><option>Partial</option><option>✓ OPEN</option></select></td><td><input type="number" class="cell-input" placeholder=""></td><td><input type="number" class="cell-input" placeholder=""></td><td></td></tr>
+<tr><td>VALVE 3 — Exit Velocity</td><td>Titan income covers full lifestyle. Labor optional.</td><td><select class="cell-input"><option>Closed</option><option>Partial</option><option>✓ OPEN</option></select></td><td><input type="number" class="cell-input" placeholder=""></td><td><input type="number" class="cell-input" placeholder=""></td><td></td></tr>
+</tbody></table></div>
+<div class="sec-header"><span class="sec-badge">B</span><span class="sec-title">Freedom Budget — Monthly</span></div>
+<div class="table-wrap"><table>
+<thead><tr><th>Category</th><th>Target Amount ($)</th><th>Covered By Engine?</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><input type="text" class="cell-input" placeholder="Housing (rent/mortgage)"></td><td><input type="number" class="cell-input" placeholder=""></td><td><select class="cell-input"><option>Not yet</option><option>Partial</option><option>Engine 2 covers it</option></select></td><td><input type="text" class="cell-input" placeholder=""></td></tr>
+<tr><td><input type="text" class="cell-input" placeholder="Groceries"></td><td><input type="number" class="cell-input" placeholder=""></td><td><select class="cell-input"><option>Not yet</option><option>Partial</option><option>Engine 1 covers it</option></select></td><td><input type="text" class="cell-input" placeholder=""></td></tr>
+<tr><td><input type="text" class="cell-input" placeholder="Utilities"></td><td><input type="number" class="cell-input" placeholder=""></td><td><select class="cell-input"><option>Not yet</option><option>Partial</option><option>Engine 1 covers it</option></select></td><td><input type="text" class="cell-input" placeholder=""></td></tr>
+<tr><td><input type="text" class="cell-input" placeholder="Transportation"></td><td><input type="number" class="cell-input" placeholder=""></td><td><select class="cell-input"><option>Not yet</option><option>Partial</option><option>Engine 2 covers it</option></select></td><td><input type="text" class="cell-input" placeholder=""></td></tr>
+<tr><td><input type="text" class="cell-input" placeholder="Insurance"></td><td><input type="number" class="cell-input" placeholder=""></td><td><select class="cell-input"><option>Not yet</option><option>Partial</option><option>Engine 2 covers it</option></select></td><td><input type="text" class="cell-input" placeholder=""></td></tr>
+<tr><td><input type="text" class="cell-input" placeholder="Discretionary"></td><td><input type="number" class="cell-input" placeholder=""></td><td><select class="cell-input"><option>Not yet</option><option>Partial</option><option>Engine 3 covers it</option></select></td><td><input type="text" class="cell-input" placeholder=""></td></tr>
+</tbody></table></div>
+<div class="ws-quote">&#8220;Build the lifeboat. Then build the deck. Then build the sails.&#8221;</div><div class="ws-footer"><span>VERITY ARCHITECTURE · CORVUS VERITY · 2026</span><span>Worksheet 15 of 16</span></div></div>
+<div class="ws-panel" id="ws-16" style="display:none">
+<div class="ws-top-bar">FINANCIALLY TRAPPED &nbsp;·&nbsp; THE ARCHITECT'S WORKING DOCUMENTS</div>
+<div class="ws-head">
+  <h2 class="ws-title">Worksheet 16: The Eternal Architect</h2>
+  <p class="ws-sub">Black Box Creation · Beneficiary Audit · Co-Pilot Curriculum · Gold Envelope System</p>
+</div>
+<div class="ws-rule"></div><p class="ws-instruction">The architecture outlives you. Build the Black Box. Name the inheritors.</p>
+<div class="sec-header"><span class="sec-badge">A</span><span class="sec-title">Black Box Creation Checklist</span></div>
+<div class="table-wrap"><table>
+<thead><tr><th>Document</th><th>Created?</th><th>Location</th><th>Last Updated</th></tr></thead>
+<tbody>
+<tr><td>The Three-Engine summary (platforms, tickers, passwords)</td><td><select class="cell-input"><option>Not created</option><option>Draft</option><option>✓ Complete</option></select></td><td><input type="text" class="cell-input" placeholder=""></td><td><input type="date" class="cell-input"></td></tr>
+<tr><td>The Beneficiary Shield document</td><td><select class="cell-input"><option>Not created</option><option>Draft</option><option>✓ Complete</option></select></td><td><input type="text" class="cell-input" placeholder=""></td><td><input type="date" class="cell-input"></td></tr>
+<tr><td>The DRIP and dividend income summary</td><td><select class="cell-input"><option>Not created</option><option>Draft</option><option>✓ Complete</option></select></td><td><input type="text" class="cell-input" placeholder=""></td><td><input type="date" class="cell-input"></td></tr>
+<tr><td>The Injection Protocol (bi-weekly amounts)</td><td><select class="cell-input"><option>Not created</option><option>Draft</option><option>✓ Complete</option></select></td><td><input type="text" class="cell-input" placeholder=""></td><td><input type="date" class="cell-input"></td></tr>
+<tr><td>The Two-Envelope System (physical)</td><td><select class="cell-input"><option>Not created</option><option>Draft</option><option>✓ Complete</option></select></td><td><input type="text" class="cell-input" placeholder=""></td><td><input type="date" class="cell-input"></td></tr>
+</tbody></table></div>
+<div class="sec-header"><span class="sec-badge">B</span><span class="sec-title">Beneficiary Audit</span></div>
+<div class="table-wrap"><table>
+<thead><tr><th>Asset / Account</th><th>Beneficiary Named?</th><th>Who?</th><th>Date Verified</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>Engine 1 TFSA</td><td><select class="cell-input"><option>Yes</option><option>No</option><option>Needs Update</option></select></td><td><input type="text" class="cell-input" placeholder=""></td><td><input type="date" class="cell-input"></td><td><input type="text" class="cell-input" placeholder=""></td></tr>
+<tr><td>Engine 2 TFSA</td><td><select class="cell-input"><option>Yes</option><option>No</option><option>Needs Update</option></select></td><td><input type="text" class="cell-input" placeholder=""></td><td><input type="date" class="cell-input"></td><td><input type="text" class="cell-input" placeholder=""></td></tr>
+<tr><td>Engine 3 TFSA</td><td><select class="cell-input"><option>Yes</option><option>No</option><option>Needs Update</option></select></td><td><input type="text" class="cell-input" placeholder=""></td><td><input type="date" class="cell-input"></td><td><input type="text" class="cell-input" placeholder=""></td></tr>
+<tr><td>Life insurance</td><td><select class="cell-input"><option>Yes</option><option>No</option><option>Needs Update</option></select></td><td><input type="text" class="cell-input" placeholder=""></td><td><input type="date" class="cell-input"></td><td><input type="text" class="cell-input" placeholder=""></td></tr>
+<tr><td>Other assets</td><td><select class="cell-input"><option>Yes</option><option>No</option><option>Needs Update</option></select></td><td><input type="text" class="cell-input" placeholder=""></td><td><input type="date" class="cell-input"></td><td><input type="text" class="cell-input" placeholder=""></td></tr>
+</tbody></table></div>
+<div class="ws-quote">&#8220;Wealth is what you earn. A Legacy is what you build.&#8221;</div><div class="ws-footer"><span>VERITY ARCHITECTURE · CORVUS VERITY · 2026</span><span>Worksheet 16 of 16</span></div></div>
+</div>
+
+<script>
+function showWS(n){
+  document.querySelectorAll('.ws-panel').forEach(function(p){p.style.display='none';});
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
+  var panel=document.getElementById('ws-'+n);
+  if(panel) panel.style.display='block';
+  var btn=document.getElementById('tab-'+n);
+  if(btn) btn.classList.add('active');
+  localStorage.setItem('ft-ws-active',n);
+}
+var saved=localStorage.getItem('ft-ws-active');
+showWS(saved?parseInt(saved):1);
+</script>
+</body>
+</html>
