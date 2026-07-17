@@ -128,6 +128,9 @@ section{padding-top:2.4em;}
 .bundle-includes{display:grid;grid-template-columns:1fr 1fr;gap:0.4em 1.2em;margin-bottom:1.1em;}
 .bundle-includes .bi{font-size:0.84em;color:#CCC;display:flex;align-items:baseline;gap:0.4em;}
 .bundle-includes .bi::before{content:"CHECK";color:var(--gold);font-weight:bold;flex-shrink:0;font-size:0.7em;}
+.dl-stats{display:flex;flex-wrap:wrap;gap:0.4em 1.4em;margin:0 0 1.1em;font-family:Arial,sans-serif;font-size:0.72em;letter-spacing:0.08em;text-transform:uppercase;color:#9a9ab0;}
+.dl-stats .dl-ico{color:var(--gold);}
+.dl-stats b{color:var(--gold);font-weight:bold;}
 footer{background:var(--dark);color:#999;text-align:center;font-size:0.8em;padding:1.6em 1em;margin-top:3em;border-top:3px solid var(--gold);}
 footer .f-brand{color:var(--gold);}
 @media(max-width:640px){
@@ -141,7 +144,6 @@ footer .f-brand{color:var(--gold);}
 </head>
 <body>
 <a href="/" id="vaHomeBtn" aria-label="Home" style="position:fixed;top:14px;left:14px;z-index:99999;display:inline-flex;align-items:center;gap:7px;padding:9px 15px;background:rgba(18,22,44,0.9);color:#d9b676;font-family:Georgia,'Times New Roman',serif;font-size:14px;font-weight:bold;letter-spacing:.5px;text-decoration:none;border:1px solid #d9b676;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.35);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);"><span style="font-size:16px;line-height:1;">&#8962;</span> Home</a>
-<a href="#" id="vaBackBtn" aria-label="Back" onclick="if(document.referrer&&document.referrer.indexOf(location.host)>-1){history.back();}else if(history.length>1){history.back();}else{location.href='/';}return false;" style="position:fixed;top:60px;left:14px;z-index:99999;display:inline-flex;align-items:center;gap:7px;padding:9px 15px;background:rgba(18,22,44,0.9);color:#d9b676;font-family:Georgia,'Times New Roman',serif;font-size:14px;font-weight:bold;letter-spacing:.5px;text-decoration:none;border:1px solid #d9b676;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.35);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);"><span style="font-size:16px;line-height:1;">&#8592;</span> Back</a>
 
 <header>
   <div class="brand label">Verity Architecture</div>
@@ -157,7 +159,6 @@ footer .f-brand{color:var(--gold);}
   <a href="#tutorials">How-To Videos</a>
   <a href="#collection">The Collection</a>
   <a href="portfolio-architect.html">Portfolio Architecture</a>
-  <a href="book-three.html">The Escape</a>
   <a href="index.html" style="color:var(--gold);">Verity Architecture</a>
 </nav>
 
@@ -177,9 +178,8 @@ footer .f-brand{color:var(--gold);}
     <div class="bm-tagline">Engineering of Persistence</div>
     <div class="bm-desc">A systematic framework for escaping financial inertia &mdash; one engineered position at a time. Real strategies, real account data, zero fluff. The book that started the portfolios you're looking at right now.</div>
     <div class="bm-buy">
-      <a class="btn-hero btn-hero-gold" href="#" id="heroEbook">Buy Ebook &mdash; $14.99</a>
-      <a class="btn-hero btn-hero-line" href="/worksheets">Free Worksheets &rarr;</a>
-      <span class="btn-hero btn-hero-dim">Book One Bundle &mdash; Coming Soon</span>
+      <a class="btn-hero btn-hero-gold" href="cart.html" data-buy-now="ft-ebook" id="heroEbook">Buy Ebook &mdash; $14.99</a>
+      <a class="btn-hero btn-hero-line" href="cart.html" data-add-to-cart="ft-bundle" id="heroBundle">Add Bundle to Cart &mdash; $29.99</a>
       <span class="btn-hero btn-hero-dim">Paperback &mdash; Coming Soon</span>
       <a class="btn-hero btn-hero-line" href="https://www.amazon.ca/dp/B0H6M2W9HZ" target="_blank" rel="noopener">Amazon Kindle &mdash; CAD $9.99</a>
     </div>
@@ -271,11 +271,16 @@ footer .f-brand{color:var(--gold);}
       <div class="bi">Excel Worksheet Workbook</div>
       <div class="bi">Works offline, no account needed</div>
     </div>
-    <a class="btn btn-gold" href="#" id="buyWorksheets">Buy Worksheet Pack (PayPal)</a>
+    <div class="dl-stats">
+      <span><span class="dl-ico">&#11015;</span> <b data-count-display="dl-worksheets">0</b> worksheet downloads</span>
+      <span><span class="dl-ico">&#11015;</span> <b data-count-display="dl-excel">0</b> Excel sheet downloads</span>
+    </div>
+    <a class="btn btn-gold" href="#" data-add-to-cart="ft-worksheets" id="buyWorksheets">Add to Cart</a>
+    <a class="btn btn-line" href="#" data-buy-now="ft-worksheets">Buy Now &rarr;</a>
   </div>
   <div class="bundle-card">
     <div class="bc-head">Book One Bundle &mdash; Financially Trapped Complete</div>
-    <div class="bc-price">Coming Soon</div>
+    <div class="bc-price">$29.99 CAD</div>
     <div class="bundle-includes">
       <div class="bi">Ebook (EPUB)</div>
       <div class="bi">Interactive HTML Book + Worksheets</div>
@@ -286,7 +291,8 @@ footer .f-brand{color:var(--gold);}
       <div class="bi">Purchase Plan Spreadsheet</div>
       <div class="bi">Works offline, no account needed</div>
     </div>
-    <span class="btn btn-line" data-pending>Book One Bundle &mdash; Coming Soon</span>
+    <a class="btn btn-gold" href="#" data-add-to-cart="ft-bundle" id="buyBundle">Add to Cart</a>
+    <a class="btn btn-line" href="#" data-buy-now="ft-bundle">Buy Now &rarr;</a>
   </div>
   <div class="bundle-card" style="border-color:rgba(201,168,76,0.3);opacity:0.72;position:relative;overflow:hidden;">
     <div style="position:absolute;top:0.9em;right:1em;font-family:Arial,sans-serif;font-size:0.62em;letter-spacing:0.2em;text-transform:uppercase;color:#C9A84C;border:1px solid rgba(201,168,76,0.4);padding:0.2em 0.7em;border-radius:20px;">Coming Soon</div>
@@ -303,7 +309,7 @@ footer .f-brand{color:var(--gold);}
     <div class="btn btn-gold" style="opacity:0.4;cursor:not-allowed;text-align:center;">Available When Book Two Launches</div>
   </div>
   <div class="grid" style="margin-top:0.5em;">
-    <div class="card"><h3>Ebook Only</h3><div class="c-sub">EPUB format. Delivered instantly.</div><div class="price">$14.99</div><div class="spacer"></div><a class="btn btn-gold" href="#" id="buyEbookDirect">Buy Ebook (PayPal)</a></div>
+    <div class="card"><h3>Ebook Only</h3><div class="c-sub">EPUB format. Delivered instantly.</div><div class="price">$14.99</div><div class="spacer"></div><a class="btn btn-gold" href="#" data-add-to-cart="ft-ebook" id="buyEbookDirect">Add to Cart</a><a class="btn btn-line" href="#" data-buy-now="ft-ebook">Buy Now &rarr;</a></div>
     <div class="card"><h3>Paperback</h3><div class="c-sub">Print edition &mdash; CAD $25 on Amazon, Aug 1, 2026.</div><div class="spacer"></div><a class="btn btn-line" data-pending href="#">Amazon &mdash; Aug 1, 2026</a><a class="btn btn-line" data-pending href="#">Barnes &amp; Noble &mdash; Coming Soon</a></div>
     <div class="card"><h3>Hardcover</h3><div class="c-sub">Collector's print edition.</div><div class="price">CAD $85</div><div class="spacer"></div><a class="btn btn-gold" href="https://www.amazon.com/dp/B0H8KV4JRH" target="_blank" rel="noopener">Buy Hardcover on Amazon</a><a class="btn btn-line" data-pending href="#">Indigo &mdash; Coming Soon</a></div>
     <div class="card"><h3>Kindle</h3><div class="c-sub">Amazon Kindle edition.</div><div class="price">CAD $9.99</div><div class="spacer"></div><a class="btn btn-gold" href="https://www.amazon.ca/dp/B0H6M2W9HZ" target="_blank" rel="noopener">Buy on Amazon Kindle</a></div>
@@ -328,7 +334,6 @@ footer .f-brand{color:var(--gold);}
 
 <footer>
   <div class="f-brand label" style="font-size:0.8em;">Verity Architecture</div>
-  <div style="margin-top:0.55em;"><a href="https://www.facebook.com/profile.php?id=61591774325348" target="_blank" rel="noopener noreferrer" style="color:#C9A84C;">Follow Corvus Verity on Facebook</a></div>
   <div style="margin-top:0.4em;">Copyright 2026 Verity Architecture. All progress shown is real account data, updated monthly. Nothing on this page is financial advice.</div>
 </footer>
 
@@ -343,7 +348,7 @@ var fmt=function(n){return n!=null?n.toLocaleString("en-CA",{style:"currency",cu
 var COLL=[{name:"Financially Trapped",tag:"Financially Trapped",href:"financially-trapped.html"},{name:"Centurion",tag:"Portfolio Architecture",href:"centurion.html"},{name:"Fortress",tag:"Portfolio Architecture",href:"fortress.html"},{name:"Quiet Titan",tag:"Portfolio Architecture",href:"quiet-titan.html"},{name:"WhiteSwan",tag:"Portfolio Architecture",href:"whiteswan.html"},{name:"Developer",tag:"Portfolio Architecture",href:"developer.html"},{name:"Rebate",tag:"Portfolio Architecture",href:"rebate.html"},{name:"10 ETF",tag:"Portfolio Architecture",href:"10-etf.html"},{name:"Tactical",tag:"Portfolio Architecture",href:"tactical.html"},{name:"REITS",tag:"Portfolio Architecture",href:"reits.html"}];
 document.getElementById("collectionGrid").innerHTML=COLL.map(function(c){return '<div class="card coll-card"><span class="tag">'+c.tag+'</span><h3>'+c.name+'</h3><div class="c-sub">Deposits - Value - Dividends, by account.</div><div class="spacer"></div><a class="btn btn-line" href="'+c.href+'?from=ft">View Progress</a></div>';}).join("");
 var TUT=[
-  {ch:1, t:"The Shopping Cart Protocol", d:"Find found money, prepare the account, and document your first deployment.", v:"videos/worksheets/01-shopping-cart-protocol/worksheet-01-shopping-cart-protocol.mp4", sec:"Found Money Log", cols:["SOURCE","AMOUNT ($)","DATE FOUND","STATUS"]},
+  {ch:1, t:"The Shopping Cart Protocol", d:"Find found money, set up your TFSA platform, and log your first injection.", v:"ws1-tutorial.html", sec:"Found Money Log", cols:["SOURCE","AMOUNT ($)","DATE FOUND","STATUS"]},
   {ch:2, t:"The Pantry-Level Math", d:"Enter a bill, set your yield target, and watch the Engine Price calculate.", v:"ws2-tutorial.html", sec:"Bill Map", cols:["BILL","MONTHLY ($)","ANNUAL ($)","ENGINE PRICE"]},
   {ch:3, t:"The Triple-TFSA Blueprint", d:"Set up all three account slots and activate DRIP across the fleet.", v:"ws3-tutorial.html", sec:"Account Setup", cols:["ACCOUNT","NICKNAME","PLATFORM","DRIP"]},
   {ch:4, t:"The Leech and the Cage", d:"Audit your MER drag — compare the Architect vs Leech cost over 30 years.", v:"ws4-tutorial.html", sec:"MER Audit", cols:["PRODUCT","TYPE","MER (%)","30-YR DRAG"]},
@@ -364,31 +369,24 @@ function makeThumb(ws,title,sec,cols){
   var c1=cols[0]||'',c2=cols[1]||'',c3=cols[2]||'';
   var svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 108" width="220" height="108">'
     +'<rect width="220" height="108" fill="#F0EFE8"/>'
-    // Top bar
     +'<rect width="220" height="18" fill="#1A1A2E"/>'
     +'<text x="7" y="12.5" font-family="Arial,sans-serif" font-size="6.5" font-weight="bold" fill="#C9A84C" letter-spacing="1">FINANCIALLY TRAPPED · WS '+ws+'</text>'
-    // Title band
     +'<rect y="18" width="220" height="20" fill="#FFF"/>'
     +'<line x1="0" y1="18" x2="220" y2="18" stroke="#C9A84C" stroke-width="1.5"/>'
     +'<text x="7" y="32" font-family="Georgia,serif" font-size="9" font-weight="bold" fill="#1A1A2E">'+title+'</text>'
-    // Section band
     +'<rect y="38" width="220" height="14" fill="#1A1A2E"/>'
     +'<text x="7" y="48.5" font-family="Arial,sans-serif" font-size="6" font-weight="bold" fill="#C9A84C" letter-spacing="0.5">[A] '+sec+'</text>'
-    // Column headers
     +'<rect y="52" width="220" height="14" fill="#1A1A2E"/>'
     +'<line x1="0" y1="52" x2="220" y2="52" stroke="#C9A84C" stroke-width="0.5"/>'
     +'<text x="7" y="62" font-family="Arial,sans-serif" font-size="5.5" fill="#C9A84C">'+c1+'</text>'
     +'<text x="78" y="62" font-family="Arial,sans-serif" font-size="5.5" fill="#C9A84C">'+c2+'</text>'
     +'<text x="148" y="62" font-family="Arial,sans-serif" font-size="5.5" fill="#C9A84C">'+c3+'</text>'
-    // Row 1
     +'<rect y="66" width="220" height="13" fill="#FFF"/>'
     +'<line x1="0" y1="66" x2="220" y2="66" stroke="#DDD" stroke-width="0.5"/>'
     +'<text x="7" y="75.5" font-family="Arial,sans-serif" font-size="7" fill="#CCCCCC">· · · · · · · · ·</text>'
-    // Row 2
     +'<rect y="79" width="220" height="13" fill="#FAFAF6"/>'
     +'<line x1="0" y1="79" x2="220" y2="79" stroke="#DDD" stroke-width="0.5"/>'
     +'<text x="7" y="88.5" font-family="Arial,sans-serif" font-size="7" fill="#CCCCCC">· · · · · · · · ·</text>'
-    // Footer total row
     +'<rect y="92" width="220" height="16" fill="#F5E6C8"/>'
     +'<line x1="0" y1="92" x2="220" y2="92" stroke="#C9A84C" stroke-width="1.5"/>'
     +'<text x="7" y="103" font-family="Arial,sans-serif" font-size="6" font-weight="bold" fill="#1A1A2E">TOTAL</text>'
@@ -412,8 +410,7 @@ document.getElementById("tutGrid").innerHTML=TUT.map(function(t){
     +(live?'<a class="btn-tut live" href="'+t.v+'">Watch Tutorial</a>':'<a class="btn-tut" data-pending href="#">Video Coming Soon</a>')
     +'</div></div>';
 }).join("");
-var PP={ebook:"",worksheets:"",bundle:""};
-[["buyEbookDirect","ebook"],["heroEbook","ebook"],["heroBundle","bundle"],["buyWorksheets","worksheets"],["buyBundle","bundle"]].forEach(function(p){var el=document.getElementById(p[0]);if(!el)return;if(PP[p[1]])el.href=PP[p[1]];else{el.setAttribute("data-pending","");el.style.opacity="0.45";el.style.pointerEvents="none";}});
+/* Buy buttons are now wired by the cart engine (store.js) via data-add-to-cart / data-buy-now. */
 Chart.defaults.font.family="Georgia, serif";Chart.defaults.color="#555";
 var go={color:"rgba(26,26,46,0.08)"};var mt={callback:function(v){return "$"+Number(v).toLocaleString();}};var mtp=function(c){return "$"+c.parsed.y.toFixed(2)+" CAD";};
 var deps=FT.deposits.map(function(v){return v??0;});
@@ -423,5 +420,10 @@ new Chart(document.getElementById("chartDeposits"),{type:"bar",data:{labels:FT.m
 new Chart(document.getElementById("chartValue"),{type:"line",data:{labels:FT.months,datasets:[{label:"Value (CAD)",data:vals,borderColor:DARK,backgroundColor:"rgba(201,168,76,0.22)",fill:true,tension:0.3,pointBackgroundColor:GOLD,pointBorderColor:DARK,pointRadius:5,spanGaps:true}]},options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:mtp}}},scales:{y:{beginAtZero:true,ticks:mt,grid:go},x:{grid:{display:false}}}}});
 new Chart(document.getElementById("chartDividends"),{type:"line",data:{labels:FT.months,datasets:[{label:"Dividends (CAD)",data:divs,borderColor:GOLDDIM,backgroundColor:"rgba(201,168,76,0.1)",fill:true,tension:0.38,pointRadius:4,pointBackgroundColor:GOLD,pointBorderColor:GOLDDIM,spanGaps:true}]},options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:mtp}}},scales:{y:{beginAtZero:true,ticks:mt,grid:go},x:{grid:{display:false}}}}});
 </script>
+<script src="store-config.js"></script>
+<script src="store.js"></script>
+<span data-visit-hit="visit-ft" hidden></span>
+<script src="counters-config.js"></script>
+<script src="counters.js"></script>
 </body>
 </html>

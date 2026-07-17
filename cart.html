@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Cart | Verity Architecture</title>
+<style>
+:root{--dark:#1A1A2E;--gold:#C9A84C;--light-gold:#F5E6C8;--gold-dim:#A88830;--paper:#F0EFE8;--ink:#1A1A2E;--muted:#555;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Georgia,"Times New Roman",serif;background:var(--paper);color:var(--ink);line-height:1.55;}
+.label{font-family:Arial,sans-serif;font-weight:bold;text-transform:uppercase;letter-spacing:0.18em;}
+header{background:var(--dark);padding:2em 1.5em 1.6em;text-align:center;border-bottom:3px solid var(--gold);}
+header .brand{color:var(--gold);font-size:0.7em;}
+header h1{color:#fff;font-size:2em;margin:0.2em 0 0.1em;font-weight:bold;}
+header .subtitle{color:var(--light-gold);font-style:italic;font-size:1em;}
+nav{background:var(--dark);border-bottom:1px solid rgba(201,168,76,0.35);display:flex;justify-content:center;flex-wrap:wrap;position:sticky;top:0;z-index:50;}
+nav a{color:#CCC;text-decoration:none;font-family:Arial,sans-serif;font-size:0.7em;font-weight:bold;letter-spacing:0.14em;text-transform:uppercase;padding:0.9em 1.1em;transition:background .15s;}
+nav a:hover{background:rgba(201,168,76,0.15);color:var(--gold);}
+.wrap{max-width:1000px;margin:0 auto;padding:0 1.5em 3em;}
+section{padding-top:2.4em;}
+.sec-header{display:flex;align-items:center;gap:0.7em;margin-bottom:0.4em;}
+.sec-badge{width:30px;height:30px;border-radius:50%;background:var(--gold);color:var(--dark);font-weight:bold;display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif;flex-shrink:0;}
+.sec-title{font-weight:bold;font-size:1.35em;}
+.sec-rule{border:none;border-top:2px solid var(--gold);margin:0.5em 0 1.1em;}
+.note{font-style:italic;color:var(--muted);font-size:0.92em;border-left:4px solid var(--gold);background:var(--light-gold);padding:0.5em 0.8em;border-radius:0 4px 4px 0;margin-bottom:1.2em;}
+footer{background:var(--dark);color:#999;text-align:center;font-size:0.8em;padding:1.6em 1em;margin-top:3em;border-top:3px solid var(--gold);}
+footer .f-brand{color:var(--gold);}
+</style>
+</head>
+<body>
+<a href="/" id="vaHomeBtn" aria-label="Home" style="position:fixed;top:14px;left:14px;z-index:99999;display:inline-flex;align-items:center;gap:7px;padding:9px 15px;background:rgba(18,22,44,0.9);color:#d9b676;font-family:Georgia,'Times New Roman',serif;font-size:14px;font-weight:bold;letter-spacing:.5px;text-decoration:none;border:1px solid #d9b676;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.35);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);"><span style="font-size:16px;line-height:1;">&#8962;</span> Home</a>
+
+<header>
+  <div class="brand label">Verity Architecture</div>
+  <h1>Your Cart</h1>
+  <div class="subtitle">Buy direct &mdash; cut out the middleman</div>
+</header>
+
+<nav>
+  <a href="financially-trapped-hub.html">Financially Trapped</a>
+  <a href="portfolio-architect.html">Portfolio Architecture</a>
+  <a href="store-policies.html">Store Policies</a>
+  <a href="index.html" style="color:var(--gold);">Verity Architecture</a>
+</nav>
+
+<div class="wrap">
+  <section>
+    <div class="sec-header"><div class="sec-badge">&#128722;</div><div class="sec-title">Order Review</div></div>
+    <hr class="sec-rule">
+    <div class="note">Review your items below. Prices are in CAD. Applicable tax is calculated on the secure checkout page before you pay.</div>
+    <div id="verity-cart-page"></div>
+  </section>
+</div>
+
+<footer>
+  <div class="f-brand label" style="font-size:0.8em;">Verity Architecture</div>
+  <div style="margin-top:0.4em;">Copyright 2026 Verity Architecture. Digital goods delivered instantly after payment. Nothing on this page is financial advice.</div>
+</footer>
+
+<script src="store-config.js"></script>
+<script src="store.js"></script>
+</body>
+</html>

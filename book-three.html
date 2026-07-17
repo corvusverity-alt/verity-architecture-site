@@ -100,15 +100,12 @@ footer .f-brand{color:#7E6230 !important;}
 </head>
 <body>
 <a href="/" id="vaHomeBtn" aria-label="Home" style="position:fixed;top:14px;left:14px;z-index:99999;display:inline-flex;align-items:center;gap:7px;padding:9px 15px;background:rgba(18,22,44,0.9);color:#d9b676;font-family:Georgia,'Times New Roman',serif;font-size:14px;font-weight:bold;letter-spacing:.5px;text-decoration:none;border:1px solid #d9b676;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.35);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);"><span style="font-size:16px;line-height:1;">&#8962;</span> Home</a>
-<a href="#" id="vaBackBtn" aria-label="Back" onclick="if(document.referrer&&document.referrer.indexOf(location.host)>-1){history.back();}else if(history.length>1){history.back();}else{location.href='/';}return false;" style="position:fixed;top:60px;left:14px;z-index:99999;display:inline-flex;align-items:center;gap:7px;padding:9px 15px;background:rgba(18,22,44,0.9);color:#d9b676;font-family:Georgia,'Times New Roman',serif;font-size:14px;font-weight:bold;letter-spacing:.5px;text-decoration:none;border:1px solid #d9b676;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.35);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);"><span style="font-size:16px;line-height:1;">&#8592;</span> Back</a>
 
 <nav>
   <a href="#book">The Book</a>
   <a href="#about">About</a>
   <a href="#inside">What's Inside</a>
   <a href="#notify">Get Notified</a>
-  <a href="financially-trapped-hub.html">Financially Trapped</a>
-  <a href="portfolio-architect.html">Portfolio Architecture</a>
   <a href="index.html" class="home">Verity Architecture</a>
 </nav>
 
@@ -189,5 +186,8 @@ footer .f-brand{color:#7E6230 !important;}
 document.getElementById('yr').textContent=new Date().getFullYear();
 document.querySelectorAll('nav a[href^="#"]').forEach(function(a){a.addEventListener('click',function(e){var t=document.querySelector(a.getAttribute('href'));if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth'});}});});
 </script>
+<span data-visit-hit="visit-b3" hidden></span>
+<script src="counters-config.js"></script>
+<script src="counters.js"></script>
 </body>
 </html>

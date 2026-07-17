@@ -154,6 +154,8 @@ nav{
 .book-link:hover{background:#C9A84C;color:#0E0E1C;border-color:#C9A84C;}
 .book-link.soon{color:#666;border-color:rgba(255,255,255,.12);cursor:default;}
 .book-link.soon:hover{background:none;color:#666;border-color:rgba(255,255,255,.12);}
+.book-visits{ font-family:Arial,sans-serif;font-size:.64em;letter-spacing:.14em;text-transform:uppercase;color:#8a825f;margin:.9em 0 -.2em; }
+.book-visits b{ color:#C9A84C;font-weight:bold;letter-spacing:.06em; }
 
 /* ─── About strip ────────────────────────────────────────────────────────── */
 .about{
@@ -274,6 +276,7 @@ footer{
         <div class="book-title">Financially Trapped</div>
         <div class="book-sub">Engineering of Persistence</div>
         <div class="book-pages">444 pages</div>
+        <div class="book-visits">&#128065; <b data-count-display="visit-ft">0</b> visitors</div>
         <a href="financially-trapped-hub.html" class="book-link">Enter the Hub →</a>
       </div>
     </div>
@@ -299,6 +302,7 @@ footer{
         <div class="book-title">Portfolio Architecture</div>
         <div class="book-sub">Build Your Own Passive Income Legacy</div>
         <div class="book-pages">618 pages</div>
+        <div class="book-visits">&#128065; <b data-count-display="visit-pa">0</b> visitors</div>
         <a href="portfolio-architect.html" class="book-link">Coming Soon &rarr;</a>
       </div>
     </div>
@@ -324,6 +328,7 @@ footer{
         <div class="book-title">The Architect's Business Escape Strategies</div>
         <div class="book-sub">Financial Independence by Architecture</div>
         <div class="book-pages">147 pages · In progress</div>
+        <div class="book-visits">&#128065; <b data-count-display="visit-b3">0</b> visitors</div>
         <a href="book-three.html" class="book-link">Coming Soon →</a>
       </div>
     </div>
@@ -359,7 +364,6 @@ footer{
     <a href="financially-trapped-hub.html">Financially Trapped Hub</a>
     <a href="#books">Books</a>
     <a href="#about">About</a>
-    <a href="https://www.facebook.com/profile.php?id=61591774325348" target="_blank" rel="noopener noreferrer">Facebook</a>
     <a href="mailto:Support@VerityArchitect.com">Contact</a>
   </div>
   <div class="footer-contact">
@@ -376,5 +380,7 @@ footer{
 <script>
 document.getElementById('yr').textContent = new Date().getFullYear();
 </script>
+<script src="counters-config.js"></script>
+<script src="counters.js"></script>
 </body>
 </html>

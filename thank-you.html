@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thank You | Verity Architecture</title>
+<style>
+:root{--dark:#1A1A2E;--gold:#C9A84C;--light-gold:#F5E6C8;--gold-dim:#A88830;--paper:#F0EFE8;--ink:#1A1A2E;--muted:#555;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Georgia,"Times New Roman",serif;background:var(--paper);color:var(--ink);line-height:1.6;}
+.label{font-family:Arial,sans-serif;font-weight:bold;text-transform:uppercase;letter-spacing:0.18em;}
+header{background:var(--dark);padding:2em 1.5em 1.6em;text-align:center;border-bottom:3px solid var(--gold);}
+header .brand{color:var(--gold);font-size:0.7em;}
+header h1{color:#fff;font-size:2em;margin:0.2em 0 0.1em;font-weight:bold;}
+.wrap{max-width:640px;margin:0 auto;padding:3em 1.5em;text-align:center;}
+.check{width:74px;height:74px;border-radius:50%;background:var(--gold);color:var(--dark);font-size:2.4em;font-weight:bold;display:flex;align-items:center;justify-content:center;margin:0 auto 1em;box-shadow:0 4px 18px rgba(201,168,76,0.4);}
+h2{font-size:1.6em;margin-bottom:0.5em;}
+p{color:var(--muted);margin-bottom:1em;}
+.card{background:#fff;border:1px solid #DDD8C8;border-top:3px solid var(--gold);border-radius:6px;padding:1.4em 1.6em;margin:1.6em 0;text-align:left;box-shadow:0 2px 10px rgba(26,26,46,0.08);}
+.card h3{font-size:1.05em;margin-bottom:0.5em;color:var(--dark);}
+.card ol{margin:0 0 0 1.2em;color:var(--muted);font-size:0.95em;}
+.card li{margin-bottom:0.4em;}
+.btn{display:inline-block;font-family:Arial,sans-serif;font-size:0.75em;font-weight:bold;letter-spacing:0.1em;text-transform:uppercase;text-decoration:none;padding:0.8em 1.5em;border-radius:4px;margin:0.3em;}
+.btn-gold{background:var(--gold);color:var(--dark);}
+.btn-line{background:transparent;color:var(--dark);border:1.5px solid var(--gold);}
+footer{background:var(--dark);color:#999;text-align:center;font-size:0.8em;padding:1.6em 1em;border-top:3px solid var(--gold);}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand label">Verity Architecture</div>
+  <h1>Thank You</h1>
+</header>
+
+<div class="wrap">
+  <div class="check">&#10003;</div>
+  <h2>Your purchase is complete.</h2>
+  <p>A receipt and your secure download link have been emailed to you. If you completed payment, your files are ready now.</p>
+
+  <div class="card">
+    <h3>What happens next</h3>
+    <ol>
+      <li>Check your email for the receipt and download link (check spam if it's not there in a few minutes).</li>
+      <li>Your download link is private and time-limited &mdash; save your files somewhere safe once downloaded.</li>
+      <li>Everything works offline and needs no account.</li>
+      <li>Need help or a fresh link? Use the support contact on our Store Policies page.</li>
+    </ol>
+  </div>
+
+  <a class="btn btn-gold" href="financially-trapped-hub.html">Back to Financially Trapped</a>
+  <a class="btn btn-line" href="store-policies.html">Store Policies &amp; Support</a>
+</div>
+
+<footer>
+  <div class="label" style="color:var(--gold);font-size:0.8em;">Verity Architecture</div>
+  <div style="margin-top:0.4em;">Copyright 2026 Verity Architecture. Digital goods delivered instantly after payment.</div>
+</footer>
+
+<script src="counters-config.js"></script>
+<script src="counters.js"></script>
+<script>
+// clear the cart on a successful return from checkout
+try{ localStorage.removeItem("verity_cart_v1"); }catch(e){}
+
+// count a paid delivery as a download: thank-you.html?p=<productId>
+(function(){
+  try{
+    var cfg = window.VERITY_COUNTERS_CONFIG || {};
+    var map = cfg.deliveryMap || {};
+    var params = new URLSearchParams(location.search);
+    var p = params.get("p");
+    if(!p || !window.Counters) return;
+    var guard = "dlv_" + location.search;           // don't double-count on refresh
+    if(sessionStorage.getItem(guard)) return;
+    sessionStorage.setItem(guard,"1");
+    (map[p] || []).forEach(function(k){ window.Counters.hit(k); });
+  }catch(e){}
+})();
+</script>
+</body>
+</html>
