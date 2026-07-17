@@ -38,18 +38,18 @@ window.VERITY_STORE_CONFIG = {
 
     "ft-worksheets": {
       name:        "Worksheet Pack — Interactive Edition",
-      blurb:       "Fillable HTML book, all 16 chapter worksheets, Excel workbook.",
+      blurb:       "All 16 chapter worksheets (HTML) + Excel worksheet workbook.",
       price:       4.99,
       image:       "ft-cover-2026.jpg",
-      checkoutUrl: ""
+      checkoutUrl: "https://verityarchitect.lemonsqueezy.com/checkout/buy/1962aa50-3e95-4804-9a1a-43764c76cd4d"
     },
 
     "ft-bundle": {
       name:        "Book One Bundle — Financially Trapped Complete",
       blurb:       "Ebook (EPUB) + interactive HTML + Excel workbook + 3 portfolio trackers.",
-      price:       14.99,
+      price:       18.99,
       image:       "ft-cover-2026.jpg",
-      checkoutUrl: ""
+      checkoutUrl: "https://verityarchitect.lemonsqueezy.com/checkout/buy/4bd08afa-f2f5-40bd-9f39-c6b3241e522e"
     },
 
     "ft-ebook": {
@@ -57,7 +57,15 @@ window.VERITY_STORE_CONFIG = {
       blurb:       "EPUB format. Delivered instantly.",
       price:       8.99,
       image:       "ft-cover-2026.jpg",
-      checkoutUrl: ""
+      checkoutUrl: "https://verityarchitect.lemonsqueezy.com/checkout/buy/163cdf49-3d19-4c08-bf45-cdce8bf0e66c"
+    },
+
+    "ft-interactive": {
+      name:        "Interactive Book — Financially Trapped (Fillable HTML)",
+      blurb:       "The complete book, fillable right in your browser. Works offline, no account.",
+      price:       14.99,
+      image:       "ft-cover-2026.jpg",
+      checkoutUrl: "https://verityarchitect.lemonsqueezy.com/checkout/buy/cee4f6cb-4e2a-4c68-9fea-a1b590f39c79"
     }
 
   }
