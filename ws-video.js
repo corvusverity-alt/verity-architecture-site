@@ -67,7 +67,16 @@
       + '<a href="videos/ws' + n + '.mp4" style="color:#C9A84C;">Download the video</a>.</video>';
   }
 
-  function open() { modal.style.display = "flex"; body.innerHTML = playerHTML(); }
+  // Pause the page's animated how-to tutorial (voice narration + animation)
+  // so its audio doesn't overlap the YouTube video.
+  function stopHowTo() {
+    try { if (window.speechSynthesis) { window.speechSynthesis.cancel(); } } catch (e) {}
+    try { if (window.synth && typeof window.synth.cancel === "function") { window.synth.cancel(); } } catch (e) {}
+    try { if (window.CLK && window.CLK.running && typeof window.togglePause === "function") { window.togglePause(); } } catch (e) {}
+    try { document.querySelectorAll("audio, video").forEach(function (m) { try { m.pause(); } catch (e) {} }); } catch (e) {}
+  }
+
+  function open() { stopHowTo(); modal.style.display = "flex"; body.innerHTML = playerHTML(); }
   function shut() { modal.style.display = "none"; body.innerHTML = ""; }   // clearing stops playback
 
   btn.addEventListener("click", open);
