@@ -13,7 +13,7 @@
  *
  *   dividends[]= DIV transactions from CSV, CAD equivalent.
  *
- * FX rates used: Dec/Jan 1.44 | Feb 1.43 | Mar 1.44 | Apr 1.41 | May 1.38 CAD/USD
+ * FX rates used: Dec/Jan 1.44 | Feb 1.43 | Mar 1.44 | Apr 1.41 | May 1.38 | Jun 1.421 CAD/USD
  *
  * Coverage notes (TSX-first pricing: tries .TO → .V → .NE → bare):
  *   Centurion 98% | Fortress 100% | Rebate ~90% | Tactical 95% | REITS 100% | FT 100%
@@ -31,6 +31,10 @@
  *   1. Run portfolio_scraper.py with new CSV files from Dispatch
  *   2. Paste updated arrays below
  *   3. Update BALANCES from brokerage app screenshot
+ *
+ * Jun 2026 update: values from monthly account statements. Account→portfolio
+ *   mapping confirmed by holdings + year-to-date contributions. USD figures
+ *   converted at the statement rate $1 USD = $1.421 CAD.
  */
 
 const PORTFOLIO_DATA = {
@@ -58,10 +62,10 @@ const PORTFOLIO_DATA = {
   "10 ETF": {
     label:    "10 ETF Portfolio (RRSP)",
     note:     "RRSP account. May 2026 = first full month post-RRSP transfer.",
-    months:   ["May 2026"],
-    deposits: [301.62],
-    value:    [267.00],
-    dividends:[0]
+    months:   ["May 2026", "Jun 2026"],
+    deposits: [301.62,     0],
+    value:    [267.00,     288.16],
+    dividends:[0,          1.26]
   },
 
   /* ══════════════════════════════════════════════════════════
@@ -70,10 +74,10 @@ const PORTFOLIO_DATA = {
   "Centurion": {
     label:    "Centurion Portfolio",
     note:     "98% of holdings priced (TSX-listed). CDAY now priced via NEO Exchange (.NE). 4 tickers remain unavailable on Yahoo Finance.",
-    months:   ["Mar 2026", "Apr 2026", "May 2026"],
-    deposits: [1000.00,   300.00,    407.00],
-    value:    [952.32,    1308.12,   1777.17],
-    dividends:[0.06,      8.52,      10.66]
+    months:   ["Mar 2026", "Apr 2026", "May 2026", "Jun 2026"],
+    deposits: [1000.00,   300.00,    407.00,    200.00],
+    value:    [952.32,    1308.12,   1777.17,   2098.95],
+    dividends:[0.06,      8.52,      10.66,     15.76]
   },
 
   /* ══════════════════════════════════════════════════════════
@@ -82,15 +86,15 @@ const PORTFOLIO_DATA = {
   "Fortress": {
     label:    "Fortress 200 USD Income",
     note:     "USD income portfolio. 100% of holdings priced.",
-    months:   ["Mar 2026", "Apr 2026", "May 2026"],
-    deposits: [200.00,    93.34,     216.20],
-    value:    [196.59,    308.23,    540.00],
-    dividends:[0.04,      2.13,      3.31]
+    months:   ["Mar 2026", "Apr 2026", "May 2026", "Jun 2026"],
+    deposits: [200.00,    93.34,     216.20,    213.15],
+    value:    [196.59,    308.23,    540.00,    787.24],
+    dividends:[0.04,      2.13,      3.31,      3.64]
   },
 
   /* ══════════════════════════════════════════════════════════
    * QUIET TITAN  — values from "Self-Directed TFSA Account" table
-   *               in each monthly Questrade statement.
+   *               in each monthly statement (full portfolio value).
    * Deposits hidden per display preference (showDeposits:false).
    * Apr 2026 drop: TFSA cash used to pay off linked margin loan.
    * ══════════════════════════════════════════════════════════ */
@@ -98,10 +102,10 @@ const PORTFOLIO_DATA = {
     label:        "Quiet Titan",
     note:         "Portfolio restructured Apr 2026 — strategy reset to align with book principles.",
     showDeposits: false,
-    months:   ["Apr 2026", "May 2026"],
-    deposits: [0,          0],
-    value:    [21049.17,   22376.99],
-    dividends:[138.50,     133.32]
+    months:   ["Apr 2026", "May 2026", "Jun 2026"],
+    deposits: [0,          0,          0],
+    value:    [21049.17,   22376.99,   23635.12],
+    dividends:[138.50,     133.32,     147.32]
   },
 
   /* ══════════════════════════════════════════════════════════
@@ -124,6 +128,9 @@ const PORTFOLIO_DATA = {
 
   /* ══════════════════════════════════════════════════════════
    * TACTICAL TAX FREE (TFSA)  (~95% priced)
+   * NOTE: Jun 2026 statement pending confirmation — the matching
+   *   account shows a lower value/contributions than the recorded
+   *   Mar–May history, so June is held until reconciled.
    * ══════════════════════════════════════════════════════════ */
   "Tactical": {
     label:    "Tactical Tax Free",
@@ -138,10 +145,10 @@ const PORTFOLIO_DATA = {
    * ══════════════════════════════════════════════════════════ */
   "REITS": {
     label:    "REITS Portfolio",
-    months:   ["Apr 2026", "May 2026"],
-    deposits: [100.00,    100.00],
-    value:    [97.93,     205.58],
-    dividends:[0,         0.31]
+    months:   ["Apr 2026", "May 2026", "Jun 2026"],
+    deposits: [100.00,    100.00,    0],
+    value:    [97.93,     205.58,    205.43],
+    dividends:[0,         0.31,      1.42]
   },
 
   /* ══════════════════════════════════════════════════════════
@@ -150,24 +157,24 @@ const PORTFOLIO_DATA = {
   "Developer": {
     label:    "Developer Portfolio",
     note:     "7/7 tickers priced (100%). ARTG priced via TSX Venture (ARTG.V), NEXG via (NEXG.V).",
-    months:   ["May 2026"],
-    deposits: [100.00],
-    value:    [98.83],
-    dividends:[0]
+    months:   ["May 2026", "Jun 2026"],
+    deposits: [100.00,    100.00],
+    value:    [98.83,     187.90],
+    dividends:[0,         0]
   },
 
   /* ══════════════════════════════════════════════════════════
    * WHITESWAN  (active trading account — fast-cycling positions)
-   * Small account, positions cycle quickly within month.
+   * Month-end statement snapshots now shown.
    * Live balance Jun 12 2026: $105.05 CAD (brokerage app).
    * ══════════════════════════════════════════════════════════ */
   "WhiteSwan": {
     label:    "WhiteSwan Portfolio",
-    note:     "Active trading account. Month-end snapshots unreliable due to fast-cycling positions. Live balance shown in plaque above.",
-    months:   ["Apr 2026", "May 2026"],
-    deposits: [90.00,     0],
-    value:    [null,      null],
-    dividends:[0,         0]
+    note:     "Active trading account. Values are month-end statement snapshots.",
+    months:   ["Apr 2026", "May 2026", "Jun 2026"],
+    deposits: [90.00,     0,          0],
+    value:    [null,      null,       106.98],
+    dividends:[0,         0,          0.45]
   },
 
   /* ══════════════════════════════════════════════════════════
@@ -190,7 +197,7 @@ const PORTFOLIO_DATA = {
     { name: "Quiet Titan",         balance: 22704.02, href: "quiet-titan.html",       sub: "TFSA · Jun 12, 2026" },
     { name: "Centurion",           balance:  2092.20, href: "centurion.html",          sub: "TFSA · Jun 12, 2026" },
     { name: "Tactical Tax Free",   balance:  1846.29, href: "tactical.html",           sub: "TFSA · Jun 12, 2026" },
-    { name: "Financially Trapped", balance:    84.58, href: "financially-trapped.html",sub: "TFSA · Proof of Concept · Jun 30, 2026" },
+    { name: "Financially Trapped", balance:    47.15, href: "financially-trapped.html",sub: "TFSA · Proof of Concept · Jun 12, 2026" },
     { name: "REITS",               balance:   212.14, href: "reits.html",              sub: "TFSA · Jun 12, 2026" },
     { name: "WhiteSwan",           balance:   105.05, href: "whiteswan.html",          sub: "TFSA · Active Trading · Jun 12, 2026" },
     { name: "Developer",           balance:   200.58, href: "developer.html",          sub: "TFSA · Jun 12, 2026" },
