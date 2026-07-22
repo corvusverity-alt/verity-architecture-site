@@ -134,10 +134,10 @@ const PORTFOLIO_DATA = {
    * ══════════════════════════════════════════════════════════ */
   "Tactical": {
     label:    "Tactical Tax Free",
-    months:   ["Mar 2026", "Apr 2026", "May 2026"],
-    deposits: [500.00,    600.00,    312.56],
-    value:    [482.85,    1081.58,   1454.35],
-    dividends:[0,         3.37,      11.79]
+    months:   ["Mar 2026", "Apr 2026", "May 2026", "Jun 2026"],
+    deposits: [500.00,    600.00,    312.56,    500.00],
+    value:    [482.85,    1081.58,   1454.35,   2029.22],
+    dividends:[0,         3.37,      11.79,     15.60]
   },
 
   /* ══════════════════════════════════════════════════════════
@@ -196,7 +196,7 @@ const PORTFOLIO_DATA = {
     /* ── TFSA ─────────────────────────────────────────── */
     { name: "Quiet Titan",         balance: 22704.02, href: "quiet-titan.html",       sub: "TFSA · Jun 12, 2026" },
     { name: "Centurion",           balance:  2092.20, href: "centurion.html",          sub: "TFSA · Jun 12, 2026" },
-    { name: "Tactical Tax Free",   balance:  1846.29, href: "tactical.html",           sub: "TFSA · Jun 12, 2026" },
+    { name: "Tactical Tax Free",   balance:  2029.22, href: "tactical.html", sub: "TFSA · Jun 2026" },
     { name: "Financially Trapped", balance:    47.15, href: "financially-trapped.html",sub: "TFSA · Proof of Concept · Jun 12, 2026" },
     { name: "REITS",               balance:   212.14, href: "reits.html",              sub: "TFSA · Jun 12, 2026" },
     { name: "WhiteSwan",           balance:   105.05, href: "whiteswan.html",          sub: "TFSA · Active Trading · Jun 12, 2026" },
@@ -208,5 +208,32 @@ const PORTFOLIO_DATA = {
     { name: "The Rebate",          balance:  -365.77, assetBalance: 388.75, href: "rebate.html", sub: "Non-Reg · Asset Value · Jun 12, 2026" }
   ]
 };
+
+/* ══════════════════════════════════════════════════════════
+ * AUTO-DERIVED BALANCE PLAQUES
+ * The gold "Account Balances" plaques (home + hub) now pull each portfolio's
+ * LATEST month-end value from the arrays above — so updating the monthly data
+ * refreshes the plaques automatically, with no separate balance list to keep.
+ * The date in each label follows the portfolio's latest month.
+ * Entries flagged `manual:true` keep their hand-set value (e.g. Tactical while
+ * its statement is being reconciled).
+ * ══════════════════════════════════════════════════════════ */
+(function () {
+  var map = {
+    "Quiet Titan": "Quiet Titan", "Centurion": "Centurion", "Tactical Tax Free": "Tactical",
+    "Financially Trapped": "Financially Trapped", "REITS": "REITS", "WhiteSwan": "WhiteSwan",
+    "Developer": "Developer", "Fortress (RRSP)": "Fortress", "10 ETF (RRSP)": "10 ETF", "The Rebate": "Rebate"
+  };
+  (PORTFOLIO_DATA.BALANCES || []).forEach(function (b) {
+    if (b.manual) { return; }
+    var p = PORTFOLIO_DATA[map[b.name]];
+    if (!p || !p.value) { return; }
+    var last = p.value.filter(function (v) { return v != null; }).slice(-1)[0];
+    if (last == null) { return; }
+    if (b.assetBalance != null) { b.assetBalance = last; } else { b.balance = last; }
+    var m = p.months && p.months.slice(-1)[0];
+    if (m && b.sub) { b.sub = b.sub.replace(/[A-Z][a-z]{2} \d{1,2}, \d{4}/, m); }
+  });
+})();
 
 if (typeof module !== 'undefined') module.exports = PORTFOLIO_DATA;

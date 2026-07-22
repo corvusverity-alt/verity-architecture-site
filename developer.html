@@ -77,10 +77,10 @@ footer{background:var(--dark);color:#999;text-align:center;font-size:0.78em;
 footer .f-brand{color:var(--gold);}
 @media(max-width:600px){header h1{font-size:1.35em;}.chart-wrap{height:210px;}}
 </style>
+<style>section[id]{scroll-margin-top:48px;}</style>
 </head>
 <body>
 <a href="/" id="vaHomeBtn" aria-label="Home" style="position:fixed;top:14px;left:14px;z-index:99999;display:inline-flex;align-items:center;gap:7px;padding:9px 15px;background:rgba(18,22,44,0.9);color:#d9b676;font-family:Georgia,'Times New Roman',serif;font-size:14px;font-weight:bold;letter-spacing:.5px;text-decoration:none;border:1px solid #d9b676;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.35);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);"><span style="font-size:16px;line-height:1;">&#8962;</span> Home</a>
-<a href="#" id="vaBackBtn" aria-label="Back" onclick="if(document.referrer&&document.referrer.indexOf(location.host)>-1){history.back();}else if(history.length>1){history.back();}else{location.href='/';}return false;" style="position:fixed;top:60px;left:14px;z-index:99999;display:inline-flex;align-items:center;gap:7px;padding:9px 15px;background:rgba(18,22,44,0.9);color:#d9b676;font-family:Georgia,'Times New Roman',serif;font-size:14px;font-weight:bold;letter-spacing:.5px;text-decoration:none;border:1px solid #d9b676;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.35);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);"><span style="font-size:16px;line-height:1;">&#8592;</span> Back</a>
 
 <header>
   <a class="back" id="backLink" href="portfolio-architect.html">&#8592; Portfolio Architecture</a>
@@ -213,7 +213,7 @@ document.querySelectorAll(".tab").forEach(t=>{
 document.querySelectorAll("nav a[href^='#']").forEach(a=>{
   a.addEventListener("click",e=>{
     e.preventDefault();
-    document.querySelector(a.getAttribute("href")).scrollIntoView({behavior:"smooth"});
+    var _t=a.getAttribute("href");if(_t==="#overview"){window.scrollTo({top:0,behavior:"smooth"});}else{var _e=document.querySelector(_t);if(_e){_e.scrollIntoView({behavior:"smooth"});}}
     document.querySelectorAll("nav a").forEach(x=>x.classList.remove("active"));
     a.classList.add("active");
   });
