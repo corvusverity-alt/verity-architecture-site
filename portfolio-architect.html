@@ -454,7 +454,7 @@ lb.addEventListener("click",function(){lb.classList.remove("open");});
 
 /* ── Combined total + balance plaques (exclude Financially Trapped) ── */
 (function(){
-  var A=(PORTFOLIO_DATA.BALANCES||[]).filter(function(b){return b.name!=="Financially Trapped";});
+  var A=(PORTFOLIO_DATA.BALANCES||[]);
   var total=A.reduce(function(s,b){return s+(typeof b.balance==="number"?b.balance:0);},0);
   document.getElementById("combinedTotal").textContent=fmt(total);
   var ct=document.getElementById("totalFloatVal");if(ct)ct.textContent=fmt(total);
