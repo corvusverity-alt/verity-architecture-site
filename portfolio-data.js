@@ -170,10 +170,10 @@ const PORTFOLIO_DATA = {
    * ========================================================== */
   "WhiteSwan": {
     label:    "WhiteSwan Portfolio",
-    note:     "Active trading account. Values are month-end statement snapshots.",
+    note:     "Active trading account. Values are month-end Total Portfolio snapshots (holdings + cash, $CAD) since it cycles in and out of cash.",
     months:   ["Apr 2026", "May 2026", "Jun 2026", "Jul 2026", "Aug 2026", "Sep 2026"],
     deposits: [90.00,     0,          0,          0,          0,          0],
-    value:    [null,      null,       106.98,     104.53,     111.70,     89.39],
+    value:    [null,      null,       107.37,     105.37,     111.71,     121.21],
     dividends:[0,         0,          0.45,       0.52,       0.51,       0.54]
   },
 
