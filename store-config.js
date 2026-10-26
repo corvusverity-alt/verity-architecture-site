@@ -41,7 +41,7 @@ window.VERITY_STORE_CONFIG = {
       blurb:       "All 16 chapter worksheets (HTML) + Excel worksheet workbook.",
       price:       4.99,
       image:       "ft-cover-2026.jpg",
-      checkoutUrl: "https://verityarchitect.lemonsqueezy.com/checkout/buy/1962aa50-3e95-4804-9a1a-43764c76cd4d"
+      checkoutUrl: "https://verityarchitect.lemonsqueezy.com/checkout/buy/dedb8d1d-afec-4ea8-a505-c57928440b3e"
     },
 
     "ft-bundle": {
@@ -49,7 +49,7 @@ window.VERITY_STORE_CONFIG = {
       blurb:       "Ebook (EPUB) + interactive HTML + Excel workbook + 3 portfolio trackers.",
       price:       18.99,
       image:       "ft-cover-2026.jpg",
-      checkoutUrl: "https://verityarchitect.lemonsqueezy.com/checkout/buy/4bd08afa-f2f5-40bd-9f39-c6b3241e522e"
+      checkoutUrl: "https://verityarchitect.lemonsqueezy.com/checkout/buy/e313ccad-95d1-405a-b68b-1535e9ac4655"
     },
 
     "ft-ebook": {
@@ -57,7 +57,7 @@ window.VERITY_STORE_CONFIG = {
       blurb:       "EPUB format. Delivered instantly.",
       price:       8.99,
       image:       "ft-cover-2026.jpg",
-      checkoutUrl: "https://verityarchitect.lemonsqueezy.com/checkout/buy/163cdf49-3d19-4c08-bf45-cdce8bf0e66c"
+      checkoutUrl: "https://verityarchitect.lemonsqueezy.com/checkout/buy/276ccd7f-1826-4e5d-a31b-53b0397029fa"
     },
 
     "ft-interactive": {
@@ -65,7 +65,7 @@ window.VERITY_STORE_CONFIG = {
       blurb:       "The complete book, fillable right in your browser. Works offline, no account.",
       price:       14.99,
       image:       "ft-cover-2026.jpg",
-      checkoutUrl: "https://verityarchitect.lemonsqueezy.com/checkout/buy/cee4f6cb-4e2a-4c68-9fea-a1b590f39c79"
+      checkoutUrl: "https://verityarchitect.lemonsqueezy.com/checkout/buy/c99eb2c0-3539-4bdd-b430-7f3473ddb6d2"
     }
 
   }
