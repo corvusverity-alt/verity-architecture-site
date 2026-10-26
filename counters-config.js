@@ -32,6 +32,7 @@ window.VERITY_COUNTERS_CONFIG = {
   deliveryMap: {
     "ft-worksheets": ["dl-worksheets", "dl-excel"],
     "ft-bundle":     ["dl-worksheets", "dl-excel"],
-    "ft-ebook":      []
+    "ft-ebook":      [],
+    "architects-bundle": ["dl-worksheets", "dl-excel"]   // includes the Book One worksheets + Excel
   }
 };

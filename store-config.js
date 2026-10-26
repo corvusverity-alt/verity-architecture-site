@@ -66,6 +66,47 @@ window.VERITY_STORE_CONFIG = {
       price:       14.99,
       image:       "ft-cover-2026.jpg",
       checkoutUrl: "https://verityarchitect.lemonsqueezy.com/checkout/buy/c99eb2c0-3539-4bdd-b430-7f3473ddb6d2"
+    },
+
+    /* ---- The Portfolio Architecture — Book Two ---- */
+    "pa-ebook": {
+      name:        "Ebook — The Portfolio Architecture (EPUB)",
+      blurb:       "EPUB format. Delivered instantly.",
+      price:       8.99,
+      image:       "pa-cover-2026.jpg",
+      checkoutUrl: "https://verityarchitect.lemonsqueezy.com/checkout/buy/9859f5c1-6f38-4588-a633-4e6eb765a47f"
+    },
+
+    "pa-toolkit": {
+      name:        "Worksheet & Tracker Toolkit — The Portfolio Architecture",
+      blurb:       "10 fillable Word worksheets + 10 Excel portfolio trackers + how-to guide.",
+      price:       9.99,
+      image:       "pa-cover-2026.jpg",
+      checkoutUrl: "https://verityarchitect.lemonsqueezy.com/checkout/buy/59ede789-70c0-4ef6-9566-a3e058cdf868"
+    },
+
+    "pa-interactive": {
+      name:        "Interactive Book — The Portfolio Architecture (Fillable HTML)",
+      blurb:       "The whole book, fillable in your browser. Autosave, backup, print. Works offline.",
+      price:       14.99,
+      image:       "pa-cover-2026.jpg",
+      checkoutUrl: "https://verityarchitect.lemonsqueezy.com/checkout/buy/b75bff91-c35c-454f-9ebf-12ecac80cd95"
+    },
+
+    "pa-bundle": {
+      name:        "Complete Bundle — The Portfolio Architecture",
+      blurb:       "Ebook (EPUB) + interactive fillable book + Worksheet & Tracker Toolkit.",
+      price:       22.99,
+      image:       "pa-cover-2026.jpg",
+      checkoutUrl: "https://verityarchitect.lemonsqueezy.com/checkout/buy/6f897b89-45a0-4ec3-9c61-518b7eb4609a"
+    },
+
+    "architects-bundle": {
+      name:        "Full Architects Bundle — Both Books + Everything",
+      blurb:       "Both ebooks, both interactive books, all worksheets and every portfolio tracker.",
+      price:       29.99,
+      image:       "pa-cover-2026.jpg",
+      checkoutUrl: "https://verityarchitect.lemonsqueezy.com/checkout/buy/ad970bd0-f490-45a3-b0c1-02020e8ad7c5"
     }
 
   }
