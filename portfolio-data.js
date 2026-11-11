@@ -13,7 +13,7 @@
  *
  *   dividends[]= DIV transactions from CSV, CAD equivalent.
  *
- * FX rates used: Dec/Jan 1.44 | Feb 1.43 | Mar 1.44 | Apr 1.41 | May 1.38 | Jun 1.421 | Jul 1.4029 | Aug 1.3866 | Sep 1.4188 CAD/USD
+ * FX rates used: Dec/Jan 1.44 | Feb 1.43 | Mar 1.44 | Apr 1.41 | May 1.38 | Jun 1.421 | Jul 1.4029 | Aug 1.3866 | Sep 1.4188 | Oct 1.3960 CAD/USD
  *
  * Coverage notes (TSX-first pricing: tries .TO -> .V -> .NE -> bare):
  *   Centurion 98% | Fortress 100% | Rebate ~90% | Tactical 95% | REITS 100% | FT 100%
@@ -48,10 +48,10 @@ const PORTFOLIO_DATA = {
   "Financially Trapped": {
     label:    "Financially Trapped \u2014 Starter",
     note:     "Reset May 14 2026. Seeded from ~$31 CAD gold proceeds. $50/month contributions beginning June 2026.",
-    months:   ["May 2026", "Jun 2026", "Jul 2026", "Aug 2026", "Sep 2026"],
-    deposits: [0,          53.65,      50.00,      50.00,      50.00],
-    value:    [31.51,      80.38,      135.57,     178.36,     225.84],
-    dividends:[0.10,       0.26,       0.55,       0.92,       1.52]
+    months:   ["May 2026", "Jun 2026", "Jul 2026", "Aug 2026", "Sep 2026", "Oct 2026"],
+    deposits: [0,          53.65,      50.00,      50.00,      50.00,      50.00],
+    value:    [31.51,      80.38,      135.57,     178.36,     225.84,     276.20],
+    dividends:[0.10,       0.26,       0.55,       0.92,       1.52,       1.47]
   },
 
   /* ==========================================================
@@ -62,10 +62,10 @@ const PORTFOLIO_DATA = {
   "10 ETF": {
     label:    "10 ETF Portfolio (RRSP)",
     note:     "RRSP account. May 2026 = first full month post-RRSP transfer.",
-    months:   ["May 2026", "Jun 2026", "Jul 2026", "Aug 2026", "Sep 2026"],
-    deposits: [301.62,     0,          0,          0,          0],
-    value:    [267.00,     288.16,     284.11,     291.80,     284.09],
-    dividends:[0,          1.26,       0.11,       0.10,       1.04]
+    months:   ["May 2026", "Jun 2026", "Jul 2026", "Aug 2026", "Sep 2026", "Oct 2026"],
+    deposits: [301.62,     0,          0,          0,          0,          0],
+    value:    [267.00,     288.16,     284.11,     291.80,     284.09,     283.12],
+    dividends:[0,          1.26,       0.11,       0.10,       1.04,       0.10]
   },
 
   /* ==========================================================
@@ -74,10 +74,10 @@ const PORTFOLIO_DATA = {
   "Centurion": {
     label:    "Centurion Portfolio",
     note:     "98% of holdings priced (TSX-listed). CDAY now priced via NEO Exchange (.NE). 4 tickers remain unavailable on Yahoo Finance.",
-    months:   ["Mar 2026", "Apr 2026", "May 2026", "Jun 2026", "Jul 2026", "Aug 2026", "Sep 2026"],
-    deposits: [1000.00,   300.00,    407.00,    200.00,    4600.00,   2000.00,   1000.00],
-    value:    [952.32,    1308.12,   1777.17,   2098.95,   6662.39,   8577.99,   8805.63],
-    dividends:[0.06,      8.52,      10.66,     15.76,     17.60,     55.35,     76.69]
+    months:   ["Mar 2026", "Apr 2026", "May 2026", "Jun 2026", "Jul 2026", "Aug 2026", "Sep 2026", "Oct 2026"],
+    deposits: [1000.00,   300.00,    407.00,    200.00,    4600.00,   2000.00,   1000.00,   500.00],
+    value:    [952.32,    1308.12,   1777.17,   2098.95,   6662.39,   8577.99,   8805.63,   9925.51],
+    dividends:[0.06,      8.52,      10.66,     15.76,     17.60,     55.35,     76.69,     74.76]
   },
 
   /* ==========================================================
@@ -86,10 +86,10 @@ const PORTFOLIO_DATA = {
   "Fortress": {
     label:    "Fortress 200 USD Income",
     note:     "USD income portfolio. 100% of holdings priced.",
-    months:   ["Mar 2026", "Apr 2026", "May 2026", "Jun 2026", "Jul 2026", "Aug 2026", "Sep 2026"],
-    deposits: [200.00,    93.34,     216.20,    213.15,    70.15,     208.66,    1819.55],
-    value:    [196.59,    308.23,    540.00,    787.24,    744.39,    1035.44,   2824.30],
-    dividends:[0.04,      2.13,      3.31,      3.64,      3.68,      4.30,      8.57]
+    months:   ["Mar 2026", "Apr 2026", "May 2026", "Jun 2026", "Jul 2026", "Aug 2026", "Sep 2026", "Oct 2026"],
+    deposits: [200.00,    93.34,     216.20,    213.15,    70.15,     208.66,    1819.55,   0],
+    value:    [196.59,    308.23,    540.00,    787.24,    744.39,    1035.44,   2824.30,   2765.55],
+    dividends:[0.04,      2.13,      3.31,      3.64,      3.68,      4.30,      8.57,      8.29]
   },
 
   /* ==========================================================
@@ -102,10 +102,10 @@ const PORTFOLIO_DATA = {
     label:        "Quiet Titan",
     note:         "Portfolio restructured Apr 2026 \u2014 strategy reset to align with book principles.",
     showDeposits: false,
-    months:   ["Apr 2026", "May 2026", "Jun 2026", "Jul 2026", "Aug 2026", "Sep 2026"],
-    deposits: [0,          0,          0,          0,          0,          0],
-    value:    [21049.17,   22376.99,   23635.12,   23267.10,   24345.96,   25143.86],
-    dividends:[138.50,     133.32,     147.32,     144.64,     152.07,     116.56]
+    months:   ["Apr 2026", "May 2026", "Jun 2026", "Jul 2026", "Aug 2026", "Sep 2026", "Oct 2026"],
+    deposits: [0,          0,          0,          0,          0,          0,          0],
+    value:    [21049.17,   22376.99,   23635.12,   23267.10,   24345.96,   25143.86,   24651.68],
+    dividends:[138.50,     133.32,     147.32,     144.64,     152.07,     116.56,     47.67]
   },
 
   /* ==========================================================
@@ -117,27 +117,27 @@ const PORTFOLIO_DATA = {
    * book's teachings and is disclosed via the BALANCES plaque.
    * Deposits held at 0 while it remains a margin account with a loan
    * (transfers in/out not recorded until stable & loan-free).
-   * Net balance Sep 2026: -$968.49 CAD (margin loan drawn up again; was +$5.63 Aug).
+   * Net balance Oct 2026: -$1042.78 CAD (margin loan; was -$968.49 Sep).
    * ========================================================== */
   "Rebate": {
     label:    "The Rebate Portfolio",
     note:     "Margin account. Charts show investment side only (shares purchased & their value). Outstanding margin loan is separate and disclosed in the account balance plaque.",
-    months:   ["Feb 2026", "Mar 2026", "Apr 2026", "May 2026", "Jun 2026", "Jul 2026", "Aug 2026", "Sep 2026"],
-    deposits: [0,          20.00,     220.00,    210.00,     0,          0,          0,          0],
-    value:    [0,          0,         242.21,    375.25,     388.75,     499.73,     876.48,     841.91],
-    dividends:[0,          0,         0.01,      1.73,       0,          3.66,       3.82,       6.52]
+    months:   ["Feb 2026", "Mar 2026", "Apr 2026", "May 2026", "Jun 2026", "Jul 2026", "Aug 2026", "Sep 2026", "Oct 2026"],
+    deposits: [0,          20.00,     220.00,    210.00,     0,          0,          0,          0,          0],
+    value:    [0,          0,         242.21,    375.25,     388.75,     499.73,     876.48,     841.91,     879.40],
+    dividends:[0,          0,         0.01,      1.73,       0,          3.66,       3.82,       6.52,       6.12]
   },
 
   /* ==========================================================
    * TACTICAL TAX FREE (TFSA)  (~95% priced)
-   * Jun?Aug 2026 all confirmed from statements (Jul added once provided).
+   * Jun\u2013Aug 2026 all confirmed from statements (Jul added once provided).
    * ========================================================== */
   "Tactical": {
     label:    "Tactical Tax Free",
-    months:   ["Mar 2026", "Apr 2026", "May 2026", "Jun 2026", "Jul 2026", "Aug 2026", "Sep 2026"],
-    deposits: [500.00,    600.00,    312.56,    500.00,    2000.00,   2000.00,   800.00],
-    value:    [482.85,    1081.58,   1454.35,   2029.22,   3993.63,   5981.25,   6831.38],
-    dividends:[0,         3.37,      11.79,     15.60,     20.68,     42.38,     61.81]
+    months:   ["Mar 2026", "Apr 2026", "May 2026", "Jun 2026", "Jul 2026", "Aug 2026", "Sep 2026", "Oct 2026"],
+    deposits: [500.00,    600.00,    312.56,    500.00,    2000.00,   2000.00,   800.00,    1500.00],
+    value:    [482.85,    1081.58,   1454.35,   2029.22,   3993.63,   5981.25,   6831.38,   8147.36],
+    dividends:[0,         3.37,      11.79,     15.60,     20.68,     42.38,     61.81,     71.03]
   },
 
   /* ==========================================================
@@ -145,10 +145,10 @@ const PORTFOLIO_DATA = {
    * ========================================================== */
   "REITS": {
     label:    "REITS Portfolio",
-    months:   ["Apr 2026", "May 2026", "Jun 2026", "Jul 2026", "Aug 2026", "Sep 2026"],
-    deposits: [100.00,    100.00,    0,         200.00,    300.00,    0],
-    value:    [97.93,     205.58,    205.43,    319.59,    672.83,    675.31],
-    dividends:[0,         0.31,      1.42,      0.63,      0.98,      4.64]
+    months:   ["Apr 2026", "May 2026", "Jun 2026", "Jul 2026", "Aug 2026", "Sep 2026", "Oct 2026"],
+    deposits: [100.00,    100.00,    0,         200.00,    300.00,    0,         0],
+    value:    [97.93,     205.58,    205.43,    319.59,    672.83,    675.31,    686.70],
+    dividends:[0,         0.31,      1.42,      0.63,      0.98,      4.64,      1.59]
   },
 
   /* ==========================================================
@@ -157,10 +157,10 @@ const PORTFOLIO_DATA = {
   "Developer": {
     label:    "Developer Portfolio",
     note:     "7/7 tickers priced (100%). ARTG priced via TSX Venture (ARTG.V), NEXG via (NEXG.V).",
-    months:   ["May 2026", "Jun 2026", "Jul 2026", "Aug 2026", "Sep 2026"],
-    deposits: [100.00,    100.00,    0,         0,         0],
-    value:    [98.83,     187.90,    181.83,    220.73,    203.51],
-    dividends:[0,         0,         0,         0,         0.02]
+    months:   ["May 2026", "Jun 2026", "Jul 2026", "Aug 2026", "Sep 2026", "Oct 2026"],
+    deposits: [100.00,    100.00,    0,         0,         0,         0],
+    value:    [98.83,     187.90,    181.83,    220.73,    203.51,    173.17],
+    dividends:[0,         0,         0,         0,         0.02,      0]
   },
 
   /* ==========================================================
@@ -171,10 +171,10 @@ const PORTFOLIO_DATA = {
   "WhiteSwan": {
     label:    "WhiteSwan Portfolio",
     note:     "Active trading account. Values are month-end Total Portfolio snapshots (holdings + cash, $CAD) since it cycles in and out of cash.",
-    months:   ["Apr 2026", "May 2026", "Jun 2026", "Jul 2026", "Aug 2026", "Sep 2026"],
-    deposits: [90.00,     0,          0,          0,          0,          0],
-    value:    [null,      null,       107.37,     105.37,     111.71,     121.21],
-    dividends:[0,         0,          0.45,       0.52,       0.51,       0.54]
+    months:   ["Apr 2026", "May 2026", "Jun 2026", "Jul 2026", "Aug 2026", "Sep 2026", "Oct 2026"],
+    deposits: [90.00,     0,          0,          0,          0,          0,          0],
+    value:    [null,      null,       107.37,     105.37,     111.71,     121.21,     113.28],
+    dividends:[0,         0,          0.45,       0.52,       0.51,       0.54,       0.49]
   },
 
   /* ==========================================================
@@ -205,7 +205,7 @@ const PORTFOLIO_DATA = {
     { name: "Fortress (RRSP)",     balance:   690.30, href: "fortress.html",           sub: "RRSP \u00b7 Jun 12, 2026" },
     { name: "10 ETF (RRSP)",       balance:   310.69, href: "10-etf.html",             sub: "RRSP \u00b7 Jun 12, 2026" },
     /* -- Non-Registered ---------------------- */
-    { name: "The Rebate",          balance:  -968.49, assetBalance: 841.91, href: "rebate.html", sub: "Non-Reg \u00b7 Asset Value \u00b7 Sep 2026" }
+    { name: "The Rebate",          balance: -1042.78, assetBalance: 879.40, href: "rebate.html", sub: "Non-Reg \u00b7 Asset Value \u00b7 Oct 2026" }
   ]
 };
 
