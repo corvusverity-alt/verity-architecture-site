@@ -112,9 +112,9 @@ window.VERITY_STORE_CONFIG = {
 
     /* ---- Book Promotions (sponsored author features) ----
        Create each as a product in Lemon Squeezy, then paste its checkout link. */
-    "promo-spotlight": { name:"Book Promotions — Spotlight", blurb:"100–150-word sponsored book feature.", price:7.00, image:"thumbnail.jpg", checkoutUrl:"" },
-    "promo-featured":  { name:"Book Promotions — Featured", blurb:"200–300-word sponsored feature and book page.", price:12.00, image:"thumbnail.jpg", checkoutUrl:"" },
-    "promo-premium":   { name:"Book Promotions — Premium", blurb:"Featured + 1 social graphic + 1 social post.", price:20.00, image:"thumbnail.jpg", checkoutUrl:"" },
-    "promo-extended":  { name:"Book Promotions — Extended Launch", blurb:"Long feature, Q&A, 3 graphics, 2 social posts.", price:32.00, image:"thumbnail.jpg", checkoutUrl:"" }
+    "promo-spotlight": { name:"Book Promotions — Spotlight", blurb:"100–150-word sponsored book feature.", price:7.00, image:"thumbnail.jpg", checkoutUrl:"https://verityarchitect.lemonsqueezy.com/checkout/buy/5a5ef295-17e0-48eb-9828-fbf044150fda" },
+    "promo-featured":  { name:"Book Promotions — Featured", blurb:"200–300-word sponsored feature and book page.", price:12.00, image:"thumbnail.jpg", checkoutUrl:"https://verityarchitect.lemonsqueezy.com/checkout/buy/4af49b38-c317-498a-8539-0c375749041a" },
+    "promo-premium":   { name:"Book Promotions — Premium", blurb:"Featured + 1 social graphic + 1 social post.", price:20.00, image:"thumbnail.jpg", checkoutUrl:"https://verityarchitect.lemonsqueezy.com/checkout/buy/fccc1b5a-ee03-45fb-91f6-add6016d72e6" },
+    "promo-extended":  { name:"Book Promotions — Extended Launch", blurb:"Long feature, Q&A, 3 graphics, 2 social posts.", price:32.00, image:"thumbnail.jpg", checkoutUrl:"https://verityarchitect.lemonsqueezy.com/checkout/buy/6991fd22-ab83-485e-83f9-5b309fab4b7b" }
   }
 };
