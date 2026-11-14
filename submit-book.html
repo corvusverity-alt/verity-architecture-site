@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Submit Your Book — Book Promotions by Verity Architecture</title>
+<meta name="description" content="Submit your book for a sponsored feature or feature swap with Book Promotions by Verity Architecture.">
+<link rel="canonical" href="https://verityarchitect.com/submit-book.html">
+<link rel="stylesheet" href="promo.css"></head><body>
+<div class="topbar">
+  <a href="/"><img src="Verity Architecture Company logos/VerityArchitecture_Logo.svg" alt="Verity Architecture"></a>
+  <div class="tabs">
+    <a href="book-promotions.html">Book Promotions</a>
+    <a href="book-reviews.html">Book Reviews</a>
+    <a href="promote.html">Promote Your Book</a>
+    <a href="submit-book.html" class="on">Submit a Book</a>
+    <a href="promotion-policy.html">Editorial Policy</a>
+  </div>
+  <div class="navbtns"><button class="nbtn" onclick="if(history.length>1){history.back()}else{location.href='book-promotions.html'}">&larr; Back</button><a class="nbtn" href="/">Home</a></div>
+</div>
+<main>
+
+<div class="label">Step 2 of 3</div>
+<h1>Submit Your Book</h1>
+<div class="rule"></div>
+<p class="sub">Tell us about your book. You'll pay after submitting &mdash; nothing is charged yet.</p>
+<form id="pf">
+  <label>Package</label>
+  <select name="package" required>
+    <option value="spotlight">Spotlight — CA$7</option><option value="featured">Featured — CA$12</option>
+    <option value="premium">Premium — CA$20</option><option value="extended">Extended Launch — CA$32</option>
+    <option value="swap">Feature Swap — Free</option>
+  </select>
+  <label>Author name</label><input name="author_name" required maxlength="120">
+  <label>Email</label><input name="email" type="email" required maxlength="160">
+  <label>Book title</label><input name="book_title" required maxlength="200">
+  <label>Genre</label><input name="genre" required maxlength="80">
+  <label>Publication date</label><input name="pub_date" type="date">
+  <label>Retailer link (Amazon, Kobo, your site…)</label><input name="retail_url" type="url" required maxlength="500">
+  <label>Synopsis</label><textarea name="synopsis" required maxlength="3000"></textarea>
+  <label>Author bio</label><textarea name="author_bio" maxlength="1500"></textarea>
+  <label>Q&amp;A answers (Extended Launch only, optional)</label><textarea name="qa_answers" maxlength="4000" placeholder="What inspired the book? Who is it for? What's next?"></textarea>
+  <label>Feature Swap: where would you feature our book? (link)</label><input name="swap_link" maxlength="500" placeholder="Your website, newsletter or social profile">
+  <label>Cover image (JPG/PNG, under 8 MB)</label><input name="cover" type="file" accept="image/*">
+  <input name="website" style="display:none" tabindex="-1" autocomplete="off">
+  <label class="check"><input type="checkbox" name="rights" required> I own or have permission to use this cover, bio and book information, and I understand this is a sponsored promotion, not an independent review, with no guarantee of reviews, rankings or sales.</label>
+  <div class="cta-row"><button class="btn btn-gold" type="submit">Submit Book</button></div>
+  <div class="msg" id="msg"></div>
+  <p style="font-size:.8em;color:#888;text-align:center">Your details are used only to produce your feature and contact you. Covers are stored privately. See our <a href="promotion-policy.html" style="color:#C9A84C">privacy notice</a>.</p>
+</form>
+<div id="done" style="display:none;text-align:center"></div>
+</main>
+<footer>Book Promotions by Verity Architecture &middot; <a href="promotion-policy.html">Editorial &amp; Sponsored Content Policy</a> &middot; <a href="mailto:Support@VerityArchitect.com">Support@VerityArchitect.com</a><br>&copy; <span id="yr"></span> Verity Architecture. Paid features are advertising and never guarantee reviews, rankings or sales.</footer>
+<script>document.getElementById('yr').textContent=new Date().getFullYear();</script>
+<script src="store-config.js"></script>
+<script>
+(function(){
+var SB="https://xbfniastpofnowhdiayc.supabase.co", KEY="sb_publishable_qVKIvuz_1yCqLBj6yCxFag_kA4gag99";
+var CHECKOUT={spotlight:"promo-spotlight",featured:"promo-featured",premium:"promo-premium",extended:"promo-extended"};
+var f=document.getElementById('pf'), m=document.getElementById('msg');
+var q=new URLSearchParams(location.search).get('package'); if(q&&f.package.querySelector('option[value="'+q+'"]')) f.package.value=q;
+function hdr(ct){var h={apikey:KEY,Authorization:"Bearer "+KEY};if(ct)h["Content-Type"]=ct;return h;}
+f.addEventListener('submit',async function(e){
+  e.preventDefault(); if(f.website.value) return; /* honeypot */
+  var b=f.querySelector('button'); b.disabled=true; m.style.color="#C9A84C"; m.textContent="Sending…";
+  try{
+    var cover=f.cover.files[0], path=null;
+    if(cover){
+      if(cover.size>8e6) throw new Error("Cover image must be under 8 MB.");
+      path=Date.now()+"-"+cover.name.replace(/[^a-z0-9.\-_]/gi,"_");
+      var up=await fetch(SB+"/storage/v1/object/promo-uploads/"+path,{method:"POST",headers:hdr(cover.type||"application/octet-stream"),body:cover});
+      if(!up.ok) throw new Error("Cover upload failed.");
+    }
+    var row={package:f.package.value,author_name:f.author_name.value,email:f.email.value,book_title:f.book_title.value,genre:f.genre.value,
+      pub_date:f.pub_date.value||null,retail_url:f.retail_url.value,synopsis:f.synopsis.value,author_bio:f.author_bio.value,
+      qa_answers:f.qa_answers.value,swap_link:f.swap_link.value,cover_path:path,rights_confirmed:f.rights.checked};
+    var r=await fetch(SB+"/rest/v1/promo_submissions",{method:"POST",headers:Object.assign(hdr("application/json"),{Prefer:"return=minimal"}),body:JSON.stringify(row)});
+    if(!r.ok) throw new Error("Submission failed ("+r.status+").");
+    f.style.display="none";
+    var p=(window.VERITY_STORE_CONFIG||{}).products||{}, id=CHECKOUT[row.package], url=id&&p[id]&&p[id].checkoutUrl;
+    var out=document.getElementById('done'); out.style.display="block";
+    if(row.package==="swap") out.innerHTML="<h2>Swap request received</h2><p>Thanks! We'll review your book and reply by email within 2 business days.</p>";
+    else if(url) out.innerHTML="<h2>Submission received</h2><p>Last step: complete your secure payment. Work begins once payment is confirmed.</p><p><a class='btn btn-gold' href='"+url+"'>Pay Securely</a></p>";
+    else out.innerHTML="<h2>Submission received</h2><p>Thank you! We'll email you a secure payment link within 1 business day. Work begins once payment is confirmed.</p>";
+  }catch(err){ m.style.color="#e07a7a"; m.textContent=err.message+" Please try again or email Support@VerityArchitect.com."; b.disabled=false; }
+});
+})();
+</script>
+</body></html>

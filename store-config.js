@@ -108,6 +108,13 @@ window.VERITY_STORE_CONFIG = {
       image:       "pa-cover-2026.jpg",
       checkoutUrl: "https://verityarchitect.lemonsqueezy.com/checkout/buy/ad970bd0-f490-45a3-b0c1-02020e8ad7c5"
     }
+,
 
+    /* ---- Book Promotions (sponsored author features) ----
+       Create each as a product in Lemon Squeezy, then paste its checkout link. */
+    "promo-spotlight": { name:"Book Promotions — Spotlight", blurb:"100–150-word sponsored book feature.", price:7.00, image:"thumbnail.jpg", checkoutUrl:"" },
+    "promo-featured":  { name:"Book Promotions — Featured", blurb:"200–300-word sponsored feature and book page.", price:12.00, image:"thumbnail.jpg", checkoutUrl:"" },
+    "promo-premium":   { name:"Book Promotions — Premium", blurb:"Featured + 1 social graphic + 1 social post.", price:20.00, image:"thumbnail.jpg", checkoutUrl:"" },
+    "promo-extended":  { name:"Book Promotions — Extended Launch", blurb:"Long feature, Q&A, 3 graphics, 2 social posts.", price:32.00, image:"thumbnail.jpg", checkoutUrl:"" }
   }
 };
