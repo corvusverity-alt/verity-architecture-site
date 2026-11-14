@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta name="robots" content="noindex"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{BOOK_TITLE}} by {{AUTHOR_NAME}} (Sponsored) — Book Promotions by Verity Architecture</title>
+<meta name="description" content="Sponsored book feature: {{BOOK_TITLE}} by {{AUTHOR_NAME}}.">
+<link rel="canonical" href="https://verityarchitect.com/feature-template.html">
+<link rel="stylesheet" href="promo.css"></head><body>
+<div class="topbar">
+  <a href="/"><img src="Verity Architecture Company logos/VerityArchitecture_Logo.svg" alt="Verity Architecture"></a>
+  <div class="tabs">
+    <a href="book-promotions.html">Book Promotions</a>
+    <a href="book-reviews.html">Book Reviews</a>
+    <a href="author-features.html">Author Features</a>
+    <a href="promote.html">Promote Your Book</a>
+    <a href="submit-book.html">Submit a Book</a>
+    <a href="promotion-policy.html">Editorial Policy</a>
+  </div>
+  <div class="navbtns"><button class="nbtn" onclick="if(history.length>1){history.back()}else{location.href='book-promotions.html'}">&larr; Back</button><a class="nbtn" href="/">Home</a></div>
+</div>
+<main>
+<!-- TEMPLATE: copy to feature-<book-slug>.html and replace every {{...}}. Keep the sponsored label first. -->
+<div style="text-align:center;margin-bottom:1.2em"><span class="sponsored">Sponsored Book Feature &mdash; Paid Promotion</span></div>
+<div class="label">{{GENRE}}</div>
+<h1>{{BOOK_TITLE}}</h1>
+<p class="sub">by {{AUTHOR_NAME}}</p>
+<div class="rule"></div>
+<div style="display:flex;gap:2em;flex-wrap:wrap;align-items:flex-start">
+  <img src="{{COVER_FILE}}" alt="Cover of {{BOOK_TITLE}}" style="width:220px;max-width:100%;border-radius:4px;box-shadow:0 8px 30px rgba(0,0,0,.5)">
+  <div style="flex:1;min-width:260px">
+    {{FEATURE_BODY_PARAGRAPHS}}
+    {{OPTIONAL_QA_SECTION}}
+    <h2>About the author</h2>
+    {{AUTHOR_BIO_PARAGRAPH}}
+    <div class="cta-row" style="justify-content:flex-start"><a class="btn btn-gold" href="{{RETAIL_URL}}" target="_blank" rel="noopener sponsored">Get the Book</a></div>
+  </div>
+</div>
+<div class="notice">This is a paid promotional feature written from materials supplied by the author. It is not an independent review. Published {{PUBLISH_DATE}}. <a href="promotion-policy.html" style="color:#C9A84C">Our policy</a>.</div>
+</main>
+<footer>Book Promotions by Verity Architecture &middot; <a href="promotion-policy.html">Editorial &amp; Sponsored Content Policy</a> &middot; <a href="mailto:Support@VerityArchitect.com">Support@VerityArchitect.com</a><br>&copy; <span id="yr"></span> Verity Architecture. Paid features are advertising and never guarantee reviews, rankings or sales.</footer>
+<script>document.getElementById('yr').textContent=new Date().getFullYear();</script>
+</body></html>
