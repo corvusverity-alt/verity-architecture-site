@@ -13,6 +13,7 @@
     <a href='/promote'>Promote Your Book</a>
     <a href='/submit-book'>Submit a Book</a>
     <a href='/promotion-policy'>Editorial Policy</a>
+    <a href="search.html">Search</a>
   </div>
   <div class="navbtns"><button class="nbtn" onclick="if(history.length>1){history.back()}else{location.href='book-promotions.html'}">&larr; Back</button><a class="nbtn" href="/">Home</a></div>
 </div>
@@ -22,7 +23,14 @@
 <h1>Book Reviews</h1>
 <div class="rule"></div>
 <p class="sub">Books chosen independently and actually read. Honest verdicts &mdash; good, mixed or critical.</p>
-<div id="reviewList" class="grid">
+<div class="filterbar" style="display:flex;gap:.8em;flex-wrap:wrap;justify-content:center;margin:0 0 1.8em">
+  <input id="textSearch" type="search" placeholder="Search title, author or genre…" style="width:auto;min-width:240px;flex:1;max-width:360px">
+  <label style="margin:0;display:flex;align-items:center;gap:.5em">Genre
+    <select id="genreFilter" style="width:auto;min-width:170px"><option value="">All genres</option></select></label>
+  <label style="margin:0;display:flex;align-items:center;gap:.5em">Sort
+    <select id="sortBy" style="width:auto"><option value="new">Newest first</option><option value="title">Title A–Z</option><option value="genre">Genre</option></select></label>
+</div>
+<div class="grid" id="reviewList" data-filterable>
   <div class="card"><span class="editorial">Coming Soon</span><h3 style="margin-top:.8em">Our first review is on the way</h3><p style="font-size:.9em">We publish one carefully read review at a time. Check back soon, or follow us on <a href="https://x.com/VerityArchitect" style="color:#C9A84C">X</a> and <a href="https://www.tiktok.com/@corvus_verity" style="color:#C9A84C">TikTok</a>.</p></div>
 </div>
 <div class="notice">Looking for sponsored author features? Those live on their own pages, marked <span class="sponsored">Sponsored</span>. <a href='/promote' style='color:#C9A84C'>Promote your book</a>.</div>
@@ -34,21 +42,21 @@
 (function(){
   var grid=document.querySelector('.grid[data-filterable]'); if(!grid) return;
   var cards=[].slice.call(grid.querySelectorAll('.card[data-genre]'));
-  var gf=document.getElementById('genreFilter'), sb=document.getElementById('sortBy'), bar=document.querySelector('.filterbar');
+  var ts=document.getElementById('textSearch'), gf=document.getElementById('genreFilter'), sb=document.getElementById('sortBy'), bar=document.querySelector('.filterbar');
   if(!cards.length){ bar.style.display='none'; return; }
   var genres={}; cards.forEach(function(c){ c.getAttribute('data-genre').split(',').forEach(function(g){ g=g.trim(); if(g) genres[g]=1; }); });
   Object.keys(genres).sort().forEach(function(g){ var o=document.createElement('option'); o.value=g; o.textContent=g; gf.appendChild(o); });
-  var q=new URLSearchParams(location.search).get('genre'); if(q && genres[q]) gf.value=q;
+  var P=new URLSearchParams(location.search), q=P.get('genre'); if(q && genres[q]) gf.value=q; if(P.get('q')) ts.value=P.get('q');
   function apply(){
-    var g=gf.value, s=sb.value;
+    var g=gf.value, s=sb.value, t=(ts.value||'').toLowerCase().trim();
     cards.sort(function(a,b){
       if(s==='title') return (a.dataset.title||'').localeCompare(b.dataset.title||'');
       if(s==='genre') return (a.dataset.genre||'').localeCompare(b.dataset.genre||'') || (a.dataset.title||'').localeCompare(b.dataset.title||'');
       return (b.dataset.date||'').localeCompare(a.dataset.date||'');
-    }).forEach(function(c){ grid.appendChild(c); c.style.display = (!g || c.dataset.genre.split(',').map(function(x){return x.trim()}).indexOf(g)>-1) ? '' : 'none'; });
+    }).forEach(function(c){ grid.appendChild(c); var okG=(!g || c.dataset.genre.split(',').map(function(x){return x.trim()}).indexOf(g)>-1); var okT=(!t || c.textContent.toLowerCase().indexOf(t)>-1); c.style.display = (okG&&okT) ? '' : 'none'; });
     var u=new URL(location.href); if(g) u.searchParams.set('genre',g); else u.searchParams.delete('genre'); history.replaceState(null,'',u);
   }
-  gf.addEventListener('change',apply); sb.addEventListener('change',apply); apply();
+  gf.addEventListener('change',apply); ts.addEventListener('input',apply); sb.addEventListener('change',apply); apply();
 })();
 </script>
 <script>document.getElementById('yr').textContent=new Date().getFullYear();</script>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Search Books &amp; Pages — Verity Architecture</title>
+<meta name="description" content="Search Verity Architecture: featured books, independent reviews, genres, Corvus Verity titles, portfolios and guides.">
+<link rel="canonical" href="https://verityarchitect.com/search.html">
+<link rel="stylesheet" href="promo.css"></head><body>
+<div class="topbar">
+  <a href="/"><img src="Verity Architecture Company logos/VerityArchitecture_Logo.svg" alt="Verity Architecture"></a>
+  <div class="tabs">
+    <a class='on' href='/book-promotions'>Book Promotions</a>
+    <a href='/book-reviews'>Book Reviews</a>
+    <a href='/author-features'>Author Features</a>
+    <a href='/promote'>Promote Your Book</a>
+    <a href='/submit-book'>Submit a Book</a>
+    <a href='/promotion-policy'>Editorial Policy</a>
+    <a href="search.html" class="on">Search</a>
+  </div>
+  <div class="navbtns"><button class="nbtn" onclick="if(history.length>1){history.back()}else{location.href='book-promotions.html'}">&larr; Back</button><a class="nbtn" href="/">Home</a></div>
+</div>
+<main>
+<div class="label">Verity Architecture</div>
+<h1>Search</h1>
+<div class="rule"></div>
+<p class="sub">Find featured books, independent reviews, genres and everything else on VerityArchitect.com.</p>
+<div style="display:flex;gap:.8em;flex-wrap:wrap;justify-content:center;margin-bottom:1em">
+  <input id="q" type="search" placeholder="Search books, authors, genres, topics…" autofocus style="max-width:520px">
+</div>
+<div id="chips" style="display:flex;gap:.5em;flex-wrap:wrap;justify-content:center;margin-bottom:2em"></div>
+<div id="status" class="msg" style="color:#aaa">Loading the site index…</div>
+<h2 id="bh" style="display:none">Books</h2><div id="books" class="grid"></div>
+<h2 id="ph" style="display:none">Pages</h2><div id="pages"></div>
+</main>
+<footer>Book Promotions by Verity Architecture &middot; <a href='/promotion-policy'>Editorial &amp; Sponsored Content Policy</a> &middot; <a href="mailto:Support@VerityArchitect.com">Support@VerityArchitect.com</a><br>&copy; <span id="yr"></span> Verity Architecture. Paid features are advertising and never guarantee reviews, rankings or sales.</footer>
+<script>
+(function(){
+var books=[], pages=[], q=document.getElementById('q'), st=document.getElementById('status'), chips=document.getElementById('chips'), activeGenre='';
+function txt(el){return (el&&el.textContent||'').replace(/\s+/g,' ').trim();}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function parse(html){return new DOMParser().parseFromString(html,'text/html');}
+async function load(){
+  var cached=null; try{cached=JSON.parse(sessionStorage.getItem('va-search')||'null');}catch(e){}
+  if(cached){books=cached.b;pages=cached.p;return;}
+  for (var src of [['author-features.html','Sponsored feature'],['book-reviews.html','Independent review']]){
+    try{ var d=parse(await (await fetch(src[0])).text());
+      d.querySelectorAll('.card[data-genre]').forEach(function(c){ var a=c.querySelector('a[href]');
+        books.push({t:c.dataset.title||txt(c.querySelector('h3')),g:c.dataset.genre,d:c.dataset.date||'',k:src[1],u:a?a.getAttribute('href'):src[0],x:txt(c)}); });
+    }catch(e){}
+  }
+  try{ var sm=await (await fetch('sitemap.xml')).text(); var locs=[].slice.call(new DOMParser().parseFromString(sm,'text/xml').querySelectorAll('loc')).map(function(l){return l.textContent;});
+    await Promise.all(locs.map(async function(u){ try{ var p=new URL(u).pathname; var d=parse(await (await fetch(p)).text());
+      var m=d.querySelector('meta[name=description]'); pages.push({t:txt(d.querySelector('title'))||p,u:p,x:(m?m.content:'')+' '+txt(d.querySelector('h1'))}); }catch(e){} }));
+  }catch(e){}
+  try{sessionStorage.setItem('va-search',JSON.stringify({b:books,p:pages}));}catch(e){}
+}
+function render(){
+  var t=q.value.toLowerCase().trim();
+  var bs=books.filter(function(b){ return (!activeGenre || b.g.split(',').map(function(s){return s.trim()}).indexOf(activeGenre)>-1) && (!t || (b.t+' '+b.g+' '+b.x).toLowerCase().indexOf(t)>-1); }).sort(function(a,b){return b.d.localeCompare(a.d);});
+  var ps=(!t||activeGenre)?[]:pages.filter(function(p){return (p.t+' '+p.x).toLowerCase().indexOf(t)>-1;}).slice(0,20);
+  document.getElementById('books').innerHTML=bs.map(function(b){return '<div class="card"><span class="'+(b.k[0]=='S'?'sponsored':'editorial')+'">'+esc(b.k)+'</span><h3 style="margin-top:.7em">'+esc(b.t)+'</h3><div class="tag">'+esc(b.g)+'</div><p style="margin-top:auto"><a class="btn btn-line" href="'+esc(b.u)+'">View</a></p></div>';}).join('');
+  document.getElementById('pages').innerHTML=ps.map(function(p){return '<p><a href="'+esc(p.u)+'" style="color:#C9A84C">'+esc(p.t)+'</a><br><span style="font-size:.85em;color:#999">'+esc(p.x.slice(0,160))+'</span></p>';}).join('');
+  document.getElementById('bh').style.display=bs.length?'':'none'; document.getElementById('ph').style.display=ps.length?'':'none';
+  st.textContent=(!bs.length&&!ps.length)?(books.length?'No matches yet — try another word or genre.':'No featured books yet. Search covers our pages below as you type.'):'';
+  var u=new URL(location.href); t?u.searchParams.set('q',q.value):u.searchParams.delete('q'); activeGenre?u.searchParams.set('genre',activeGenre):u.searchParams.delete('genre'); history.replaceState(null,'',u);
+}
+function buildChips(){
+  var g={}; books.forEach(function(b){b.g.split(',').forEach(function(x){x=x.trim(); if(x) g[x]=(g[x]||0)+1;});});
+  chips.innerHTML=Object.keys(g).sort().map(function(x){return '<button class="nbtn" data-g="'+esc(x)+'">'+esc(x)+' ('+g[x]+')</button>';}).join('');
+  chips.querySelectorAll('button').forEach(function(btn){ btn.onclick=function(){ activeGenre = activeGenre===btn.dataset.g?'':btn.dataset.g; chips.querySelectorAll('button').forEach(function(o){o.style.background=o.dataset.g===activeGenre?'#C9A84C':''; o.style.color=o.dataset.g===activeGenre?'#0E0E1C':'';}); render(); }; });
+}
+var P=new URLSearchParams(location.search); q.value=P.get('q')||''; activeGenre=P.get('genre')||'';
+load().then(function(){ buildChips(); if(activeGenre) chips.querySelectorAll('button').forEach(function(o){ if(o.dataset.g===activeGenre){o.style.background='#C9A84C';o.style.color='#0E0E1C';} }); render(); });
+q.addEventListener('input',render);
+})();
+</script>
+<script>document.getElementById('yr').textContent=new Date().getFullYear();</script>
+</body></html>
