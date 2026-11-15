@@ -7,12 +7,12 @@
 <div class="topbar">
   <a href="/"><img src="Verity Architecture Company logos/VerityArchitecture_Logo.svg" alt="Verity Architecture"></a>
   <div class="tabs">
-    <a href="book-promotions.html">Book Promotions</a>
-    <a href="book-reviews.html" class="on">Book Reviews</a>
-    <a href="author-features.html">Author Features</a>
-    <a href="promote.html">Promote Your Book</a>
-    <a href="submit-book.html">Submit a Book</a>
-    <a href="promotion-policy.html">Editorial Policy</a>
+    <a href='/book-promotions'>Book Promotions</a>
+    <a class='on' href='/book-reviews'>Book Reviews</a>
+    <a href='/author-features'>Author Features</a>
+    <a href='/promote'>Promote Your Book</a>
+    <a href='/submit-book'>Submit a Book</a>
+    <a href='/promotion-policy'>Editorial Policy</a>
   </div>
   <div class="navbtns"><button class="nbtn" onclick="if(history.length>1){history.back()}else{location.href='book-promotions.html'}">&larr; Back</button><a class="nbtn" href="/">Home</a></div>
 </div>
@@ -25,9 +25,31 @@
 <div id="reviewList" class="grid">
   <div class="card"><span class="editorial">Coming Soon</span><h3 style="margin-top:.8em">Our first review is on the way</h3><p style="font-size:.9em">We publish one carefully read review at a time. Check back soon, or follow us on <a href="https://x.com/VerityArchitect" style="color:#C9A84C">X</a> and <a href="https://www.tiktok.com/@corvus_verity" style="color:#C9A84C">TikTok</a>.</p></div>
 </div>
-<div class="notice">Looking for sponsored author features? Those live on their own pages, marked <span class="sponsored">Sponsored</span>. <a href="promote.html" style="color:#C9A84C">Promote your book</a>.</div>
+<div class="notice">Looking for sponsored author features? Those live on their own pages, marked <span class="sponsored">Sponsored</span>. <a href='/promote' style='color:#C9A84C'>Promote your book</a>.</div>
 <!-- To add a review: copy the card above, set the title, author, a 1-line verdict, and link to the review page (e.g. review-atomic-habits.html). -->
 </main>
-<footer>Book Promotions by Verity Architecture &middot; <a href="promotion-policy.html">Editorial &amp; Sponsored Content Policy</a> &middot; <a href="mailto:Support@VerityArchitect.com">Support@VerityArchitect.com</a><br>&copy; <span id="yr"></span> Verity Architecture. Paid features are advertising and never guarantee reviews, rankings or sales.</footer>
+<footer>Book Promotions by Verity Architecture &middot; <a href='/promotion-policy'>Editorial &amp; Sponsored Content Policy</a> &middot; <a href="mailto:Support@VerityArchitect.com">Support@VerityArchitect.com</a><br>&copy; <span id="yr"></span> Verity Architecture. Paid features are advertising and never guarantee reviews, rankings or sales.</footer>
+<script>
+/* Genre filter + sort. Each real card needs: data-genre="Personal Finance" data-date="YYYY-MM-DD" data-title="Book Title" */
+(function(){
+  var grid=document.querySelector('.grid[data-filterable]'); if(!grid) return;
+  var cards=[].slice.call(grid.querySelectorAll('.card[data-genre]'));
+  var gf=document.getElementById('genreFilter'), sb=document.getElementById('sortBy'), bar=document.querySelector('.filterbar');
+  if(!cards.length){ bar.style.display='none'; return; }
+  var genres={}; cards.forEach(function(c){ c.getAttribute('data-genre').split(',').forEach(function(g){ g=g.trim(); if(g) genres[g]=1; }); });
+  Object.keys(genres).sort().forEach(function(g){ var o=document.createElement('option'); o.value=g; o.textContent=g; gf.appendChild(o); });
+  var q=new URLSearchParams(location.search).get('genre'); if(q && genres[q]) gf.value=q;
+  function apply(){
+    var g=gf.value, s=sb.value;
+    cards.sort(function(a,b){
+      if(s==='title') return (a.dataset.title||'').localeCompare(b.dataset.title||'');
+      if(s==='genre') return (a.dataset.genre||'').localeCompare(b.dataset.genre||'') || (a.dataset.title||'').localeCompare(b.dataset.title||'');
+      return (b.dataset.date||'').localeCompare(a.dataset.date||'');
+    }).forEach(function(c){ grid.appendChild(c); c.style.display = (!g || c.dataset.genre.split(',').map(function(x){return x.trim()}).indexOf(g)>-1) ? '' : 'none'; });
+    var u=new URL(location.href); if(g) u.searchParams.set('genre',g); else u.searchParams.delete('genre'); history.replaceState(null,'',u);
+  }
+  gf.addEventListener('change',apply); sb.addEventListener('change',apply); apply();
+})();
+</script>
 <script>document.getElementById('yr').textContent=new Date().getFullYear();</script>
 </body></html>
