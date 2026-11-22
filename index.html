@@ -221,6 +221,23 @@ footer{
   color:#444;letter-spacing:.04em;
 }
 
+
+/* ─── Featured Authors strip ─────────────────────────────────────────────── */
+.fa-section{padding-top:1em;}
+.fa-grid{display:flex;flex-wrap:wrap;gap:1.6em;justify-content:center;max-width:1000px;margin:0 auto;}
+.fa-card{position:relative;width:280px;background:rgba(20,18,34,.55);border:1px solid rgba(201,168,76,.28);border-radius:6px;padding:1.4em 1.3em 1.5em;text-align:center;display:flex;flex-direction:column;align-items:center;}
+.fa-card.ph{border-style:dashed;border-color:rgba(201,168,76,.35);background:rgba(20,18,34,.3);}
+.fa-badge{font-family:Arial,sans-serif;font-size:.62em;font-weight:bold;letter-spacing:.16em;text-transform:uppercase;color:#0E0E1C;background:#C9A84C;border-radius:2px;padding:.3em .7em;margin-bottom:1em;}
+.fa-badge.free{background:transparent;color:#C9A84C;border:1px solid #C9A84C;}
+.fa-cover{width:120px;height:180px;object-fit:cover;border-radius:2px 5px 5px 2px;box-shadow:5px 7px 22px rgba(0,0,0,.5);margin-bottom:1em;background:#1A1828;}
+.fa-cover.ph{display:flex;align-items:center;justify-content:center;border:1px dashed rgba(201,168,76,.4);box-shadow:none;color:#7d7560;font-family:Arial,sans-serif;font-size:.65em;letter-spacing:.14em;text-transform:uppercase;}
+.fa-genre{font-family:Arial,sans-serif;font-size:.62em;letter-spacing:.16em;text-transform:uppercase;color:#C9A84C;margin-bottom:.4em;}
+.fa-title{font-size:1.02em;font-weight:bold;color:#E8E0CC;line-height:1.3;margin-bottom:.2em;}
+.fa-author{font-style:italic;font-size:.82em;color:#aaa;margin-bottom:.7em;}
+.fa-hook{font-size:.84em;color:#cfc6b0;line-height:1.5;margin-bottom:1.1em;flex:1;}
+.fa-note{text-align:center;font-family:Arial,sans-serif;font-size:.68em;letter-spacing:.06em;color:#7d7560;max-width:640px;margin:2.2em auto 0;line-height:1.6;}
+.fa-note a{color:#C9A84C;}
+
 /* ─── Responsive ─────────────────────────────────────────────────────────── */
 @media(max-width:680px){
   nav{padding:.6em 1.2em;}
@@ -228,6 +245,7 @@ footer{
   .book-shelf{gap:2.5em;}
   .book-card{width:180px;}
   .book-3d-wrap,.book-3d{width:160px;height:232px;}
+  .fa-card{width:100%;max-width:320px;}
 }
 </style>
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://verityarchitect.com/#org","name":"Verity Architecture","url":"https://verityarchitect.com/","founder":{"@type":"Person","name":"Corvus Verity"},"logo":"https://verityarchitect.com/ft-cover-2026.jpg","sameAs":["https://x.com/VerityArchitect","https://www.tiktok.com/@corvus_verity"]},{"@type":"WebSite","@id":"https://verityarchitect.com/#website","url":"https://verityarchitect.com/","name":"Verity Architecture","publisher":{"@id":"https://verityarchitect.com/#org"}}]}</script>
@@ -245,7 +263,7 @@ footer{
     <a href='/financially-trapped-hub'>Financially Trapped</a>
     <a href='/portfolio-architect'>Portfolio Architecture</a>
     <a href='/book-promotions'>Book Promotions</a>
-    <a href="search.html">Search</a>
+    <a href='/search'>Search</a>
   </div>
   <div class="nav-contact">
     <a href="mailto:Support@VerityArchitect.com">Support@VerityArchitect.com</a>
@@ -345,6 +363,15 @@ footer{
   </div>
 </section>
 
+<!-- ─── Featured Authors (data: home-features.js) ─────────────────────────── -->
+<section class="section fa-section" id="featured-authors">
+  <div class="section-label">Book Promotions</div>
+  <h2 class="section-title">Featured Authors</h2>
+  <p class="section-sub">Independent authors featured alongside the Verity Architecture series.</p>
+  <div class="fa-grid" id="faGrid"></div>
+  <p class="fa-note">Cards marked <b style="color:#C9A84C">Sponsored</b> are paid promotions (included with our Extended Launch package). The <b style="color:#C9A84C">Free Spotlight</b> is unpaid. Neither is a review. <a href='/promotion-policy'>Editorial policy</a> &middot; <a href='/promote'>Promote your book</a></p>
+</section>
+
 <!-- ─── About ─────────────────────────────────────────────────────────────── -->
 <section class="about" id="about">
   <div class="about-inner">
@@ -390,6 +417,40 @@ footer{
 
 <script>
 document.getElementById('yr').textContent = new Date().getFullYear();
+</script>
+<script src="home-features.js"></script>
+<script>
+(function(){
+  var grid=document.getElementById('faGrid'); if(!grid) return;
+  var list=[]; try{ list=(window.HOME_FEATURES||[]).filter(function(f){return f&&f.title;}); }catch(e){ list=[]; }
+  function el(tag,cls,txt){ var e=document.createElement(tag); if(cls) e.className=cls; if(txt!=null) e.textContent=txt; return e; }
+  function safeUrl(u){ return /^(https?:\/\/|\/)/i.test(u||'') ? u : ''; }
+  var spons=list.filter(function(f){return f.type==='sponsored';}).slice(0,2);
+  var free=list.filter(function(f){return f.type==='free';}).slice(0,1);
+  var slots=[spons[0]||{ph:1,type:'sponsored'}, free[0]||{ph:1,type:'free'}, spons[1]||{ph:1,type:'sponsored'}];
+  slots.forEach(function(f){
+    var paid=f.type==='sponsored';
+    var c=el('div','fa-card'+(f.ph?' ph':''));
+    c.appendChild(el('span','fa-badge'+(paid?'':' free'), paid?'Sponsored':'Free Spotlight'));
+    if(f.ph){
+      c.appendChild(el('div','fa-cover ph','Your cover'));
+      c.appendChild(el('div','fa-genre','Any genre'));
+      c.appendChild(el('div','fa-title','Your book here'));
+      c.appendChild(el('div','fa-hook', paid?'Sponsored home page spots come with the Extended Launch package.':'One free spotlight spot, offered author to author.'));
+      var a=el('a','book-link', paid?'See packages':'Ask about it'); a.href='/promote'; c.appendChild(a);
+    }else{
+      var cv=safeUrl(f.cover)||(f.cover&&/^[\w\- .\/]+$/.test(f.cover)?f.cover:'');
+      if(cv){ var img=el('img','fa-cover'); img.src=cv; img.alt='Cover of '+f.title; img.loading='lazy'; c.appendChild(img); }
+      if(f.genre){ var g=el('a','fa-genre',f.genre); g.href='/author-features?genre='+encodeURIComponent(f.genre); g.style.textDecoration='none'; c.appendChild(g); }
+      c.appendChild(el('div','fa-title',f.title));
+      if(f.author) c.appendChild(el('div','fa-author','by '+f.author));
+      if(f.hook) c.appendChild(el('div','fa-hook',f.hook));
+      var u=safeUrl(f.authorUrl);
+      if(u){ var b=el('a','book-link','Visit the author'); b.href=u; b.target='_blank'; b.rel=paid?'sponsored noopener':'noopener'; c.appendChild(b); }
+    }
+    grid.appendChild(c);
+  });
+})();
 </script>
 <script src="counters-config.js"></script>
 <script src="counters.js"></script>
